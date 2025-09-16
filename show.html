@@ -40,17 +40,21 @@
       border: none;
     }
     
+    /* Mengatur posisi iklan dan notifikasi di bagian bawah */
     #ad-container {
       height: 90px;
       width: 100%;
       background: #222;
       overflow: hidden;
+      position: fixed; /* Menempatkan di posisi tetap */
+      bottom: 0;
+      z-index: 1; /* Lapisan bawah */
     }
     
     #notification {
       display: none;
-      position: absolute;
-      bottom: 100px;
+      position: fixed; /* Menempatkan di posisi tetap */
+      bottom: 0;
       left: 50%;
       transform: translateX(-50%);
       background: rgba(255, 255, 255, 0.95);
@@ -59,7 +63,7 @@
       color: #222;
       text-align: center;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-      z-index: 10;
+      z-index: 2; /* Lapisan atas */
       width: 80%;
       max-width: 400px;
     }
