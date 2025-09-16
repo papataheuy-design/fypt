@@ -5,43 +5,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tampilan Link</title>
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      background: #000;
+    body {
+      font-family: sans-serif;
+      background: #f5f5f5;
+      text-align: center;
+      padding: 20px;
     }
-    #wrapper {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+    .box {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 500px;
+      margin: auto;
     }
     iframe {
       width: 100%;
-      height: 100%;
+      height: 300px;
       border: none;
+      border-radius: 10px;
     }
     #notif {
       display: none;
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(255,255,255,0.9);
-      padding: 10px 15px;
-      border-radius: 8px;
-      color: #333;
-      font-family: sans-serif;
+      margin-top: 15px;
+      padding: 10px;
+      background: #e0e7ff;
+      border-radius: 6px;
     }
   </style>
 </head>
 <body>
-  <div id="wrapper">
-    <div id="content" style="color:white;font-family:sans-serif;">⏳ Memuat data...</div>
+  <div class="box">
+    <div id="content">⏳ Memuat data...</div>
     <div id="notif">⏳ Menutup halaman...</div>
   </div>
 
@@ -68,13 +62,20 @@
     const content = document.getElementById("content");
     const notif = document.getElementById("notif");
 
-    if (localStorage.getItem("watched_" + id)) {
-      // Sudah nonton → tutup langsung
-      location.href = "about:blank";
-    } else {
+    async function loadData() {
+      // Cek apakah user sudah pernah nonton (pakai localStorage)
+      if (localStorage.getItem("watched_" + id)) {
+        window.close();
+        location.href = "about:blank";
+        return;
+      }
+
       if (!id) {
         content.textContent = "ID tidak ditemukan.";
-      } else {
+        return;
+      }
+
+      try {
         const q = query(collection(db, "links"), where("authLink", "==", id));
         const snap = await getDocs(q);
 
@@ -82,33 +83,25 @@
           content.textContent = "Link tidak ditemukan.";
         } else {
           const data = snap.docs[0].data();
-          let src = data.videoLink;
+          content.innerHTML = `<iframe src="${data.videoLink}" allowfullscreen></iframe>`;
 
-          // Konversi otomatis ke embed
-          if (src.includes("youtube.com/watch?v=")) {
-            const vid = src.split("v=")[1].split("&")[0];
-            src = `https://www.youtube.com/embed/${vid}?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0`;
-          } else if (src.includes("youtu.be/")) {
-            const vid = src.split("youtu.be/")[1].split("?")[0];
-            src = `https://www.youtube.com/embed/${vid}?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0`;
-          } else if (src.includes("tiktok.com/")) {
-            const vid = src.split("/video/")[1]?.split("?")[0];
-            if (vid) src = `https://www.tiktok.com/embed/v2/${vid}?autoplay=1`;
-          }
-
-          content.innerHTML = `<iframe src="${src}" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
-
+          // Setelah 10 detik
           setTimeout(() => {
             localStorage.setItem("watched_" + id, "true");
-            notif.style.display = "block";
-            content.style.display = "none";
+            notif.style.display = 'block';
+            content.style.display = 'none';
             setTimeout(() => {
               location.href = data.targetLink;
             }, 2000);
           }, 10000);
         }
+      } catch (err) {
+        content.textContent = "Terjadi kesalahan saat memuat data.";
+        console.error(err);
       }
     }
+
+    loadData();
   </script>
 </body>
 </html>
