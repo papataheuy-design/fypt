@@ -9,15 +9,22 @@
       font-family: sans-serif;
       background: #f5f5f5;
       padding: 20px;
-      max-width: 400px;
+      max-width: 420px;
       margin: auto;
     }
     .box { background:#fff; padding:20px; border-radius:10px; margin-bottom:20px; }
-    input { width:100%; padding:10px; margin:5px 0; }
-    button { padding:10px; width:100%; background:#4361ee; color:#fff; border:none; border-radius:5px; cursor:pointer; }
-    #panel { display:none; }
-    .link-box { background:#e0e7ff; padding:10px; border-radius:6px; word-break:break-all; margin-top:10px; }
-    #loading { display:none; text-align:center; margin-top:10px; color:#666; }
+    input,button { width:100%; padding:10px; margin:5px 0; }
+    button { background:#4361ee; color:#fff; border:none; border-radius:5px; cursor:pointer; }
+    .link-box {
+      background:#e0e7ff; padding:10px; border-radius:6px; word-break:break-all;
+      margin-top:10px; text-align:center;
+    }
+    iframe {
+      width: 100%; height: 200px; border:none; border-radius:10px; margin-top:10px;
+    }
+    #loading {
+      display:none; text-align:center; margin-top:10px;
+    }
   </style>
 </head>
 <body>
@@ -27,19 +34,31 @@
     <input id="email" type="email" placeholder="Email">
     <input id="password" type="password" placeholder="Password">
     <button onclick="login()">Login / Daftar</button>
-    <div id="loading">Memproses...</div>
   </div>
 
-  <div id="panel" class="box">
-    <h3>Buat / Update Link Tampilan</h3>
+  <div id="panel" class="box" style="display:none;">
+    <h3>Buat / Update Link</h3>
+    <small>📌 Masukkan link video <b>embed</b> dari TikTok / YouTube dan link tujuan.</small><br><br>
     <input id="videoLink" type="url" placeholder="Link Embed TikTok / YouTube">
     <input id="targetLink" type="url" placeholder="Link Tujuan">
     <button onclick="saveLink()">Simpan</button>
-    <div id="loadingPanel">Memproses...</div>
-    <div id="result"></div>
+    <div id="loading">⏳ Menyimpan...</div>
+
+    <h4>Preview Postingan Kamu</h4>
+    <div id="preview">Belum ada postingan</div>
   </div>
 
-  <!-- Firebase SDK -->
+  <div class="box">
+    <h3>Cara Penggunaan 📝</h3>
+    <ol>
+      <li>Login / daftar pakai email dan password</li>
+      <li>Tempel link video <b>embed</b> TikTok / YouTube</li>
+      <li>Tempel link tujuan (misal link produk / website)</li>
+      <li>Klik <b>Simpan</b> → muncul preview & link publik</li>
+      <li>Copy link publik, bagikan ke orang lain</li>
+    </ol>
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { 
@@ -47,7 +66,7 @@
       signInWithEmailAndPassword, onAuthStateChanged 
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
     import { 
-      getFirestore, collection, query, where, getDocs, setDoc, doc 
+      getFirestore, collection, addDoc, query, where, getDocs, updateDoc, doc 
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -64,26 +83,15 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    let currentDocId = null;
-    let currentAuthLink = null;
+    const preview = document.getElementById('preview');
+    const loading = document.getElementById('loading');
 
-    const showLoading = (id, show) => {
-      document.getElementById(id).style.display = show ? 'block' : 'none';
-    };
-
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        document.getElementById('authBox').style.display = 'none';
-        document.getElementById('panel').style.display = 'block';
-        await loadUserLink(user.uid);
-      }
-    });
-
+    // Fungsi login/daftar
     window.login = async () => {
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
       if(!email || !password) return alert("Isi email dan password");
-      showLoading('loading', true);
+
       try {
         await signInWithEmailAndPassword(auth, email, password);
       } catch (err) {
@@ -93,63 +101,64 @@
           alert("Gagal daftar: " + err2.message);
         }
       }
-      showLoading('loading', false);
     };
 
-    async function loadUserLink(uid){
-      showLoading('loadingPanel', true);
-      const q = query(collection(db, "links"), where("owner", "==", uid));
-      const snap = await getDocs(q);
-      if(!snap.empty){
-        const docData = snap.docs[0];
-        currentDocId = docData.id;
-        const data = docData.data();
-        currentAuthLink = data.authLink;
-        document.getElementById('videoLink').value = data.videoLink;
-        document.getElementById('targetLink').value = data.targetLink;
-        const finalLink = `${location.origin}/show.html?id=${data.authLink}`;
-        document.getElementById('result').innerHTML = 
-          `<div class="link-box">Link frontend kamu:<br>
-          <a href="${finalLink}" target="_blank">${finalLink}</a></div>`;
+    // Cek status login
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        document.getElementById('authBox').style.display = 'none';
+        document.getElementById('panel').style.display = 'block';
+        loadMyPost();
       }
-      showLoading('loadingPanel', false);
+    });
+
+    // Muat posting milik user
+    async function loadMyPost() {
+      preview.innerHTML = "⏳ Memuat...";
+      const q = query(collection(db, "links"), where("owner", "==", auth.currentUser.uid));
+      const snap = await getDocs(q);
+      if (snap.empty) {
+        preview.textContent = "Belum ada postingan";
+      } else {
+        const docData = snap.docs[0].data();
+        const finalLink = `${location.origin}/show.html?id=${docData.authLink}`;
+        preview.innerHTML = `
+          <iframe src="${docData.videoLink}" allowfullscreen></iframe>
+          <div class="link-box">
+            <a href="${finalLink}" target="_blank">${finalLink}</a>
+          </div>
+        `;
+      }
     }
 
+    // Simpan / update link
     window.saveLink = async () => {
       const videoLink = document.getElementById('videoLink').value.trim();
       const targetLink = document.getElementById('targetLink').value.trim();
       if(!videoLink || !targetLink) return alert("Isi semua field");
-      showLoading('loadingPanel', true);
+
+      loading.style.display = 'block';
+
+      const q = query(collection(db, "links"), where("owner", "==", auth.currentUser.uid));
+      const snap = await getDocs(q);
+
       try {
-        if(currentDocId){
-          await setDoc(doc(db,"links",currentDocId), {
+        if (snap.empty) {
+          const authLink = Math.random().toString(36).substring(2,10);
+          await addDoc(collection(db, "links"), {
             owner: auth.currentUser.uid,
-            videoLink,
-            targetLink,
-            authLink: currentAuthLink,
-            used: false
+            videoLink, targetLink, authLink
           });
         } else {
-          currentAuthLink = Math.random().toString(36).substring(2,10);
-          const newId = doc(collection(db,"links")).id;
-          currentDocId = newId;
-          await setDoc(doc(db,"links",newId), {
-            owner: auth.currentUser.uid,
-            videoLink,
-            targetLink,
-            authLink: currentAuthLink,
-            used: false
-          });
+          const ref = doc(db, "links", snap.docs[0].id);
+          await updateDoc(ref, { videoLink, targetLink });
         }
-        const finalLink = `${location.origin}/show.html?id=${currentAuthLink}`;
-        document.getElementById('result').innerHTML = 
-          `<div class="link-box">Link frontend kamu:<br>
-          <a href="${finalLink}" target="_blank">${finalLink}</a></div>`;
-        alert("Link berhasil disimpan / diperbarui");
+        await loadMyPost();
       } catch (err) {
         alert("Gagal simpan: " + err.message);
       }
-      showLoading('loadingPanel', false);
+
+      loading.style.display = 'none';
     };
   </script>
 </body>
