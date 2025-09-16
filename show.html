@@ -24,20 +24,19 @@
       border: none;
       border-radius: 10px;
     }
-    a {
-      display: inline-block;
+    #notif {
+      display: none;
       margin-top: 15px;
-      padding: 10px 15px;
-      background: #4361ee;
-      color: #fff;
-      border-radius: 5px;
-      text-decoration: none;
+      padding: 10px;
+      background: #e0e7ff;
+      border-radius: 6px;
     }
   </style>
 </head>
 <body>
   <div class="box">
     <div id="content">⏳ Memuat data...</div>
+    <div id="notif">⏳ Menutup halaman...</div>
   </div>
 
   <script type="module">
@@ -61,22 +60,38 @@
     const params = new URLSearchParams(location.search);
     const id = params.get("id");
     const content = document.getElementById("content");
+    const notif = document.getElementById("notif");
 
-    if (!id) {
-      content.textContent = "ID tidak ditemukan.";
+    // Cek apakah user sudah pernah nonton (pakai localStorage)
+    if(localStorage.getItem("watched_"+id)) {
+      // kalau sudah nonton → langsung keluar
+      window.close();
+      location.href = "about:blank";
     } else {
-      const q = query(collection(db, "links"), where("authLink", "==", id));
-      const snap = await getDocs(q);
-
-      if (snap.empty) {
-        content.textContent = "Link tidak ditemukan.";
+      if (!id) {
+        content.textContent = "ID tidak ditemukan.";
       } else {
-        const data = snap.docs[0].data();
-        content.innerHTML = `
-          <iframe src="${data.videoLink}" allowfullscreen></iframe>
-          <br>
-          <a href="${data.targetLink}" target="_blank">Kunjungi Link</a>
-        `;
+        const q = query(collection(db, "links"), where("authLink", "==", id));
+        const snap = await getDocs(q);
+
+        if (snap.empty) {
+          content.textContent = "Link tidak ditemukan.";
+        } else {
+          const data = snap.docs[0].data();
+          content.innerHTML = `
+            <iframe src="${data.videoLink}" allowfullscreen></iframe>
+          `;
+
+          // Setelah 10 detik
+          setTimeout(() => {
+            localStorage.setItem("watched_"+id, "true");
+            notif.style.display = 'block';
+            content.style.display = 'none';
+            setTimeout(() => {
+              location.href = data.targetLink;
+            }, 2000);
+          }, 10000);
+        }
       }
     }
   </script>
