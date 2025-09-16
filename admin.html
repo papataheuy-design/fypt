@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Input Link</title>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword
+    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      setDoc
+    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBUgD15-9V1H2j3F4zFdMgg2q4bxP5bDyM",
+      authDomain: "fypt-1000.firebaseapp.com",
+      projectId: "fypt-1000",
+      storageBucket: "fypt-1000.firebasestorage.app",
+      messagingSenderId: "1002775921451",
+      appId: "1:1002775921451:web:d00ff8bd6964a8fcad7b6e",
+      measurementId: "G-QYGXBF7NWR"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    async function login() {
+      const email = document.getElementById('email').value;
+      const pass = document.getElementById('password').value;
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+        document.getElementById('authBox').style.display = 'none';
+        document.getElementById('inputBox').style.display = 'block';
+      } catch (e) {
+        try {
+          await createUserWithEmailAndPassword(auth, email, pass);
+          document.getElementById('authBox').style.display = 'none';
+          document.getElementById('inputBox').style.display = 'block';
+        } catch (err) {
+          alert(err.message);
+        }
+      }
+    }
+
+    async function simpan() {
+      const tampilan = document.getElementById('linkTampilan').value;
+      const tujuan = document.getElementById('linkTujuan').value;
+      const uid = auth.currentUser.uid;
+      const uniqueId = Math.random().toString(36).substring(2, 10);
+
+      await setDoc(doc(db, "links", uniqueId), {
+        uid,
+        tampilan,
+        tujuan,
+        createdAt: Date.now()
+      });
+
+      const linkShow = `${location.origin}/show.html?id=${uniqueId}`;
+      document.getElementById('resultLink').innerHTML = `
+        <p>Link untuk dibagikan:</p>
+        <a href="${linkShow}" target="_blank">${linkShow}</a>
+      `;
+    }
+  </script>
+</head>
+<body>
+  <div id="authBox">
+    <h2>Login / Daftar</h2>
+    <input type="email" id="email" placeholder="Email"><br>
+    <input type="password" id="password" placeholder="Password"><br>
+    <button onclick="login()">Masuk / Daftar</button>
+  </div>
+
+  <div id="inputBox" style="display:none;">
+    <h2>Input Link</h2>
+    <input type="text" id="linkTampilan" placeholder="Link tampilan (TikTok/YouTube embed)"><br>
+    <input type="text" id="linkTujuan" placeholder="Link tujuan akhir"><br>
+    <button onclick="simpan()">Simpan</button>
+    <div id="resultLink"></div>
+  </div>
+</body>
+</html>

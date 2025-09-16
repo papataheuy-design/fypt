@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tampilan Video</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      background: black;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    #popup {
+      position: fixed;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 10px;
+      display: none;
+    }
+  </style>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBUgD15-9V1H2j3F4zFdMgg2q4bxP5bDyM",
+      authDomain: "fypt-1000.firebaseapp.com",
+      projectId: "fypt-1000",
+      storageBucket: "fypt-1000.firebasestorage.app",
+      messagingSenderId: "1002775921451",
+      appId: "1:1002775921451:web:d00ff8bd6964a8fcad7b6e",
+      measurementId: "G-QYGXBF7NWR"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get('id');
+
+    async function load() {
+      const ref = doc(db, "links", id);
+      const snap = await getDoc(ref);
+      if (!snap.exists()) {
+        document.body.innerHTML = "<h1>Link tidak ditemukan</h1>";
+        return;
+      }
+      const data = snap.data();
+      document.getElementById('video').src = data.tampilan;
+
+      setTimeout(() => {
+        const popup = document.getElementById('popup');
+        popup.style.display = 'block';
+        setTimeout(() => {
+          window.location.href = data.tujuan;
+        }, 3000);
+      }, 15000);
+    }
+    load();
+  </script>
+</head>
+<body>
+  <iframe id="video" allowfullscreen allow="autoplay"></iframe>
+  <div id="popup">Sebentar lagi akan menuju halaman berikutnya...</div>
+</body>
+</html>
