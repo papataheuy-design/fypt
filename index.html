@@ -22,16 +22,14 @@
     iframe {
       width: 100%; height: 200px; border:none; border-radius:10px; margin-top:10px;
     }
-    #loading {
-      display:none; text-align:center; margin-top:10px;
-    }
-    #notif {
-      display:none; text-align:center; color:green; margin-top:10px;
-    }
+    #loading { display:none; text-align:center; margin-top:10px; }
+    #notif { display:none; text-align:center; color:green; margin-top:10px; }
+    #error { display:none; text-align:center; color:red; margin-top:10px; }
   </style>
 </head>
 <body>
 
+  <!-- Box Login -->
   <div id="authBox" class="box">
     <h3>Login / Daftar</h3>
     <input id="email" type="email" placeholder="Email">
@@ -39,6 +37,7 @@
     <button onclick="login()">Login / Daftar</button>
   </div>
 
+  <!-- Panel utama -->
   <div id="panel" class="box" style="display:none;">
     <h3>Buat / Update Link</h3>
     <small>📌 Masukkan link video <b>embed</b> dari TikTok / YouTube dan link tujuan.</small><br><br>
@@ -47,11 +46,13 @@
     <button onclick="saveLink()">Simpan</button>
     <div id="loading">⏳ Menyimpan...</div>
     <div id="notif">✅ Link berhasil disimpan</div>
+    <div id="error"></div>
 
     <h4>Preview Postingan Kamu</h4>
     <div id="preview">Belum ada postingan</div>
   </div>
 
+  <!-- Cara pakai -->
   <div class="box">
     <h3>Cara Penggunaan 📝</h3>
     <ol>
@@ -90,6 +91,7 @@
     const preview = document.getElementById('preview');
     const loading = document.getElementById('loading');
     const notif = document.getElementById('notif');
+    const errorBox = document.getElementById('error');
 
     window.login = async () => {
       const email = document.getElementById('email').value.trim();
@@ -124,7 +126,6 @@
       } else {
         const docData = snap.docs[0].data();
         const finalLink = `${location.origin}/show.html?id=${docData.authLink}`;
-        // isi otomatis ke input agar bisa diupdate
         document.getElementById('videoLink').value = docData.videoLink;
         document.getElementById('targetLink').value = docData.targetLink;
 
@@ -144,6 +145,7 @@
 
       loading.style.display = 'block';
       notif.style.display = 'none';
+      errorBox.style.display = 'none';
 
       const q = query(collection(db, "links"), where("owner", "==", auth.currentUser.uid));
       const snap = await getDocs(q);
@@ -160,9 +162,10 @@
           await updateDoc(ref, { videoLink, targetLink });
         }
         await loadMyPost();
-        notif.style.display = 'block'; // ✅ tampilkan notif berhasil
+        notif.style.display = 'block';
       } catch (err) {
-        alert("Gagal simpan: " + err.message);
+        errorBox.textContent = "❌ Gagal simpan: " + err.message;
+        errorBox.style.display = 'block';
       }
 
       loading.style.display = 'none';
