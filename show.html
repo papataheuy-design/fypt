@@ -3,41 +3,36 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tampilan Link</title>
+  <title>Tampilan Video</title>
   <style>
-    body {
-      font-family: sans-serif;
-      background: #f5f5f5;
-      text-align: center;
-      padding: 20px;
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #000;
     }
-    .box {
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      max-width: 500px;
-      margin: auto;
-    }
-    iframe {
+    #videoFrame {
       width: 100%;
-      height: 300px;
+      height: 100%;
       border: none;
-      border-radius: 10px;
     }
     #notif {
-      display: none;
-      margin-top: 15px;
-      padding: 10px;
-      background: #e0e7ff;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      padding: 10px 15px;
       border-radius: 6px;
+      font-family: sans-serif;
+      display: none;
     }
   </style>
 </head>
 <body>
-  <div class="box">
-    <div id="content">⏳ Memuat data...</div>
-    <div id="notif">⏳ Menutup halaman...</div>
-  </div>
+  <iframe id="videoFrame" allow="autoplay; fullscreen" allowfullscreen></iframe>
+  <div id="notif">⏳ Mengalihkan...</div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
@@ -59,49 +54,54 @@
 
     const params = new URLSearchParams(location.search);
     const id = params.get("id");
-    const content = document.getElementById("content");
+    const iframe = document.getElementById("videoFrame");
     const notif = document.getElementById("notif");
 
-    async function loadData() {
-      // Cek apakah user sudah pernah nonton (pakai localStorage)
-      if (localStorage.getItem("watched_" + id)) {
-        window.close();
-        location.href = "about:blank";
-        return;
+    // Fungsi ubah link jadi embed autoplay
+    function convertToEmbed(url) {
+      if (/youtube\.com|youtu\.be/.test(url)) {
+        const videoId = url.match(/(?:v=|\.be\/)([a-zA-Z0-9_-]+)/)?.[1];
+        return `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&modestbranding=1&rel=0`;
+      } else if (/tiktok\.com/.test(url)) {
+        return url.replace(/(tiktok\.com\/)/, "tiktok.com/embed/") + "?autoplay=1";
+      } else if (/instagram\.com\/reel/.test(url)) {
+        const path = url.split("?")[0];
+        return `${path}embed`;
+      } else if (/facebook\.com\/reel/.test(url)) {
+        return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&autoplay=true&show_text=false`;
+      } else {
+        return url; // fallback
       }
+    }
 
+    if(localStorage.getItem("watched_"+id)) {
+      window.close();
+      location.href = "about:blank";
+    } else {
       if (!id) {
-        content.textContent = "ID tidak ditemukan.";
-        return;
-      }
-
-      try {
+        alert("ID tidak ditemukan.");
+      } else {
         const q = query(collection(db, "links"), where("authLink", "==", id));
         const snap = await getDocs(q);
 
         if (snap.empty) {
-          content.textContent = "Link tidak ditemukan.";
+          alert("Link tidak ditemukan.");
         } else {
           const data = snap.docs[0].data();
-          content.innerHTML = `<iframe src="${data.videoLink}" allowfullscreen></iframe>`;
+          const embedUrl = convertToEmbed(data.videoLink);
+          iframe.src = embedUrl;
 
           // Setelah 10 detik
           setTimeout(() => {
-            localStorage.setItem("watched_" + id, "true");
+            localStorage.setItem("watched_"+id, "true");
             notif.style.display = 'block';
-            content.style.display = 'none';
             setTimeout(() => {
               location.href = data.targetLink;
             }, 2000);
           }, 10000);
         }
-      } catch (err) {
-        content.textContent = "Terjadi kesalahan saat memuat data.";
-        console.error(err);
       }
     }
-
-    loadData();
   </script>
 </body>
 </html>
