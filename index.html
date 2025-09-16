@@ -40,8 +40,8 @@
   <!-- Panel utama -->
   <div id="panel" class="box" style="display:none;">
     <h3>Buat / Update Link</h3>
-    <small>📌 Masukkan link video <b>embed</b> dari TikTok / YouTube dan link tujuan.</small><br><br>
-    <input id="videoLink" type="url" placeholder="Link Embed TikTok / YouTube">
+    <small>📌 Tempel link video <b>apa saja</b> (TikTok / YouTube) — otomatis dikonversi jadi embed.</small><br><br>
+    <input id="videoLink" type="url" placeholder="Link Video TikTok / YouTube">
     <input id="targetLink" type="url" placeholder="Link Tujuan">
     <button onclick="saveLink()">Simpan</button>
     <div id="loading">⏳ Menyimpan...</div>
@@ -57,7 +57,7 @@
     <h3>Cara Penggunaan 📝</h3>
     <ol>
       <li>Login / daftar pakai email dan password</li>
-      <li>Tempel link video <b>embed</b> TikTok / YouTube</li>
+      <li>Tempel link video TikTok / YouTube (tidak perlu embed)</li>
       <li>Tempel link tujuan (misal link produk / website)</li>
       <li>Klik <b>Simpan</b> → muncul preview & link publik</li>
       <li>Copy link publik, bagikan ke orang lain</li>
@@ -92,6 +92,24 @@
     const loading = document.getElementById('loading');
     const notif = document.getElementById('notif');
     const errorBox = document.getElementById('error');
+
+    function convertToEmbed(url){
+      try {
+        if(url.includes("youtube.com/watch?v=")){
+          const id = new URL(url).searchParams.get("v");
+          return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&controls=0`;
+        }
+        if(url.includes("youtu.be/")){
+          const id = url.split("youtu.be/")[1].split(/[?&]/)[0];
+          return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&controls=0`;
+        }
+        if(url.includes("tiktok.com/")){
+          // TikTok tidak ada API resmi embed autoplay, tapi ini tetap tampil
+          return `https://www.tiktok.com/embed${new URL(url).pathname}`;
+        }
+      } catch(e){}
+      return url;
+    }
 
     window.login = async () => {
       const email = document.getElementById('email').value.trim();
@@ -129,8 +147,9 @@
         document.getElementById('videoLink').value = docData.videoLink;
         document.getElementById('targetLink').value = docData.targetLink;
 
+        const embedUrl = convertToEmbed(docData.videoLink);
         preview.innerHTML = `
-          <iframe src="${docData.videoLink}" allowfullscreen></iframe>
+          <iframe src="${embedUrl}" allow="autoplay; fullscreen" allowfullscreen></iframe>
           <div class="link-box">
             <a href="${finalLink}" target="_blank">${finalLink}</a>
           </div>
@@ -139,9 +158,9 @@
     }
 
     window.saveLink = async () => {
-      const videoLink = document.getElementById('videoLink').value.trim();
+      const rawVideoLink = document.getElementById('videoLink').value.trim();
       const targetLink = document.getElementById('targetLink').value.trim();
-      if(!videoLink || !targetLink) return alert("Isi semua field");
+      if(!rawVideoLink || !targetLink) return alert("Isi semua field");
 
       loading.style.display = 'block';
       notif.style.display = 'none';
@@ -155,11 +174,12 @@
           const authLink = Math.random().toString(36).substring(2,10);
           await addDoc(collection(db, "links"), {
             owner: auth.currentUser.uid,
-            videoLink, targetLink, authLink
+            videoLink: rawVideoLink,
+            targetLink, authLink
           });
         } else {
           const ref = doc(db, "links", snap.docs[0].id);
-          await updateDoc(ref, { videoLink, targetLink });
+          await updateDoc(ref, { videoLink: rawVideoLink, targetLink });
         }
         await loadMyPost();
         notif.style.display = 'block';
