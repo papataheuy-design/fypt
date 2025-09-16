@@ -62,15 +62,20 @@
     const content = document.getElementById("content");
     const notif = document.getElementById("notif");
 
-    // Cek apakah user sudah pernah nonton (pakai localStorage)
-    if(localStorage.getItem("watched_"+id)) {
-      // kalau sudah nonton → langsung keluar
-      window.close();
-      location.href = "about:blank";
-    } else {
+    async function loadData() {
+      // Cek apakah user sudah pernah nonton (pakai localStorage)
+      if (localStorage.getItem("watched_" + id)) {
+        window.close();
+        location.href = "about:blank";
+        return;
+      }
+
       if (!id) {
         content.textContent = "ID tidak ditemukan.";
-      } else {
+        return;
+      }
+
+      try {
         const q = query(collection(db, "links"), where("authLink", "==", id));
         const snap = await getDocs(q);
 
@@ -78,13 +83,11 @@
           content.textContent = "Link tidak ditemukan.";
         } else {
           const data = snap.docs[0].data();
-          content.innerHTML = `
-            <iframe src="${data.videoLink}" allowfullscreen></iframe>
-          `;
+          content.innerHTML = `<iframe src="${data.videoLink}" allowfullscreen></iframe>`;
 
           // Setelah 10 detik
           setTimeout(() => {
-            localStorage.setItem("watched_"+id, "true");
+            localStorage.setItem("watched_" + id, "true");
             notif.style.display = 'block';
             content.style.display = 'none';
             setTimeout(() => {
@@ -92,8 +95,13 @@
             }, 2000);
           }, 10000);
         }
+      } catch (err) {
+        content.textContent = "Terjadi kesalahan saat memuat data.";
+        console.error(err);
       }
     }
+
+    loadData();
   </script>
 </body>
 </html>
