@@ -49,6 +49,18 @@
     const urlParams = new URLSearchParams(window.location.search);
     const id = urlParams.get('id');
 
+    function convertToEmbed(url) {
+      if (url.includes("youtube.com") || url.includes("youtu.be")) {
+        const videoId = url.split("v=")[1]?.split("&")[0] || url.split("youtu.be/")[1];
+        return `https://www.youtube.com/embed/${videoId}`;
+      } else if (url.includes("tiktok.com")) {
+        return url.replace("/video/", "/embed/video/");
+      } else if (url.includes("instagram.com/reel")) {
+        return url.replace("/reel/", "/reel/embed/");
+      }
+      return url; 
+    }
+
     async function load() {
       const ref = doc(db, "links", id);
       const snap = await getDoc(ref);
@@ -57,13 +69,14 @@
         return;
       }
       const data = snap.data();
-      document.getElementById('video').src = data.tampilan;
+      const embedUrl = convertToEmbed(data.videoLink);
+      document.getElementById('video').src = embedUrl;
 
       setTimeout(() => {
         const popup = document.getElementById('popup');
         popup.style.display = 'block';
         setTimeout(() => {
-          window.location.href = data.tujuan;
+          window.location.href = data.targetLink;
         }, 3000);
       }, 15000);
     }
