@@ -25,6 +25,9 @@
     #loading {
       display:none; text-align:center; margin-top:10px;
     }
+    #notif {
+      display:none; text-align:center; color:green; margin-top:10px;
+    }
   </style>
 </head>
 <body>
@@ -43,6 +46,7 @@
     <input id="targetLink" type="url" placeholder="Link Tujuan">
     <button onclick="saveLink()">Simpan</button>
     <div id="loading">⏳ Menyimpan...</div>
+    <div id="notif">✅ Link berhasil disimpan</div>
 
     <h4>Preview Postingan Kamu</h4>
     <div id="preview">Belum ada postingan</div>
@@ -85,8 +89,8 @@
 
     const preview = document.getElementById('preview');
     const loading = document.getElementById('loading');
+    const notif = document.getElementById('notif');
 
-    // Fungsi login/daftar
     window.login = async () => {
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
@@ -103,7 +107,6 @@
       }
     };
 
-    // Cek status login
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         document.getElementById('authBox').style.display = 'none';
@@ -112,7 +115,6 @@
       }
     });
 
-    // Muat posting milik user
     async function loadMyPost() {
       preview.innerHTML = "⏳ Memuat...";
       const q = query(collection(db, "links"), where("owner", "==", auth.currentUser.uid));
@@ -122,6 +124,10 @@
       } else {
         const docData = snap.docs[0].data();
         const finalLink = `${location.origin}/show.html?id=${docData.authLink}`;
+        // isi otomatis ke input agar bisa diupdate
+        document.getElementById('videoLink').value = docData.videoLink;
+        document.getElementById('targetLink').value = docData.targetLink;
+
         preview.innerHTML = `
           <iframe src="${docData.videoLink}" allowfullscreen></iframe>
           <div class="link-box">
@@ -131,13 +137,13 @@
       }
     }
 
-    // Simpan / update link
     window.saveLink = async () => {
       const videoLink = document.getElementById('videoLink').value.trim();
       const targetLink = document.getElementById('targetLink').value.trim();
       if(!videoLink || !targetLink) return alert("Isi semua field");
 
       loading.style.display = 'block';
+      notif.style.display = 'none';
 
       const q = query(collection(db, "links"), where("owner", "==", auth.currentUser.uid));
       const snap = await getDocs(q);
@@ -154,6 +160,7 @@
           await updateDoc(ref, { videoLink, targetLink });
         }
         await loadMyPost();
+        notif.style.display = 'block'; // ✅ tampilkan notif berhasil
       } catch (err) {
         alert("Gagal simpan: " + err.message);
       }
