@@ -1,127 +1,190 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <script>
-    (function(s){s.dataset.zone='9885126',s.src='https://gizokraijaw.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))
-  </script>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tayangan Video</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    html, body {
-      height: 100%;
-      background: #000;
-      overflow: hidden;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    
-    #wrapper {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-    
-    #video-container {
-      flex: 1;
-      position: relative;
-    }
-    
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-    
-    /* Mengatur posisi iklan dan notifikasi di bagian bawah */
-    #ad-container {
-      height: 90px;
-      width: 100%;
-      background: #222;
-      overflow: hidden;
-      position: fixed; /* Menempatkan di posisi tetap */
-      bottom: 0;
-      z-index: 1; /* Lapisan bawah */
-    }
-    
-    #notification {
-      display: none;
-      position: fixed; /* Menempatkan di posisi tetap */
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(255, 255, 255, 0.95);
-      padding: 15px 20px;
-      border-radius: 12px;
-      color: #222;
-      text-align: center;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-      z-index: 2; /* Lapisan atas */
-      width: 80%;
-      max-width: 400px;
-    }
-    
-    #notification h3 {
-      margin-bottom: 8px;
-      color: #4361ee;
-    }
-    
-    .loader {
-      width: 50px;
-      height: 50px;
-      border: 5px solid rgba(255, 255, 255, 0.3);
-      border-top: 5px solid #ffffff;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin: 20px auto;
-    }
-    
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    
-    .error-message {
-      color: white;
-      text-align: center;
-      padding: 40px 20px;
-    }
-    
-    .error-message h2 {
-      margin-bottom: 15px;
-      font-size: 22px;
-    }
-  </style>
+  <script>(function(s){s.dataset.zone='9885185',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saksikan Video Ini!</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            position: relative;
+        }
+
+        .video-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .video-container iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            object-fit: cover;
+        }
+
+        .overlay-text {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 15px;
+            border-radius: 10px;
+            z-index: 10;
+        }
+
+        .overlay-text p {
+            margin: 0;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+
+        @media (orientation: landscape) {
+            .video-container iframe {
+                object-fit: contain;
+            }
+        }
+        
+        /* Loading and Error Styles */
+        .loading-state, .error-state {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 50;
+            background-color: #000;
+        }
+
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top: 5px solid #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-state h2 {
+            margin-bottom: 15px;
+        }
+
+        /* Modal/Popup Styles */
+        .modal-overlay {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: flex-end; /* Posisikan di bagian bawah */
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease-in-out;
+        }
+        .modal-overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 20px; /* Lebih kecil agar tidak terlalu besar di ponsel */
+            border-radius: 12px 12px 0 0;
+            text-align: center;
+            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.2);
+            max-width: 90%;
+            width: 400px;
+            position: relative;
+            transform: translateY(100%);
+            transition: transform 0.4s ease-in-out;
+        }
+        .modal-overlay.visible .modal-content {
+            transform: translateY(0);
+        }
+        .modal-title {
+            color: #25d366;
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+        .modal-text {
+            color: #555;
+            font-size: 1em;
+            line-height: 1.4;
+        }
+        .modal-btn {
+            background-color: #ff5722;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 20px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .modal-btn:hover {
+            background-color: #e64a19;
+            transform: translateY(-2px);
+        }
+    </style>
 </head>
 <body>
-  <div id="wrapper">
-    <div id="video-container">
-      <div id="content">
-        <div style="display: flex; justify-content: center; align-items: center; height: 100%; flex-direction: column;">
-          <div class="loader"></div>
-          <p style="color: white; margin-top: 20px;">Memuat video...</p>
-        </div>
-      </div>
-      <div id="notification">
-        <h3>⏳ Segera Dialihkan</h3>
-        <p>Halaman akan segera dialihkan ke konten menarik...</p>
-      </div>
-    </div>
-    <div id="ad-container">
-      <!-- Iklan akan dimuat di sini secara otomatis oleh script Monetag -->
-    </div>
-  </div>
 
-  <script type="module">
+    <div id="loading-state" class="loading-state">
+        <div class="loader"></div>
+        <p style="margin-top: 20px;">Memuat video...</p>
+    </div>
+
+    <div id="video-container" class="video-container" style="display: none;">
+        <!-- iframe akan dimasukkan di sini oleh JavaScript -->
+    </div>
+
+    <div id="overlay-text" class="overlay-text" style="display: none;">
+        <p>Tonton sampai habis, ada pesan penting di baliknya!</p>
+    </div>
+    
+    <div id="popupModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="modal-title">Transaksi Anti-Drama! 🎉</h2>
+            <p class="modal-text">Sudah lihat kan? Jangan sampai kejadian itu menimpa Anda! Kami punya solusinya.</p>
+            <a href="#" id="modal-btn" class="modal-btn">Lanjut ke Halaman Aman!</a>
+        </div>
+    </div>
+
+<script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getFirestore, collection, getDocs, query, where } 
+    import { getFirestore, collection, getDocs, query, where }
       from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -139,116 +202,60 @@
 
     const params = new URLSearchParams(location.search);
     const id = params.get("id");
-    const content = document.getElementById("content");
-    const notification = document.getElementById("notification");
+    
+    const loadingState = document.getElementById('loading-state');
+    const videoContainer = document.getElementById('video-container');
+    const overlayText = document.getElementById('overlay-text');
+    const popupModal = document.getElementById('popupModal');
+    const modalBtn = document.getElementById('modal-btn');
 
-    let videoTimer;
-    let notificationTimer;
     let redirectTimer;
+    let popupTimer;
 
     // Fungsi untuk menampilkan error
     function showError(message) {
-      content.innerHTML = `
-        <div class="error-message">
-          <h2>❌ Terjadi Kesalahan</h2>
-          <p>${message}</p>
-        </div>
-      `;
+        loadingState.style.display = 'none';
+        videoContainer.style.display = 'none';
+        overlayText.style.display = 'none';
+        const errorState = document.createElement('div');
+        errorState.className = 'error-state';
+        errorState.innerHTML = `<h2>❌ Terjadi Kesalahan</h2><p>${message}</p>`;
+        document.body.appendChild(errorState);
     }
 
     // Fungsi untuk mengonversi ke embed URL
     function convertToEmbed(url) {
       try {
-        // Handle berbagai format YouTube
         if (url.includes("youtube.com/") || url.includes("youtu.be/")) {
           let videoId = "";
-          
-          // Format: https://www.youtube.com/watch?v=VIDEO_ID
           if (url.includes("youtube.com/watch?v=")) {
-            videoId = url.split("v=")[1];
-            const ampersandPosition = videoId.indexOf("&");
-            if (ampersandPosition !== -1) {
-              videoId = videoId.substring(0, ampersandPosition);
-            }
-          } 
-          // Format: https://youtu.be/VIDEO_ID
-          else if (url.includes("youtu.be/")) {
-            videoId = url.split("youtu.be/")[1];
-            const queryPosition = videoId.indexOf("?");
-            if (queryPosition !== -1) {
-              videoId = videoId.substring(0, queryPosition);
-            }
+            videoId = url.split("v=")[1].split("&")[0];
+          } else if (url.includes("youtu.be/")) {
+            videoId = url.split("youtu.be/")[1].split("?")[0];
+          } else if (url.includes("youtube.com/embed/")) {
+            videoId = url.split("embed/")[1].split("?")[0];
+          } else if (url.includes("youtube.com/v/")) {
+            videoId = url.split("v/")[1].split("?")[0];
           }
-          // Format: https://www.youtube.com/embed/VIDEO_ID
-          else if (url.includes("youtube.com/embed/")) {
-            videoId = url.split("embed/")[1];
-            const queryPosition = videoId.indexOf("?");
-            if (queryPosition !== -1) {
-              videoId = videoId.substring(0, queryPosition);
-            }
-          }
-          // Format: https://www.youtube.com/v/VIDEO_ID
-          else if (url.includes("youtube.com/v/")) {
-            videoId = url.split("v/")[1];
-            const queryPosition = videoId.indexOf("?");
-            if (queryPosition !== -1) {
-              videoId = videoId.substring(0, queryPosition);
-            }
-          }
-          
           if (videoId) {
             return `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&playsinline=1`;
           }
-        } 
-        // Handle berbagai format TikTok
-        else if (url.includes("tiktok.com/")) {
+        } else if (url.includes("tiktok.com/")) {
           let videoId = "";
-          
-          // Format: https://www.tiktok.com/@username/video/VIDEO_ID
           if (url.includes("/video/")) {
-            const parts = url.split("/video/");
-            if (parts.length > 1) {
-              videoId = parts[1];
-              const queryPosition = videoId.indexOf("?");
-              if (queryPosition !== -1) {
-                videoId = videoId.substring(0, queryPosition);
-              }
-            }
-          } 
-          // Format: https://vt.tiktok.com/VIDEO_ID
-          else if (url.includes("vt.tiktok.com/")) {
-            const parts = url.split("vt.tiktok.com/");
-            if (parts.length > 1) {
-              videoId = parts[1];
-              const queryPosition = videoId.indexOf("?");
-              if (queryPosition !== -1) {
-                videoId = videoId.substring(0, queryPosition);
-              }
-            }
+            videoId = url.split("/video/")[1].split("?")[0];
+          } else if (url.includes("vt.tiktok.com/")) {
+            videoId = url.split("vt.tiktok.com/")[1].split("?")[0];
           }
-          
           if (videoId) {
             return `https://www.tiktok.com/embed/v2/${videoId}?autoplay=1`;
           }
         }
-        
         return url;
       } catch (error) {
         console.error("Error converting URL:", error);
         return url;
       }
-    }
-
-    // Fungsi untuk memproses redirect
-    function processRedirect(targetLink) {
-      // Tampilkan notifikasi
-      notification.style.display = "block";
-      
-      // Tunggu 3 detik kemudian redirect
-      redirectTimer = setTimeout(() => {
-        // Redirect ke halaman tujuan
-        location.href = targetLink;
-      }, 3000);
     }
 
     // Fungsi utama
@@ -259,7 +266,6 @@
           return;
         }
 
-        // Ambil data dari Firestore
         const q = query(collection(db, "links"), where("authLink", "==", id));
         const snap = await getDocs(q);
 
@@ -270,14 +276,25 @@
 
         const data = snap.docs[0].data();
         const embedUrl = convertToEmbed(data.videoLink);
+        const redirectLink = data.targetLink;
+        const videoDuration = 10; // Menggunakan durasi default 10 detik
 
-        // Tampilkan video
-        content.innerHTML = `<iframe src="${embedUrl}" allow="autoplay; fullscreen; accelerometer; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
-        
-        // Set timer untuk notifikasi dan redirect
-        videoTimer = setTimeout(() => {
-          processRedirect(data.targetLink);
-        }, 10000); // 10 detik untuk menonton video
+        // Sembunyikan loading dan tampilkan video
+        loadingState.style.display = 'none';
+        videoContainer.style.display = 'block';
+        overlayText.style.display = 'block';
+        videoContainer.innerHTML = `<iframe src="${embedUrl}" allow="autoplay; fullscreen; accelerometer; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+        modalBtn.href = redirectLink;
+
+        // Tampilkan pop-up setelah 7 detik
+        popupTimer = setTimeout(() => {
+            popupModal.classList.add('visible');
+        }, (videoDuration - 3) * 1000);
+
+        // Alihkan halaman setelah 10 detik
+        redirectTimer = setTimeout(() => {
+            window.location.href = redirectLink;
+        }, videoDuration * 1000);
 
       } catch (error) {
         console.error("Error:", error);
@@ -288,21 +305,11 @@
     // Jalankan fungsi utama ketika halaman dimuat
     document.addEventListener('DOMContentLoaded', initializePage);
     
-    // Handle ketika user menekan tombol back
-    window.addEventListener('pageshow', function(event) {
-      // Halaman dimuat dari cache, tutup saja
-      if (event.persisted) {
-        window.close();
-      }
-    });
-    
-    // Cegah pengguna melakukan navigasi manual
     window.addEventListener('beforeunload', function() {
-      // Bersihkan timer
-      if (videoTimer) clearTimeout(videoTimer);
-      if (notificationTimer) clearTimeout(notificationTimer);
+      if (popupTimer) clearTimeout(popupTimer);
       if (redirectTimer) clearTimeout(redirectTimer);
     });
-  </script>
+</script>
+
 </body>
 </html>
