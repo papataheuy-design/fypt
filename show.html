@@ -1,49 +1,118 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <script>(function(s){s.dataset.zone='9885126',s.src='https://gizokraijaw.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+  <script>
+    (function(s){s.dataset.zone='9885126',s.src='https://gizokraijaw.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))
+  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tampilan Link</title>
+  <title>Tayangan Video</title>
   <style>
-    html, body {
+    * {
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
+    }
+    
+    html, body {
       height: 100%;
       background: #000;
+      overflow: hidden;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
+    
     #wrapper {
       position: relative;
       width: 100%;
       height: 100%;
-      overflow: hidden;
       display: flex;
-      justify-content: center;
-      align-items: center;
+      flex-direction: column;
     }
+    
+    #video-container {
+      flex: 1;
+      position: relative;
+    }
+    
     iframe {
       width: 100%;
       height: 100%;
       border: none;
     }
-    #notif {
+    
+    #ad-container {
+      height: 90px;
+      width: 100%;
+      background: #222;
+      overflow: hidden;
+    }
+    
+    #notification {
       display: none;
       position: absolute;
-      bottom: 20px;
+      bottom: 100px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(255,255,255,0.9);
-      padding: 10px 15px;
-      border-radius: 8px;
-      color: #333;
-      font-family: sans-serif;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 15px 20px;
+      border-radius: 12px;
+      color: #222;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      z-index: 10;
+      width: 80%;
+      max-width: 400px;
+    }
+    
+    #notification h3 {
+      margin-bottom: 8px;
+      color: #4361ee;
+    }
+    
+    .loader {
+      width: 50px;
+      height: 50px;
+      border: 5px solid rgba(255, 255, 255, 0.3);
+      border-top: 5px solid #ffffff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .error-message {
+      color: white;
+      text-align: center;
+      padding: 40px 20px;
+    }
+    
+    .error-message h2 {
+      margin-bottom: 15px;
+      font-size: 22px;
     }
   </style>
 </head>
 <body>
   <div id="wrapper">
-    <div id="content" style="color:white;font-family:sans-serif;">⏳ Memuat data...</div>
-    <div id="notif">⏳ Menutup halaman...</div>
+    <div id="video-container">
+      <div id="content">
+        <div style="display: flex; justify-content: center; align-items: center; height: 100%; flex-direction: column;">
+          <div class="loader"></div>
+          <p style="color: white; margin-top: 20px;">Memuat video...</p>
+        </div>
+      </div>
+      <div id="notification">
+        <h3>⏳ Segera Dialihkan</h3>
+        <p>Halaman akan segera dialihkan ke konten menarik...</p>
+      </div>
+    </div>
+    <div id="ad-container">
+      <!-- Iklan akan dimuat di sini secara otomatis oleh script Monetag -->
+    </div>
   </div>
 
   <script type="module">
@@ -67,49 +136,169 @@
     const params = new URLSearchParams(location.search);
     const id = params.get("id");
     const content = document.getElementById("content");
-    const notif = document.getElementById("notif");
+    const notification = document.getElementById("notification");
 
-    if (localStorage.getItem("watched_" + id)) {
-      // Sudah nonton → tutup langsung
-      location.href = "about:blank";
-    } else {
-      if (!id) {
-        content.textContent = "ID tidak ditemukan.";
-      } else {
+    let videoTimer;
+    let notificationTimer;
+    let redirectTimer;
+
+    // Fungsi untuk menampilkan error
+    function showError(message) {
+      content.innerHTML = `
+        <div class="error-message">
+          <h2>❌ Terjadi Kesalahan</h2>
+          <p>${message}</p>
+        </div>
+      `;
+    }
+
+    // Fungsi untuk mengonversi ke embed URL
+    function convertToEmbed(url) {
+      try {
+        // Handle berbagai format YouTube
+        if (url.includes("youtube.com/") || url.includes("youtu.be/")) {
+          let videoId = "";
+          
+          // Format: https://www.youtube.com/watch?v=VIDEO_ID
+          if (url.includes("youtube.com/watch?v=")) {
+            videoId = url.split("v=")[1];
+            const ampersandPosition = videoId.indexOf("&");
+            if (ampersandPosition !== -1) {
+              videoId = videoId.substring(0, ampersandPosition);
+            }
+          } 
+          // Format: https://youtu.be/VIDEO_ID
+          else if (url.includes("youtu.be/")) {
+            videoId = url.split("youtu.be/")[1];
+            const queryPosition = videoId.indexOf("?");
+            if (queryPosition !== -1) {
+              videoId = videoId.substring(0, queryPosition);
+            }
+          }
+          // Format: https://www.youtube.com/embed/VIDEO_ID
+          else if (url.includes("youtube.com/embed/")) {
+            videoId = url.split("embed/")[1];
+            const queryPosition = videoId.indexOf("?");
+            if (queryPosition !== -1) {
+              videoId = videoId.substring(0, queryPosition);
+            }
+          }
+          // Format: https://www.youtube.com/v/VIDEO_ID
+          else if (url.includes("youtube.com/v/")) {
+            videoId = url.split("v/")[1];
+            const queryPosition = videoId.indexOf("?");
+            if (queryPosition !== -1) {
+              videoId = videoId.substring(0, queryPosition);
+            }
+          }
+          
+          if (videoId) {
+            return `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&playsinline=1`;
+          }
+        } 
+        // Handle berbagai format TikTok
+        else if (url.includes("tiktok.com/")) {
+          let videoId = "";
+          
+          // Format: https://www.tiktok.com/@username/video/VIDEO_ID
+          if (url.includes("/video/")) {
+            const parts = url.split("/video/");
+            if (parts.length > 1) {
+              videoId = parts[1];
+              const queryPosition = videoId.indexOf("?");
+              if (queryPosition !== -1) {
+                videoId = videoId.substring(0, queryPosition);
+              }
+            }
+          } 
+          // Format: https://vt.tiktok.com/VIDEO_ID
+          else if (url.includes("vt.tiktok.com/")) {
+            const parts = url.split("vt.tiktok.com/");
+            if (parts.length > 1) {
+              videoId = parts[1];
+              const queryPosition = videoId.indexOf("?");
+              if (queryPosition !== -1) {
+                videoId = videoId.substring(0, queryPosition);
+              }
+            }
+          }
+          
+          if (videoId) {
+            return `https://www.tiktok.com/embed/v2/${videoId}?autoplay=1`;
+          }
+        }
+        
+        return url;
+      } catch (error) {
+        console.error("Error converting URL:", error);
+        return url;
+      }
+    }
+
+    // Fungsi untuk memproses redirect
+    function processRedirect(targetLink) {
+      // Tampilkan notifikasi
+      notification.style.display = "block";
+      
+      // Tunggu 3 detik kemudian redirect
+      redirectTimer = setTimeout(() => {
+        // Redirect ke halaman tujuan
+        location.href = targetLink;
+      }, 3000);
+    }
+
+    // Fungsi utama
+    async function initializePage() {
+      try {
+        if (!id) {
+          showError("ID tidak ditemukan.");
+          return;
+        }
+
+        // Ambil data dari Firestore
         const q = query(collection(db, "links"), where("authLink", "==", id));
         const snap = await getDocs(q);
 
         if (snap.empty) {
-          content.textContent = "Link tidak ditemukan.";
-        } else {
-          const data = snap.docs[0].data();
-          let src = data.videoLink;
-
-          // Konversi otomatis ke embed
-          if (src.includes("youtube.com/watch?v=")) {
-            const vid = src.split("v=")[1].split("&")[0];
-            src = `https://www.youtube.com/embed/${vid}?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0`;
-          } else if (src.includes("youtu.be/")) {
-            const vid = src.split("youtu.be/")[1].split("?")[0];
-            src = `https://www.youtube.com/embed/${vid}?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0`;
-          } else if (src.includes("tiktok.com/")) {
-            const vid = src.split("/video/")[1]?.split("?")[0];
-            if (vid) src = `https://www.tiktok.com/embed/v2/${vid}?autoplay=1`;
-          }
-
-          content.innerHTML = `<iframe src="${src}" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
-
-          setTimeout(() => {
-            localStorage.setItem("watched_" + id, "true");
-            notif.style.display = "block";
-            content.style.display = "none";
-            setTimeout(() => {
-              location.href = data.targetLink;
-            }, 2000);
-          }, 10000);
+          showError("Link tidak ditemukan.");
+          return;
         }
+
+        const data = snap.docs[0].data();
+        const embedUrl = convertToEmbed(data.videoLink);
+
+        // Tampilkan video
+        content.innerHTML = `<iframe src="${embedUrl}" allow="autoplay; fullscreen; accelerometer; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+        
+        // Set timer untuk notifikasi dan redirect
+        videoTimer = setTimeout(() => {
+          processRedirect(data.targetLink);
+        }, 10000); // 10 detik untuk menonton video
+
+      } catch (error) {
+        console.error("Error:", error);
+        showError("Terjadi kesalahan saat memuat video.");
       }
     }
+
+    // Jalankan fungsi utama ketika halaman dimuat
+    document.addEventListener('DOMContentLoaded', initializePage);
+    
+    // Handle ketika user menekan tombol back
+    window.addEventListener('pageshow', function(event) {
+      // Halaman dimuat dari cache, tutup saja
+      if (event.persisted) {
+        window.close();
+      }
+    });
+    
+    // Cegah pengguna melakukan navigasi manual
+    window.addEventListener('beforeunload', function() {
+      // Bersihkan timer
+      if (videoTimer) clearTimeout(videoTimer);
+      if (notificationTimer) clearTimeout(notificationTimer);
+      if (redirectTimer) clearTimeout(redirectTimer);
+    });
   </script>
 </body>
 </html>
