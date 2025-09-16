@@ -17,6 +17,7 @@
     button { padding:10px; width:100%; background:#4361ee; color:#fff; border:none; border-radius:5px; cursor:pointer; }
     #panel { display:none; }
     .link-box { background:#e0e7ff; padding:10px; border-radius:6px; word-break:break-all; }
+    #loading {display:none; text-align:center; margin:10px; color:#555;}
   </style>
 </head>
 <body>
@@ -29,14 +30,15 @@
   </div>
 
   <div id="panel" class="box">
-    <h3>Buat Link Tampilan</h3>
+    <h3>Kelola Link</h3>
+    <div id="loading">⏳ Memuat...</div>
+    <div id="preview"></div>
     <input id="videoLink" type="url" placeholder="Link Embed TikTok / YouTube">
     <input id="targetLink" type="url" placeholder="Link Tujuan">
-    <button onclick="saveLink()">Simpan</button>
+    <button onclick="saveLink()">Simpan / Update</button>
     <div id="result" style="margin-top:10px;"></div>
   </div>
 
-  <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { 
@@ -44,7 +46,7 @@
       signInWithEmailAndPassword, onAuthStateChanged 
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
     import { 
-      getFirestore, collection, addDoc 
+      getFirestore, collection, query, where, getDocs, addDoc, updateDoc, doc
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -61,20 +63,25 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Pantau status login
-    onAuthStateChanged(auth, (user) => {
+    let currentDocId = null;
+
+    const showLoading = (show) => {
+      document.getElementById('loading').style.display = show ? 'block' : 'none';
+    };
+
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
         document.getElementById('authBox').style.display = 'none';
         document.getElementById('panel').style.display = 'block';
+        loadUserLink();
       }
     });
 
-    // Fungsi login/daftar
     window.login = async () => {
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
       if(!email || !password) return alert("Isi email dan password");
-
+      showLoading(true);
       try {
         await signInWithEmailAndPassword(auth, email, password);
       } catch (err) {
@@ -84,34 +91,55 @@
           alert("Gagal daftar: " + err2.message);
         }
       }
+      showLoading(false);
     };
 
-    // Simpan data link
+    async function loadUserLink(){
+      showLoading(true);
+      const q = query(collection(db, "links"), where("owner","==",auth.currentUser.uid));
+      const snap = await getDocs(q);
+      if(!snap.empty){
+        const data = snap.docs[0].data();
+        currentDocId = snap.docs[0].id;
+        document.getElementById('videoLink').value = data.videoLink;
+        document.getElementById('targetLink').value = data.targetLink;
+        const link = `${location.origin}/show.html?id=${data.authLink}`;
+        document.getElementById('preview').innerHTML =
+          `<div class="link-box">
+             <b>Preview Link:</b><br>
+             <a href="${link}" target="_blank">${link}</a>
+           </div>`;
+      }
+      showLoading(false);
+    }
+
     window.saveLink = async () => {
       const videoLink = document.getElementById('videoLink').value.trim();
       const targetLink = document.getElementById('targetLink').value.trim();
       if(!videoLink || !targetLink) return alert("Isi semua field");
 
-      const authLink = Math.random().toString(36).substring(2,10);
+      showLoading(true);
 
       try {
-        await addDoc(collection(db, "links"), {
-          owner: auth.currentUser.uid,
-          videoLink,
-          targetLink,
-          authLink,
-          used: false
-        });
-
-        const finalLink = `${location.origin}/show.html?id=${authLink}`;
-        document.getElementById('result').innerHTML =
-          `<div class="link-box">
-            Link frontend kamu:<br>
-            <a href="${finalLink}" target="_blank">${finalLink}</a>
-          </div>`;
+        if(currentDocId){
+          await updateDoc(doc(db, "links", currentDocId), {
+            videoLink, targetLink
+          });
+        }else{
+          const authLink = Math.random().toString(36).substring(2,10);
+          const docRef = await addDoc(collection(db, "links"), {
+            owner: auth.currentUser.uid,
+            videoLink,
+            targetLink,
+            authLink
+          });
+          currentDocId = docRef.id;
+        }
+        await loadUserLink();
       } catch (err) {
         alert("Gagal simpan: " + err.message);
       }
+      showLoading(false);
     };
   </script>
 </body>
