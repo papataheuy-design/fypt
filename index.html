@@ -9,15 +9,22 @@
       font-family: sans-serif;
       background: #f5f5f5;
       padding: 20px;
-      max-width: 400px;
+      max-width: 420px;
       margin: auto;
     }
     .box { background:#fff; padding:20px; border-radius:10px; margin-bottom:20px; }
-    input { width:100%; padding:10px; margin:5px 0; }
-    button { padding:10px; width:100%; background:#4361ee; color:#fff; border:none; border-radius:5px; cursor:pointer; }
-    #panel { display:none; }
-    .link-box { background:#e0e7ff; padding:10px; border-radius:6px; word-break:break-all; }
-    #loading {display:none; text-align:center; margin:10px; color:#555;}
+    input,button { width:100%; padding:10px; margin:5px 0; }
+    button { background:#4361ee; color:#fff; border:none; border-radius:5px; cursor:pointer; }
+    .link-box {
+      background:#e0e7ff; padding:10px; border-radius:6px; word-break:break-all;
+      margin-top:10px; text-align:center;
+    }
+    iframe {
+      width: 100%; height: 200px; border:none; border-radius:10px; margin-top:10px;
+    }
+    #loading {
+      display:none; text-align:center; margin-top:10px;
+    }
   </style>
 </head>
 <body>
@@ -29,14 +36,27 @@
     <button onclick="login()">Login / Daftar</button>
   </div>
 
-  <div id="panel" class="box">
-    <h3>Kelola Link</h3>
-    <div id="loading">⏳ Memuat...</div>
-    <div id="preview"></div>
+  <div id="panel" class="box" style="display:none;">
+    <h3>Buat / Update Link</h3>
+    <small>📌 Masukkan link video <b>embed</b> dari TikTok / YouTube dan link tujuan.</small><br><br>
     <input id="videoLink" type="url" placeholder="Link Embed TikTok / YouTube">
     <input id="targetLink" type="url" placeholder="Link Tujuan">
-    <button onclick="saveLink()">Simpan / Update</button>
-    <div id="result" style="margin-top:10px;"></div>
+    <button onclick="saveLink()">Simpan</button>
+    <div id="loading">⏳ Menyimpan...</div>
+
+    <h4>Preview Postingan Kamu</h4>
+    <div id="preview">Belum ada postingan</div>
+  </div>
+
+  <div class="box">
+    <h3>Cara Penggunaan 📝</h3>
+    <ol>
+      <li>Login / daftar pakai email dan password</li>
+      <li>Tempel link video <b>embed</b> TikTok / YouTube</li>
+      <li>Tempel link tujuan (misal link produk / website)</li>
+      <li>Klik <b>Simpan</b> → muncul preview & link publik</li>
+      <li>Copy link publik, bagikan ke orang lain</li>
+    </ol>
   </div>
 
   <script type="module">
@@ -46,7 +66,7 @@
       signInWithEmailAndPassword, onAuthStateChanged 
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
     import { 
-      getFirestore, collection, query, where, getDocs, addDoc, updateDoc, doc
+      getFirestore, collection, addDoc, query, where, getDocs, updateDoc, doc 
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -63,25 +83,15 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    let currentDocId = null;
+    const preview = document.getElementById('preview');
+    const loading = document.getElementById('loading');
 
-    const showLoading = (show) => {
-      document.getElementById('loading').style.display = show ? 'block' : 'none';
-    };
-
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        document.getElementById('authBox').style.display = 'none';
-        document.getElementById('panel').style.display = 'block';
-        loadUserLink();
-      }
-    });
-
+    // Fungsi login/daftar
     window.login = async () => {
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
       if(!email || !password) return alert("Isi email dan password");
-      showLoading(true);
+
       try {
         await signInWithEmailAndPassword(auth, email, password);
       } catch (err) {
@@ -91,55 +101,64 @@
           alert("Gagal daftar: " + err2.message);
         }
       }
-      showLoading(false);
     };
 
-    async function loadUserLink(){
-      showLoading(true);
-      const q = query(collection(db, "links"), where("owner","==",auth.currentUser.uid));
-      const snap = await getDocs(q);
-      if(!snap.empty){
-        const data = snap.docs[0].data();
-        currentDocId = snap.docs[0].id;
-        document.getElementById('videoLink').value = data.videoLink;
-        document.getElementById('targetLink').value = data.targetLink;
-        const link = `${location.origin}/show.html?id=${data.authLink}`;
-        document.getElementById('preview').innerHTML =
-          `<div class="link-box">
-             <b>Preview Link:</b><br>
-             <a href="${link}" target="_blank">${link}</a>
-           </div>`;
+    // Cek status login
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        document.getElementById('authBox').style.display = 'none';
+        document.getElementById('panel').style.display = 'block';
+        loadMyPost();
       }
-      showLoading(false);
+    });
+
+    // Muat posting milik user
+    async function loadMyPost() {
+      preview.innerHTML = "⏳ Memuat...";
+      const q = query(collection(db, "links"), where("owner", "==", auth.currentUser.uid));
+      const snap = await getDocs(q);
+      if (snap.empty) {
+        preview.textContent = "Belum ada postingan";
+      } else {
+        const docData = snap.docs[0].data();
+        const finalLink = `${location.origin}/show.html?id=${docData.authLink}`;
+        preview.innerHTML = `
+          <iframe src="${docData.videoLink}" allowfullscreen></iframe>
+          <div class="link-box">
+            <a href="${finalLink}" target="_blank">${finalLink}</a>
+          </div>
+        `;
+      }
     }
 
+    // Simpan / update link
     window.saveLink = async () => {
       const videoLink = document.getElementById('videoLink').value.trim();
       const targetLink = document.getElementById('targetLink').value.trim();
       if(!videoLink || !targetLink) return alert("Isi semua field");
 
-      showLoading(true);
+      loading.style.display = 'block';
+
+      const q = query(collection(db, "links"), where("owner", "==", auth.currentUser.uid));
+      const snap = await getDocs(q);
 
       try {
-        if(currentDocId){
-          await updateDoc(doc(db, "links", currentDocId), {
-            videoLink, targetLink
-          });
-        }else{
+        if (snap.empty) {
           const authLink = Math.random().toString(36).substring(2,10);
-          const docRef = await addDoc(collection(db, "links"), {
+          await addDoc(collection(db, "links"), {
             owner: auth.currentUser.uid,
-            videoLink,
-            targetLink,
-            authLink
+            videoLink, targetLink, authLink
           });
-          currentDocId = docRef.id;
+        } else {
+          const ref = doc(db, "links", snap.docs[0].id);
+          await updateDoc(ref, { videoLink, targetLink });
         }
-        await loadUserLink();
+        await loadMyPost();
       } catch (err) {
         alert("Gagal simpan: " + err.message);
       }
-      showLoading(false);
+
+      loading.style.display = 'none';
     };
   </script>
 </body>
