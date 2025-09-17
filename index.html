@@ -34,16 +34,17 @@
     body {
       font-family: 'Poppins', sans-serif;
       background: #f0f2f5;
-      padding: 20px;
-      margin: auto;
+      padding: 0;
+      margin: 0;
       line-height: 1.6;
       color: #333;
       font-weight: 400;
     }
     
     .container {
-      max-width: 480px;
+      max-width: 100%;
       margin: 0 auto;
+      padding: 20px;
     }
     
     .box {
@@ -53,11 +54,6 @@
       box-shadow: var(--shadow);
       margin-bottom: 20px;
       border: 1px solid var(--border);
-      transition: var(--transition);
-    }
-    
-    .box:hover {
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
     }
     
     h3, h4 {
@@ -79,7 +75,6 @@
       border: 1px solid var(--border);
       font-family: 'Poppins', sans-serif;
       font-size: 0.95rem;
-      transition: var(--transition);
     }
     
     input {
@@ -99,18 +94,11 @@
       border: none;
       font-weight: 600;
       cursor: pointer;
-      transition: var(--transition);
       padding: 14px;
     }
     
     button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(67, 97, 238, 0.25);
-    }
-    
-    button:active {
-      transform: translateY(0);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      opacity: 0.9;
     }
     
     .link-box {
@@ -129,20 +117,28 @@
     .link-box a {
       color: var(--primary);
       text-decoration: none;
-      transition: var(--transition);
     }
     
     .link-box a:hover {
       text-decoration: underline;
     }
     
-    iframe {
-      width: 100%; 
-      height: 200px; 
-      border: none; 
-      border-radius: 10px; 
-      margin-top: 15px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    
+    .button-group button {
+      flex: 1;
+    }
+    
+    .btn-copy {
+      background: var(--secondary);
+    }
+    
+    .btn-open {
+      background: var(--success);
     }
     
     #loading, #notif, #error { 
@@ -233,14 +229,18 @@
       margin-bottom: 10px;
     }
     
+    /* Preview container */
+    .preview-container {
+      margin-top: 20px;
+      padding: 15px;
+      background: var(--light);
+      border-radius: var(--radius);
+    }
+    
     /* Responsive adjustments */
     @media (max-width: 520px) {
-      body {
-        padding: 15px;
-      }
-      
       .container {
-        max-width: 100%;
+        padding: 15px;
       }
       
       .box {
@@ -300,7 +300,9 @@
     <div id="error"></div>
 
     <h4>Preview Postingan Kamu</h4>
-    <div id="preview">Belum ada postingan</div>
+    <div class="preview-container">
+      <div id="preview">Belum ada postingan</div>
+    </div>
   </div>
 
   <!-- Cara pakai -->
@@ -402,11 +404,13 @@
         document.getElementById('videoLink').value = docData.videoLink;
         document.getElementById('targetLink').value = docData.targetLink;
 
-        const embedUrl = convertToEmbed(docData.videoLink);
         preview.innerHTML = `
-          <iframe src="${embedUrl}" allow="autoplay; fullscreen" allowfullscreen></iframe>
           <div class="link-box">
             <a href="${finalLink}" target="_blank">${finalLink}</a>
+          </div>
+          <div class="button-group">
+            <button class="btn-copy" onclick="copyToClipboard('${finalLink}')">Salin Link</button>
+            <button class="btn-open" onclick="window.open('${finalLink}', '_blank')">Buka Link</button>
           </div>
         `;
       }
@@ -458,6 +462,16 @@
         header.classList.add('open');
       }
     });
+
+    // Fungsi untuk menyalin teks ke clipboard
+    window.copyToClipboard = function(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Link berhasil disalin!");
+      }).catch(err => {
+        console.error('Gagal menyalin teks: ', err);
+        alert("Gagal menyalin link. Silakan coba manual.");
+      });
+    };
   </script>
 </div>
 
