@@ -366,39 +366,121 @@
     const notif = document.getElementById('notif');
     const errorBox = document.getElementById('error');
 
-    // Fungsi untuk mengonversi link pendek TikTok menjadi link panjang
+    /**
+     * resolveTikTokShortLink(shortUrl)
+     * - Tujuan: mengubah link pendek TikTok (vm.tiktok.com, vt.tiktok.com) menjadi link panjang origin yang berisi /video/{id}
+     * - Pendekatan: beberapa strategi berurutan:
+     *   1) FETCH dengan redirect:'manual' -> baca header Location (bila server mengembalikan redirect header dan CORS mengizinkan)
+     *   2) FETCH dengan redirect:'follow' (HEAD dulu jika mungkin) -> gunakan response.url bila tersedia
+     *   3) FALLBACK: ambil HTML melalui service text-fetch (r.jina.ai) lalu parsing meta og:url / canonical
+     * - Catatan: resolving client-side bisa dibatasi oleh CORS; jika semua gagal, fungsi mengembalikan URL asli.
+     */
     async function resolveTikTokShortLink(shortUrl) {
       try {
-        // Cek apakah ini link pendek TikTok (vm.tiktok.com, vt.tiktok.com)
-        if (shortUrl.includes('vm.tiktok.com') || shortUrl.includes('vt.tiktok.com')) {
-          console.log('Meresolve link TikTok pendek:', shortUrl);
-          
-          // Lakukan request untuk mendapatkan URL akhir setelah redirect
-          const response = await fetch(shortUrl, { 
-            method: 'HEAD', 
-            redirect: 'follow',
-            headers: {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-            }
-          });
-          
-          // Dapatkan URL akhir setelah semua redirect
-          const finalUrl = response.url;
-          console.log('Link TikTok panjang yang didapat:', finalUrl);
-          
-          // Jika URL akhir adalah link TikTok yang valid, kembalikan
-          if (finalUrl.includes('tiktok.com') && finalUrl.includes('/video/')) {
-            return finalUrl;
-          } else {
-            console.warn('URL hasil resolve bukan link TikTok yang valid:', finalUrl);
-          }
+        if (!(shortUrl.includes('vm.tiktok.com') || shortUrl.includes('vt.tiktok.com'))) {
+          // bukan short tiktok
+          return shortUrl;
         }
-        
-        // Jika bukan link pendek atau konversi gagal, kembalikan URL asli
+        console.log('Meresolve link TikTok pendek (mulai):', shortUrl);
+
+        // STRATEGI 1: Coba fetch dengan redirect: 'manual' dan periksa header Location
+        try {
+          const res = await fetch(shortUrl, {
+            method: 'GET',
+            redirect: 'manual',
+            // beberapa server memerlukan header user-agent namun browser mungkin tidak mengizinkan mengganti User-Agent
+          });
+
+          // jika server mengembalikan status 3xx dan header Location ada => gunakan itu
+          if (res.status >= 300 && res.status < 400) {
+            const loc = res.headers.get('location') || res.headers.get('Location');
+            if (loc) {
+              console.log('Ditemukan header Location (manual):', loc);
+              // Jika location adalah relatif, buat absolute URL
+              try {
+                const abs = new URL(loc, shortUrl).toString();
+                if (abs.includes('tiktok.com') && abs.includes('/video/')) return abs;
+                // jika tidak berisi /video/, tetap kembalikan abs (agar lebih informatif)
+                return abs;
+              } catch (e) {
+                return loc;
+              }
+            }
+          }
+
+          // Jika response.url memberi info (beberapa browser mengisi response.url walau redirect manual)
+          if (res.url && res.url !== shortUrl) {
+            console.log('Response.url dari manual fetch:', res.url);
+            if (res.url.includes('tiktok.com') && res.url.includes('/video/')) return res.url;
+          }
+        } catch (errManual) {
+          console.warn('Strategi manual fetch gagal atau dibatasi CORS:', errManual);
+          // lanjut ke strategi berikutnya
+        }
+
+        // STRATEGI 2: Coba fetch dengan redirect: 'follow' (HEAD jika server mengizinkan)
+        try {
+          // HEAD kadang diblok oleh CORS, tapi kita coba
+          let resHead;
+          try {
+            resHead = await fetch(shortUrl, { method: 'HEAD', redirect: 'follow' });
+            if (resHead && resHead.url && resHead.url !== shortUrl) {
+              console.log('HEAD result url:', resHead.url);
+              if (resHead.url.includes('tiktok.com') && resHead.url.includes('/video/')) return resHead.url;
+            }
+          } catch (eHead) {
+            // fallback ke GET follow
+            const resGet = await fetch(shortUrl, { method: 'GET', redirect: 'follow' });
+            if (resGet && resGet.url && resGet.url !== shortUrl) {
+              console.log('GET follow result url:', resGet.url);
+              if (resGet.url.includes('tiktok.com') && resGet.url.includes('/video/')) return resGet.url;
+            }
+          }
+        } catch (errFollow) {
+          console.warn('Strategi follow fetch gagal atau dibatasi CORS:', errFollow);
+        }
+
+        // STRATEGI 3 (FALLBACK): Ambil HTML via text/proxy reader service dan parsing meta tags
+        // menggunakan r.jina.ai untuk mengambil versi teks dari halaman target (bisa melewati beberapa pembatasan CORS)
+        try {
+          // Merapikan shortUrl agar bisa dipasangkan ke r.jina.ai/http://...
+          const normalized = shortUrl.replace(/^https?:\/\//, '');
+          const proxyUrl = `https://r.jina.ai/http://${normalized}`;
+          console.log('Mencoba fallback parsing via:', proxyUrl);
+          const r = await fetch(proxyUrl);
+          if (r && r.ok) {
+            const txt = await r.text();
+            // Cari meta property og:url atau canonical atau link utama yang mengandung /video/
+            let m = txt.match(/<meta[^>]*property=["']og:url["'][^>]*content=["']([^"']+)["'][^>]*>/i);
+            if (!m) m = txt.match(/<link[^>]*rel=["']canonical["'][^>]*href=["']([^"']+)["'][^>]*>/i);
+            if (!m) m = txt.match(/https?:\/\/(?:www\.)?tiktok\.com\/[^\s"'<>]+\/video\/\d+/i);
+            if (m) {
+              const found = m[1] || m[0];
+              console.log('Ditemukan via parsing HTML fallback:', found);
+              // normalize
+              try {
+                const abs = new URL(found).toString();
+                if (abs.includes('tiktok.com') && abs.includes('/video/')) return abs;
+                return abs;
+              } catch (e) {
+                return found;
+              }
+            } else {
+              console.warn('Tidak menemukan meta og:url / canonical dalam halaman fallback.');
+            }
+          } else {
+            console.warn('Proxy fallback tidak mengembalikan konten yang valid', r && r.status);
+          }
+        } catch (errProxy) {
+          console.warn('Fallback parsing gagal:', errProxy);
+        }
+
+        // Jika sampai sini belum bisa diresolve, kembalikan shortUrl asli
+        console.warn('Semua strategi resolve gagal — kembalikan URL asli.');
         return shortUrl;
       } catch (error) {
-        console.error('Error resolving TikTok short link:', error);
-        return shortUrl; // Kembalikan URL asli jika terjadi error
+        console.error('Error resolving TikTok short link (overall):', error);
+        return shortUrl;
       }
     }
 
