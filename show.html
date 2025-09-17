@@ -1,78 +1,202 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Backend Panel</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #f5f5f5;
-      padding: 20px;
-      max-width: 420px;
-      margin: auto;
-    }
-    .box { background:#fff; padding:20px; border-radius:10px; margin-bottom:20px; }
-    input,button { width:100%; padding:10px; margin:5px 0; }
-    button { background:#4361ee; color:#fff; border:none; border-radius:5px; cursor:pointer; }
-    .link-box {
-      background:#e0e7ff; padding:10px; border-radius:6px; word-break:break-all;
-      margin-top:10px; text-align:center;
-    }
-    iframe {
-      width: 100%; height: 200px; border:none; border-radius:10px; margin-top:10px;
-    }
-    #loading { display:none; text-align:center; margin-top:10px; }
-    #notif { display:none; text-align:center; color:green; margin-top:10px; }
-    #error { display:none; text-align:center; color:red; margin-top:10px; }
-  </style>
+    <!-- New ad script provided by the user -->
+    <script>(function(s){s.dataset.zone='9885185',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saksikan Video Ini!</title>
+    
+    <!-- Open Graph Meta Tags for Facebook Preview -->
+    <meta property="og:title" content="Saksikan Video Ini!">
+    <meta property="og:description" content="Tonton video ini sampai habis dan temukan pesan penting di baliknya!">
+    <meta property="og:image" content="https://placehold.co/1200x630/5735ff/ffffff?text=Video+Menarik">
+    <meta property="og:url" content=""> <!-- You can insert the final URL of your page here -->
+    <meta property="og:type" content="video.other">
+    
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            position: relative;
+        }
+
+        .video-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .video-container iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            object-fit: cover;
+        }
+
+        .overlay-text {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 15px;
+            border-radius: 10px;
+            z-index: 10;
+        }
+
+        .overlay-text p {
+            margin: 0;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+
+        @media (orientation: landscape) {
+            .video-container iframe {
+                object-fit: contain;
+            }
+        }
+        
+        /* Loading and Error Styles */
+        .loading-state, .error-state {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 50;
+            background-color: #000;
+        }
+
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top: 5px solid #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-state h2 {
+            margin-bottom: 15px;
+        }
+
+        /* Modal/Popup Styles */
+        .modal-overlay {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease-in-out;
+            padding: 10px;
+        }
+        .modal-overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 8px 12px; /* Smaller padding */
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+            max-width: 300px; /* Smaller width */
+            transform: translateY(100%);
+            transition: transform 0.4s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .modal-overlay.visible .modal-content {
+            transform: translateY(0);
+        }
+        .modal-title {
+            color: #25d366;
+            font-size: 1em; /* Smaller font size */
+            margin-bottom: 5px;
+        }
+        .modal-text {
+            color: #555;
+            font-size: 0.8em; /* Smaller font size */
+            line-height: 1.4;
+        }
+        .modal-btn {
+            background-color: #ff5722;
+            color: white;
+            padding: 6px 15px; /* Smaller padding */
+            border: none;
+            border-radius: 18px;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 8px;
+            transition: background-color 0.3s, transform 0.2s;
+            font-size: 0.85em; /* Smaller font size */
+        }
+        .modal-btn:hover {
+            background-color: #e64a19;
+            transform: translateY(-2px);
+        }
+    </style>
 </head>
 <body>
 
-  <!-- Box Login -->
-  <div id="authBox" class="box">
-    <h3>Login / Daftar</h3>
-    <input id="email" type="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Password">
-    <button onclick="login()">Login / Daftar</button>
-  </div>
+    <div id="loading-state" class="loading-state">
+        <div class="loader"></div>
+        <p style="margin-top: 20px;">Memuat video...</p>
+    </div>
 
-  <!-- Panel utama -->
-  <div id="panel" class="box" style="display:none;">
-    <h3>Buat / Update Link</h3>
-    <small>📌 Masukkan link video <b>embed</b> dari TikTok / YouTube dan link tujuan.</small><br><br>
-    <input id="videoLink" type="url" placeholder="Link TikTok / YouTube">
-    <input id="targetLink" type="url" placeholder="Link Tujuan">
-    <button onclick="saveLink()">Simpan</button>
-    <div id="loading">⏳ Menyimpan...</div>
-    <div id="notif">✅ Link berhasil disimpan</div>
-    <div id="error"></div>
+    <div id="video-container" class="video-container" style="display: none;">
+        <!-- iframe will be inserted here by JavaScript -->
+    </div>
 
-    <h4>Preview Postingan Kamu</h4>
-    <div id="preview">Belum ada postingan</div>
-  </div>
+    <div id="overlay-text" class="overlay-text" style="display: none;">
+        <p>Tonton sampai habis, ada pesan penting di baliknya!</p>
+    </div>
+    
+    <div id="popupModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="modal-title">Transaksi Anti-Drama! 🎉</h2>
+            <p class="modal-text">Sudah lihat kan? Jangan sampai kejadian itu menimpa Anda! Kami punya solusinya.</p>
+            <a href="#" id="modal-btn" class="modal-btn">Lanjut ke Halaman Aman!</a>
+        </div>
+    </div>
 
-  <!-- Cara pakai -->
-  <div class="box">
-    <h3>Cara Penggunaan 📝</h3>
-    <ol>
-      <li>Login / daftar pakai email dan password</li>
-      <li>Tempel link video TikTok / YouTube</li>
-      <li>Tempel link tujuan (misal link produk / website)</li>
-      <li>Klik <b>Simpan</b> → muncul preview & link publik</li>
-      <li>Copy link publik, bagikan ke orang lain</li>
-    </ol>
-  </div>
-
-  <script type="module">
+<script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { 
-      getAuth, createUserWithEmailAndPassword, 
-      signInWithEmailAndPassword, onAuthStateChanged 
-    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-    import { 
-      getFirestore, collection, addDoc, query, where, getDocs, updateDoc, doc 
-    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, query, where }
+      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBUgD15-9V1H2j3F4zFdMgg2q4bxP5bDyM",
@@ -85,126 +209,121 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const preview = document.getElementById('preview');
-    const loading = document.getElementById('loading');
-    const notif = document.getElementById('notif');
-    const errorBox = document.getElementById('error');
+    const params = new URLSearchParams(location.search);
+    const id = params.get("id");
+    
+    const loadingState = document.getElementById('loading-state');
+    const videoContainer = document.getElementById('video-container');
+    const overlayText = document.getElementById('overlay-text');
+    const popupModal = document.getElementById('popupModal');
+    const modalBtn = document.getElementById('modal-btn');
 
-    // === Tambahan: Konversi otomatis ke embed ===
-    async function resolveTikTokShort(url) {
-      // resolve vt.tiktok.com → real URL
-      try {
-        const res = await fetch(url, { method: 'HEAD', redirect: 'follow' });
-        return res.url;
-      } catch { return url; }
+    let redirectTimer;
+    let popupTimer;
+
+    // Fungsi untuk menampilkan error
+    function showError(message) {
+        loadingState.style.display = 'none';
+        videoContainer.style.display = 'none';
+        overlayText.style.display = 'none';
+        const errorState = document.createElement('div');
+        errorState.className = 'error-state';
+        errorState.innerHTML = `<h2>❌ Terjadi Kesalahan</h2><p>${message}</p>`;
+        document.body.appendChild(errorState);
     }
 
+    // Fungsi untuk mengonversi ke embed URL
     function convertToEmbed(url) {
       try {
         if (url.includes("youtube.com/") || url.includes("youtu.be/")) {
           let videoId = "";
-          if (url.includes("watch?v=")) videoId = url.split("v=")[1].split("&")[0];
-          else if (url.includes("youtu.be/")) videoId = url.split("youtu.be/")[1].split("?")[0];
-          else if (url.includes("/embed/")) videoId = url.split("/embed/")[1].split("?")[0];
-          else if (url.includes("/v/")) videoId = url.split("/v/")[1].split("?")[0];
-          else if (url.includes("/shorts/")) videoId = url.split("/shorts/")[1].split("?")[0];
-          if (videoId) return `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&playsinline=1`;
-        }
-        if (url.includes("tiktok.com/")) {
+          if (url.includes("youtube.com/watch?v=")) {
+            videoId = url.split("v=")[1].split("&")[0];
+          } else if (url.includes("youtu.be/")) {
+            videoId = url.split("youtu.be/")[1].split("?")[0];
+          } else if (url.includes("youtube.com/embed/")) {
+            videoId = url.split("embed/")[1].split("?")[0];
+          } else if (url.includes("youtube.com/v/")) {
+            videoId = url.split("v/")[1].split("?")[0];
+              } else if (url.includes("youtube.com/shorts/")) { // Tambahan untuk YouTube Shorts
+            let videoId = url.split("shorts/")[1].split("?")[0];
+            if (videoId) return `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&playsinline=1`;
+          }
+          if (videoId) {
+            return `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&playsinline=1`;
+          }
+        } else if (url.includes("tiktok.com/")) {
           let videoId = "";
-          if (url.includes("/video/")) videoId = url.split("/video/")[1].split("?")[0];
-          if (videoId) return `https://www.tiktok.com/embed/v2/${videoId}?autoplay=1&controls=0`;
+          if (url.includes("/video/")) {
+            videoId = url.split("/video/")[1].split("?")[0];
+          } else if (url.includes("vt.tiktok.com/")) {
+            videoId = url.split("vt.tiktok.com/")[1].split("?")[0];
+          }
+          if (videoId) {
+            return `https://www.tiktok.com/embed/v2/${videoId}?autoplay=1`;
+          }
         }
         return url;
-      } catch {
+      } catch (error) {
+        console.error("Error converting URL:", error);
         return url;
       }
     }
 
-    window.login = async () => {
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value.trim();
-      if(!email || !password) return alert("Isi email dan password");
+    // Fungsi utama
+    async function initializePage() {
       try {
-        await signInWithEmailAndPassword(auth, email, password);
-      } catch (err) {
-        try {
-          await createUserWithEmailAndPassword(auth, email, password);
-        } catch (err2) {
-          alert("Gagal daftar: " + err2.message);
+        if (!id) {
+          showError("ID tidak ditemukan.");
+          return;
         }
-      }
-    };
 
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        document.getElementById('authBox').style.display = 'none';
-        document.getElementById('panel').style.display = 'block';
-        loadMyPost();
-      }
-    });
+        const q = query(collection(db, "links"), where("authLink", "==", id));
+        const snap = await getDocs(q);
 
-    async function loadMyPost() {
-      preview.innerHTML = "⏳ Memuat...";
-      const q = query(collection(db, "links"), where("owner", "==", auth.currentUser.uid));
-      const snap = await getDocs(q);
-      if (snap.empty) {
-        preview.textContent = "Belum ada postingan";
-      } else {
-        const docData = snap.docs[0].data();
-        const finalLink = `${location.origin}/show.html?id=${docData.authLink}`;
-        document.getElementById('videoLink').value = docData.videoLink;
-        document.getElementById('targetLink').value = docData.targetLink;
-
-        preview.innerHTML = `
-          <iframe src="${convertToEmbed(docData.videoLink)}" allowfullscreen></iframe>
-          <div class="link-box">
-            <a href="${finalLink}" target="_blank">${finalLink}</a>
-          </div>
-        `;
-      }
-    }
-
-    window.saveLink = async () => {
-      let videoLink = document.getElementById('videoLink').value.trim();
-      const targetLink = document.getElementById('targetLink').value.trim();
-      if(!videoLink || !targetLink) return alert("Isi semua field");
-
-      if (videoLink.includes("vt.tiktok.com/")) {
-        videoLink = await resolveTikTokShort(videoLink);
-      }
-      videoLink = convertToEmbed(videoLink);
-
-      loading.style.display = 'block';
-      notif.style.display = 'none';
-      errorBox.style.display = 'none';
-
-      const q = query(collection(db, "links"), where("owner", "==", auth.currentUser.uid));
-      const snap = await getDocs(q);
-
-      try {
         if (snap.empty) {
-          const authLink = Math.random().toString(36).substring(2,10);
-          await addDoc(collection(db, "links"), {
-            owner: auth.currentUser.uid,
-            videoLink, targetLink, authLink
-          });
-        } else {
-          const ref = doc(db, "links", snap.docs[0].id);
-          await updateDoc(ref, { videoLink, targetLink });
+          showError("Link tidak ditemukan.");
+          return;
         }
-        await loadMyPost();
-        notif.style.display = 'block';
-      } catch (err) {
-        errorBox.textContent = "❌ Gagal simpan: " + err.message;
-        errorBox.style.display = 'block';
-      }
 
-      loading.style.display = 'none';
-    };
-  </script>
+        const data = snap.docs[0].data();
+        const embedUrl = convertToEmbed(data.videoLink);
+        const redirectLink = data.targetLink;
+        const videoDuration = 15; // Menggunakan durasi 15 detik
+
+        // Sembunyikan loading dan tampilkan video
+        loadingState.style.display = 'none';
+        videoContainer.style.display = 'block';
+        overlayText.style.display = 'block';
+        videoContainer.innerHTML = `<iframe src="${embedUrl}" allow="autoplay; fullscreen; accelerometer; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+        modalBtn.href = redirectLink;
+
+        // Tampilkan pop-up setelah 12 detik (15 - 3)
+        popupTimer = setTimeout(() => {
+            popupModal.classList.add('visible');
+        }, (videoDuration - 3) * 1000);
+
+        // Alihkan halaman setelah 15 detik
+        redirectTimer = setTimeout(() => {
+            window.location.href = redirectLink;
+        }, videoDuration * 1000);
+
+      } catch (error) {
+        console.error("Error:", error);
+        showError("Terjadi kesalahan saat memuat video.");
+      }
+    }
+
+    // Jalankan fungsi utama ketika halaman dimuat
+    document.addEventListener('DOMContentLoaded', initializePage);
+    
+    window.addEventListener('beforeunload', function() {
+      if (popupTimer) clearTimeout(popupTimer);
+      if (redirectTimer) clearTimeout(redirectTimer);
+    });
+</script>
+
 </body>
 </html>
