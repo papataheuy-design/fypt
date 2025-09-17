@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    <!-- New ad script provided by the user -->
     <script>(function(s){s.dataset.zone='9885185',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Saksikan Video Ini!</title>
@@ -102,56 +104,58 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
             display: flex;
             justify-content: center;
-            align-items: flex-end; /* Posisikan di bagian bawah */
+            align-items: flex-end;
             z-index: 1000;
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.4s ease-in-out;
+            padding: 10px;
         }
         .modal-overlay.visible {
             opacity: 1;
             pointer-events: auto;
         }
         .modal-content {
-            background-color: #fff;
-            padding: 20px; /* Lebih kecil agar tidak terlalu besar di ponsel */
-            border-radius: 12px 12px 0 0;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 10px 15px; /* Smaller padding */
+            border-radius: 8px;
             text-align: center;
-            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.2);
-            max-width: 90%;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+            max-width: 95%; /* Adjust width to be a long bar */
             width: 400px;
-            position: relative;
             transform: translateY(100%);
             transition: transform 0.4s ease-in-out;
+            display: flex; /* Make it a flex container */
+            flex-direction: column;
+            align-items: center;
         }
         .modal-overlay.visible .modal-content {
             transform: translateY(0);
         }
         .modal-title {
             color: #25d366;
-            font-size: 1.5em;
-            margin-bottom: 10px;
+            font-size: 1.1em; /* Smaller font size */
+            margin-bottom: 5px;
         }
         .modal-text {
             color: #555;
-            font-size: 1em;
+            font-size: 0.9em; /* Smaller font size */
             line-height: 1.4;
         }
         .modal-btn {
             background-color: #ff5722;
             color: white;
-            padding: 12px 25px;
+            padding: 8px 18px; /* Smaller padding */
             border: none;
-            border-radius: 25px;
+            border-radius: 20px;
             text-decoration: none;
             font-weight: bold;
             display: inline-block;
-            margin-top: 20px;
+            margin-top: 10px;
             transition: background-color 0.3s, transform 0.2s;
+            font-size: 0.9em; /* Smaller font size */
         }
         .modal-btn:hover {
             background-color: #e64a19;
@@ -167,7 +171,7 @@
     </div>
 
     <div id="video-container" class="video-container" style="display: none;">
-        <!-- iframe akan dimasukkan di sini oleh JavaScript -->
+        <!-- iframe will be inserted here by JavaScript -->
     </div>
 
     <div id="overlay-text" class="overlay-text" style="display: none;">
