@@ -1,80 +1,176 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <script>(function(s){s.dataset.zone='9885185',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
-  <meta name="monetag" content="01469f3272c83755d2f30ae1cd67f131">
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Backend Panel</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: #f0f2f5;
-      padding: 20px;
-      margin: auto;
-    }
-    .container {
-      max-width: 420px;
-      margin: 0 auto;
-    }
-    .box {
-      background: #ffffff;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      margin-bottom: 20px;
-      border: 1px solid #e0e0e0;
-    }
-    h3 {
-      margin-top: 0;
-      color: #333;
-      font-weight: 600;
-    }
-    input, button {
-      width: 100%;
-      padding: 12px;
-      margin: 8px 0;
-      box-sizing: border-box;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-      font-family: 'Poppins', sans-serif;
-    }
-    button {
-      background: linear-gradient(145deg, #4361ee, #5473ff);
-      color: #fff;
-      border: none;
-      font-weight: bold;
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    button:active {
-      transform: translateY(1px);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-    .link-box {
-      background:#eef2ff;
-      color: #4361ee;
-      padding: 15px;
-      border-radius: 8px;
-      word-break: break-all;
-      margin-top: 15px;
-      text-align: center;
-      font-weight: 600;
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
-    }
-    .link-box a {
-      color: #4361ee;
-      text-decoration: none;
-    }
-    iframe {
-      width: 100%; height: 200px; border:none; border-radius:10px; margin-top:10px;
-    }
-    #loading { display:none; text-align:center; color:#555; margin-top:10px; }
-    #notif { display:none; text-align:center; color:#28a745; font-weight: bold; margin-top:10px; }
-    #error { display:none; text-align:center; color:#dc3545; font-weight: bold; margin-top:10px; }
+  <script>(function(s){s.dataset.zone='9885185',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+  <meta name="monetag" content="01469f3272c83755d2f30ae1cd67f131">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Backend Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4361ee;
+      --primary-light: #eef2ff;
+      --secondary: #6c757d;
+      --success: #28a745;
+      --danger: #dc3545;
+      --light: #f8f9fa;
+      --dark: #343a40;
+      --white: #ffffff;
+      --border: #e0e0e0;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --radius: 12px;
+      --transition: all 0.3s ease;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f0f2f5;
+      padding: 20px;
+      margin: auto;
+      line-height: 1.6;
+      color: #333;
+      font-weight: 400;
+    }
+    
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    
+    .box {
+      background: var(--white);
+      padding: 25px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+      transition: var(--transition);
+    }
+    
+    .box:hover {
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    }
+    
+    h3, h4 {
+      color: var(--dark);
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+    
+    h3 {
+      font-size: 1.4rem;
+    }
+    
+    input, button {
+      width: 100%;
+      padding: 14px 16px;
+      margin: 10px 0;
+      box-sizing: border-box;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.95rem;
+      transition: var(--transition);
+    }
+    
+    input {
+      background: var(--white);
+      color: var(--dark);
+    }
+    
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+    }
+    
+    button {
+      background: linear-gradient(145deg, var(--primary), #5473ff);
+      color: var(--white);
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      padding: 14px;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(67, 97, 238, 0.25);
+    }
+    
+    button:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .link-box {
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 15px;
+      border-radius: 8px;
+      word-break: break-all;
+      margin-top: 15px;
+      text-align: center;
+      font-weight: 500;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+      font-size: 0.9rem;
+    }
+    
+    .link-box a {
+      color: var(--primary);
+      text-decoration: none;
+      transition: var(--transition);
+    }
+    
+    .link-box a:hover {
+      text-decoration: underline;
+    }
+    
+    iframe {
+      width: 100%; 
+      height: 200px; 
+      border: none; 
+      border-radius: 10px; 
+      margin-top: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    #loading, #notif, #error { 
+      padding: 12px; 
+      border-radius: 8px; 
+      margin-top: 15px;
+      text-align: center;
+      font-weight: 500;
+    }
+    
+    #loading { 
+      display: none; 
+      background-color: rgba(0, 0, 0, 0.05);
+      color: var(--secondary);
+    }
+    
+    #notif { 
+      display: none; 
+      background-color: rgba(40, 167, 69, 0.1);
+      color: var(--success);
+    }
+    
+    #error { 
+      display: none; 
+      background-color: rgba(220, 53, 69, 0.1);
+      color: var(--danger);
+    }
+    
     /* Dropdown Styles */
     .dropdown-header {
       display: flex;
@@ -82,50 +178,97 @@
       align-items: center;
       cursor: pointer;
       font-weight: 600;
-      color: #333;
+      color: var(--dark);
+      padding: 5px 0;
     }
+    
     .dropdown-header .arrow {
       font-size: 1.2em;
       transition: transform 0.3s ease;
       font-weight: bold;
+      color: var(--primary);
     }
+    
     .dropdown-header.open .arrow {
       transform: rotate(90deg);
     }
+    
     .dropdown-content {
       display: none;
       margin-top: 15px;
       line-height: 1.6;
-      color: #555;
+      color: var(--secondary);
       font-size: 0.95em;
     }
+    
     .dropdown-content.show {
       display: block;
     }
+    
     .dropdown-content ul {
       padding-left: 20px;
-      margin-top: 10px;
+      margin: 10px 0;
     }
+    
     .dropdown-content li {
-      margin-bottom: 5px;
+      margin-bottom: 8px;
     }
+    
     .dropdown-content p {
-      margin: 0 0 10px 0;
+      margin: 0 0 15px 0;
     }
-  </style>
+    
+    small {
+      color: var(--secondary);
+      font-size: 0.85rem;
+      display: block;
+      margin-bottom: 10px;
+    }
+    
+    ol {
+      padding-left: 20px;
+    }
+    
+    ol li {
+      margin-bottom: 10px;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 520px) {
+      body {
+        padding: 15px;
+      }
+      
+      .container {
+        max-width: 100%;
+      }
+      
+      .box {
+        padding: 20px;
+      }
+      
+      h3 {
+        font-size: 1.3rem;
+      }
+      
+      input, button {
+        padding: 12px 14px;
+      }
+    }
+  </style>
 </head>
 <body>
 
 <div class="container">
-  <!-- Box Login -->
-  <div id="authBox" class="box">
-    <h3>Login / Daftar</h3>
-    <input id="email" type="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Password">
-    <button onclick="login()">Login / Daftar</button>
-  </div>
+  <!-- Box Login -->
+  <div id="authBox" class="box">
+    <h3>Login / Daftar</h3>
+    <input id="email" type="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+    <button onclick="login()">Login / Daftar</button>
+  </div>
   
-  <!-- Dropdown Penjelasan untuk Afiliator -->
+  <!-- Dropdown Penjelasan untuk Afiliator -->
   <div class="box dropdown-container">
     <div id="dropdownHeader" class="dropdown-header">
       <h3>Mengapa Website Ini Penting untuk Anda? 🚀</h3>
@@ -145,163 +288,163 @@
     </div>
   </div>
 
-  <!-- Panel utama -->
-  <div id="panel" class="box" style="display:none;">
-    <h3>Buat / Update Link</h3>
-    <small>📌 Tempel link video <b>apa saja</b> (TikTok / YouTube) — otomatis dikonversi jadi embed.</small><br><br>
-    <input id="videoLink" type="url" placeholder="Link Video TikTok / YouTube">
-    <input id="targetLink" type="url" placeholder="Link Tujuan">
-    <button onclick="saveLink()">Simpan</button>
-    <div id="loading">⏳ Menyimpan...</div>
-    <div id="notif">✅ Link berhasil disimpan</div>
-    <div id="error"></div>
+  <!-- Panel utama -->
+  <div id="panel" class="box" style="display:none;">
+    <h3>Buat / Update Link</h3>
+    <small>📌 Tempel link video <b>apa saja</b> (TikTok / YouTube) — otomatis dikonversi jadi embed.</small>
+    <input id="videoLink" type="url" placeholder="Link Video TikTok / YouTube">
+    <input id="targetLink" type="url" placeholder="Link Tujuan">
+    <button onclick="saveLink()">Simpan</button>
+    <div id="loading">⏳ Menyimpan...</div>
+    <div id="notif">✅ Link berhasil disimpan</div>
+    <div id="error"></div>
 
-    <h4>Preview Postingan Kamu</h4>
-    <div id="preview">Belum ada postingan</div>
-  </div>
+    <h4>Preview Postingan Kamu</h4>
+    <div id="preview">Belum ada postingan</div>
+  </div>
 
-  <!-- Cara pakai -->
-  <div class="box">
-    <h3>Cara Penggunaan 📝</h3>
-    <ol>
-      <li>Login / daftar pakai email dan password</li>
-      <li>Tempel link video TikTok / YouTube (tidak perlu embed)</li>
-      <li>Tempel link tujuan (misal link produk / website)</li>
-      <li>Klik <b>Simpan</b> → muncul preview & link publik</li>
-      <li>Copy link publik, bagikan ke orang lain</li>
-    </ol>
-  </div>
+  <!-- Cara pakai -->
+  <div class="box">
+    <h3>Cara Penggunaan 📝</h3>
+    <ol>
+      <li>Login / daftar pakai email dan password</li>
+      <li>Tempel link video TikTok / YouTube (tidak perlu embed)</li>
+      <li>Tempel link tujuan (misal link produk / website)</li>
+      <li>Klik <b>Simpan</b> → muncul preview & link publik</li>
+      <li>Copy link publik, bagikan ke orang lain</li>
+    </ol>
+  </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { 
-      getAuth, createUserWithEmailAndPassword, 
-      signInWithEmailAndPassword, onAuthStateChanged 
-    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-    import { 
-      getFirestore, collection, addDoc, query, where, getDocs, updateDoc, doc 
-    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { 
+      getAuth, createUserWithEmailAndPassword, 
+      signInWithEmailAndPassword, onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { 
+      getFirestore, collection, addDoc, query, where, getDocs, updateDoc, doc 
+    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBUgD15-9V1H2j3F4zFdMgg2q4bxP5bDyM",
-      authDomain: "fypt-1000.firebaseapp.com",
-      projectId: "fypt-1000",
-      storageBucket: "fypt-1000.appspot.com",
-      messagingSenderId: "1002775921451",
-      appId: "1:1002775921451:web:d00ff8bd6964a8fcad7b6e",
-      measurementId: "G-QYGXBF7NWR"
-    };
+    const firebaseConfig = {
+      apiKey: "AIzaSyBUgD15-9V1H2j3F4zFdMgg2q4bxP5bDyM",
+      authDomain: "fypt-1000.firebaseapp.com",
+      projectId: "fypt-1000",
+      storageBucket: "fypt-1000.appspot.com",
+      messagingSenderId: "1002775921451",
+      appId: "1:1002775921451:web:d00ff8bd6964a8fcad7b6e",
+      measurementId: "G-QYGXBF7NWR"
+    };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    const preview = document.getElementById('preview');
-    const loading = document.getElementById('loading');
-    const notif = document.getElementById('notif');
-    const errorBox = document.getElementById('error');
+    const preview = document.getElementById('preview');
+    const loading = document.getElementById('loading');
+    const notif = document.getElementById('notif');
+    const errorBox = document.getElementById('error');
 
-    function convertToEmbed(url){
-      try {
-        if(url.includes("youtube.com/watch?v=")){
-          const id = new URL(url).searchParams.get("v");
-          return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&controls=0`;
-        }
-        if(url.includes("youtu.be/")){
-          const id = url.split("youtu.be/")[1].split(/[?&]/)[0];
-          return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&controls=0`;
-        }
-    if (url.includes("youtube.com/shorts/")) {
-      const id = url.split("shorts/")[1].split(/[?&]/)[0];
-      return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&controls=0`;
-        }
-        if(url.includes("tiktok.com/")){
-          // TikTok tidak ada API resmi embed autoplay, tapi ini tetap tampil
-          return `https://www.tiktok.com/embed${new URL(url).pathname}`;
-        }
-      } catch(e){}
-      return url;
-    }
+    function convertToEmbed(url){
+      try {
+        if(url.includes("youtube.com/watch?v=")){
+          const id = new URL(url).searchParams.get("v");
+          return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&controls=0`;
+        }
+        if(url.includes("youtu.be/")){
+          const id = url.split("youtu.be/")[1].split(/[?&]/)[0];
+          return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&controls=0`;
+        }
+    if (url.includes("youtube.com/shorts/")) {
+      const id = url.split("shorts/")[1].split(/[?&]/)[0];
+      return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&controls=0`;
+        }
+        if(url.includes("tiktok.com/")){
+          // TikTok tidak ada API resmi embed autoplay, tapi ini tetap tampil
+          return `https://www.tiktok.com/embed${new URL(url).pathname}`;
+        }
+      } catch(e){}
+      return url;
+    }
 
-    window.login = async () => {
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value.trim();
-      if(!email || !password) return alert("Isi email dan password");
+    window.login = async () => {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      if(!email || !password) return alert("Isi email dan password");
 
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-      } catch (err) {
-        try {
-          await createUserWithEmailAndPassword(auth, email, password);
-        } catch (err2) {
-          alert("Gagal daftar: " + err2.message);
-        }
-      }
-    };
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (err) {
+        try {
+          await createUserWithEmailAndPassword(auth, email, password);
+        } catch (err2) {
+          alert("Gagal daftar: " + err2.message);
+        }
+      }
+    };
 
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        document.getElementById('authBox').style.display = 'none';
-        document.getElementById('panel').style.display = 'block';
-        loadMyPost();
-      }
-    });
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        document.getElementById('authBox').style.display = 'none';
+        document.getElementById('panel').style.display = 'block';
+        loadMyPost();
+      }
+    });
 
-    async function loadMyPost() {
-      preview.innerHTML = "⏳ Memuat...";
-      const q = query(collection(db, "links"), where("owner", "==", auth.currentUser.uid));
-      const snap = await getDocs(q);
-      if (snap.empty) {
-        preview.textContent = "Belum ada postingan";
-      } else {
-        const docData = snap.docs[0].data();
-        const finalLink = `${location.origin}/show.html?id=${docData.authLink}`;
-        document.getElementById('videoLink').value = docData.videoLink;
-        document.getElementById('targetLink').value = docData.targetLink;
+    async function loadMyPost() {
+      preview.innerHTML = "⏳ Memuat...";
+      const q = query(collection(db, "links"), where("owner", "==", auth.currentUser.uid));
+      const snap = await getDocs(q);
+      if (snap.empty) {
+        preview.textContent = "Belum ada postingan";
+      } else {
+        const docData = snap.docs[0].data();
+        const finalLink = `${location.origin}/show.html?id=${docData.authLink}`;
+        document.getElementById('videoLink').value = docData.videoLink;
+        document.getElementById('targetLink').value = docData.targetLink;
 
-        const embedUrl = convertToEmbed(docData.videoLink);
-        preview.innerHTML = `
-          <iframe src="${embedUrl}" allow="autoplay; fullscreen" allowfullscreen></iframe>
-          <div class="link-box">
-            <a href="${finalLink}" target="_blank">${finalLink}</a>
-          </div>
-        `;
-      }
-    }
+        const embedUrl = convertToEmbed(docData.videoLink);
+        preview.innerHTML = `
+          <iframe src="${embedUrl}" allow="autoplay; fullscreen" allowfullscreen></iframe>
+          <div class="link-box">
+            <a href="${finalLink}" target="_blank">${finalLink}</a>
+          </div>
+        `;
+      }
+    }
 
-    window.saveLink = async () => {
-      const rawVideoLink = document.getElementById('videoLink').value.trim();
-      const targetLink = document.getElementById('targetLink').value.trim();
-      if(!rawVideoLink || !targetLink) return alert("Isi semua field");
+    window.saveLink = async () => {
+      const rawVideoLink = document.getElementById('videoLink').value.trim();
+      const targetLink = document.getElementById('targetLink').value.trim();
+      if(!rawVideoLink || !targetLink) return alert("Isi semua field");
 
-      loading.style.display = 'block';
-      notif.style.display = 'none';
-      errorBox.style.display = 'none';
+      loading.style.display = 'block';
+      notif.style.display = 'none';
+      errorBox.style.display = 'none';
 
-      const q = query(collection(db, "links"), where("owner", "==", auth.currentUser.uid));
-      const snap = await getDocs(q);
+      const q = query(collection(db, "links"), where("owner", "==", auth.currentUser.uid));
+      const snap = await getDocs(q);
 
-      try {
-        if (snap.empty) {
-          const authLink = Math.random().toString(36).substring(2,10);
-          await addDoc(collection(db, "links"), {
-            owner: auth.currentUser.uid,
-            videoLink: rawVideoLink,
-            targetLink, authLink
-          });
-        } else {
-          const ref = doc(db, "links", snap.docs[0].id);
-          await updateDoc(ref, { videoLink: rawVideoLink, targetLink });
-        }
-        await loadMyPost();
-        notif.style.display = 'block';
-      } catch (err) {
-        errorBox.textContent = "❌ Gagal simpan: " + err.message;
-        errorBox.style.display = 'block';
-      }
+      try {
+        if (snap.empty) {
+          const authLink = Math.random().toString(36).substring(2,10);
+          await addDoc(collection(db, "links"), {
+            owner: auth.currentUser.uid,
+            videoLink: rawVideoLink,
+            targetLink, authLink
+          });
+        } else {
+          const ref = doc(db, "links", snap.docs[0].id);
+          await updateDoc(ref, { videoLink: rawVideoLink, targetLink });
+        }
+        await loadMyPost();
+        notif.style.display = 'block';
+      } catch (err) {
+        errorBox.textContent = "❌ Gagal simpan: " + err.message;
+        errorBox.style.display = 'block';
+      }
 
-      loading.style.display = 'none';
-    };
+      loading.style.display = 'none';
+    };
 
     // Fungsi untuk mengelola dropdown
     document.getElementById('dropdownHeader').addEventListener('click', function() {
@@ -315,7 +458,7 @@
         header.classList.add('open');
       }
     });
-  </script>
+  </script>
 </div>
 
 </body>
