@@ -366,6 +366,37 @@
     const notif = document.getElementById('notif');
     const errorBox = document.getElementById('error');
 
+    // Fungsi untuk mengonversi link pendek TikTok menjadi link panjang
+    async function resolveTikTokShortLink(shortUrl) {
+      try {
+        // Cek apakah ini link pendek TikTok (vm.tiktok.com, vt.tiktok.com)
+        if (shortUrl.includes('vm.tiktok.com') || shortUrl.includes('vt.tiktok.com')) {
+          // Lakukan request untuk mendapatkan URL akhir setelah redirect
+          const response = await fetch(shortUrl, { 
+            method: 'HEAD', 
+            redirect: 'follow',
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+          });
+          
+          // Dapatkan URL akhir setelah semua redirect
+          const finalUrl = response.url;
+          
+          // Jika URL akhir adalah link TikTok yang valid, kembalikan
+          if (finalUrl.includes('tiktok.com') && finalUrl.includes('/video/')) {
+            return finalUrl;
+          }
+        }
+        
+        // Jika bukan link pendek atau konversi gagal, kembalikan URL asli
+        return shortUrl;
+      } catch (error) {
+        console.error('Error resolving TikTok short link:', error);
+        return shortUrl; // Kembalikan URL asli jika terjadi error
+      }
+    }
+
     function convertToEmbed(url){
       try {
         if(url.includes("youtube.com/watch?v=")){
@@ -376,15 +407,20 @@
           const id = url.split("youtu.be/")[1].split(/[?&]/)[0];
           return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&controls=0`;
         }
-    if (url.includes("youtube.com/shorts/")) {
-      const id = url.split("shorts/")[1].split(/[?&]/)[0];
-      return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&controls=0`;
+        if (url.includes("youtube.com/shorts/")) {
+          const id = url.split("shorts/")[1].split(/[?&]/)[0];
+          return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&controls=0`;
         }
-        if(url.includes("tiktok.com/")){
-          // TikTok tidak ada API resmi embed autoplay, tapi ini tetap tampil
-          return `https://www.tiktok.com/embed${new URL(url).pathname}`;
+        if(url.includes("tiktok.com")){
+          // Ambil ID video dari link TikTok
+          const videoIdMatch = url.match(/\/video\/(\d+)/);
+          if (videoIdMatch && videoIdMatch[1]) {
+            return `https://www.tiktok.com/embed/v2/${videoIdMatch[1]}`;
+          }
         }
-      } catch(e){}
+      } catch(e){
+        console.error("Error converting to embed:", e);
+      }
       return url;
     }
 
@@ -441,7 +477,7 @@
     }
 
     window.saveLink = async () => {
-      const rawVideoLink = document.getElementById('videoLink').value.trim();
+      let rawVideoLink = document.getElementById('videoLink').value.trim();
       const targetLink = document.getElementById('targetLink').value.trim();
       if(!rawVideoLink || !targetLink) return alert("Isi semua field");
 
@@ -449,22 +485,49 @@
       notif.style.display = 'none';
       errorBox.style.display = 'none';
 
-      const q = query(collection(db, "links"), where("owner", "==", auth.currentUser.uid));
-      const snap = await getDocs(q);
-
       try {
+        // Jika link TikTok pendek, konversi ke link panjang
+        if (rawVideoLink.includes('vm.tiktok.com') || rawVideoLink.includes('vt.tiktok.com')) {
+          rawVideoLink = await resolveTikTokShortLink(rawVideoLink);
+          document.getElementById('videoLink').value = rawVideoLink;
+        }
+
+        const q = query(collection(db, "links"), where("owner", "==", auth.currentUser.uid));
+        const snap = await getDocs(q);
+
         if (snap.empty) {
           const authLink = Math.random().toString(36).substring(2,10);
           await addDoc(collection(db, "links"), {
             owner: auth.currentUser.uid,
             videoLink: rawVideoLink,
-            targetLink, authLink
+            targetLink, 
+            authLink
           });
         } else {
           const ref = doc(db, "links", snap.docs[0].id);
-          await updateDoc(ref, { videoLink: rawVideoLink, targetLink });
+          await updateDoc(ref, { 
+            videoLink: rawVideoLink, 
+            targetLink 
+          });
         }
-        await loadMyPost();
+        
+        // Update preview
+        const embedUrl = convertToEmbed(rawVideoLink);
+        const finalLink = `${location.origin}/show.html?id=${snap.empty ? authLink : snap.docs[0].data().authLink}`;
+        
+        preview.innerHTML = `
+          <div class="video-preview">
+            <iframe src="${embedUrl}" allow="autoplay; fullscreen" allowfullscreen></iframe>
+          </div>
+          <div class="link-box">
+            <a href="${finalLink}" target="_blank">${finalLink}</a>
+          </div>
+          <div class="button-group">
+            <button class="btn-copy" onclick="copyToClipboard('${finalLink}')">Salin Link</button>
+            <button class="btn-open" onclick="window.open('${finalLink}', '_blank')">Buka Link</button>
+          </div>
+        `;
+        
         notif.style.display = 'block';
       } catch (err) {
         errorBox.textContent = "❌ Gagal simpan: " + err.message;
@@ -513,56 +576,6 @@
         document.body.removeChild(textArea);
       });
     };
-    // Fungsi untuk resolve link TikTok pendek ke link panjang
-async function resolveTikTokUrl(shortUrl) {
-  try {
-    const res = await fetch(shortUrl, { method: "HEAD", redirect: "follow" });
-    return res.url; // URL akhir setelah redirect
-  } catch (e) {
-    console.error("Gagal resolve TikTok:", e);
-    return shortUrl; // fallback tetap pakai URL awal
-  }
-}
-
-// Ubah fungsi saveLink agar resolve TikTok dulu sebelum disimpan
-window.saveLink = async function() {
-  const videoInput = document.getElementById("videoLink");
-  const targetInput = document.getElementById("targetLink");
-  const loading = document.getElementById("loading");
-  const notif = document.getElementById("notif");
-  const errorBox = document.getElementById("error");
-  const preview = document.getElementById("preview");
-
-  let videoUrl = videoInput.value.trim();
-  const targetUrl = targetInput.value.trim();
-
-  if (!videoUrl || !targetUrl) {
-    errorBox.style.display = "block";
-    errorBox.textContent = "Harap isi semua field";
-    return;
-  }
-
-  loading.style.display = "block";
-  notif.style.display = "none";
-  errorBox.style.display = "none";
-
-  // Jika link TikTok pendek, resolve dulu
-  if (videoUrl.includes("tiktok.com")) {
-    videoUrl = await resolveTikTokUrl(videoUrl);
-  }
-
-  // Buat embed preview
-  const embedHtml = `<div class="video-preview">
-      <iframe src="https://www.tiktok.com/embed/v2/${videoUrl.split('/video/')[1]}" 
-        allowfullscreen></iframe>
-    </div>
-    <div class="link-box"><a href="${targetUrl}" target="_blank">${targetUrl}</a></div>`;
-
-  preview.innerHTML = embedHtml;
-
-  loading.style.display = "none";
-  notif.style.display = "block";
-};
   </script>
 </div>
 
