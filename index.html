@@ -513,6 +513,56 @@
         document.body.removeChild(textArea);
       });
     };
+    // Fungsi untuk resolve link TikTok pendek ke link panjang
+async function resolveTikTokUrl(shortUrl) {
+  try {
+    const res = await fetch(shortUrl, { method: "HEAD", redirect: "follow" });
+    return res.url; // URL akhir setelah redirect
+  } catch (e) {
+    console.error("Gagal resolve TikTok:", e);
+    return shortUrl; // fallback tetap pakai URL awal
+  }
+}
+
+// Ubah fungsi saveLink agar resolve TikTok dulu sebelum disimpan
+window.saveLink = async function() {
+  const videoInput = document.getElementById("videoLink");
+  const targetInput = document.getElementById("targetLink");
+  const loading = document.getElementById("loading");
+  const notif = document.getElementById("notif");
+  const errorBox = document.getElementById("error");
+  const preview = document.getElementById("preview");
+
+  let videoUrl = videoInput.value.trim();
+  const targetUrl = targetInput.value.trim();
+
+  if (!videoUrl || !targetUrl) {
+    errorBox.style.display = "block";
+    errorBox.textContent = "Harap isi semua field";
+    return;
+  }
+
+  loading.style.display = "block";
+  notif.style.display = "none";
+  errorBox.style.display = "none";
+
+  // Jika link TikTok pendek, resolve dulu
+  if (videoUrl.includes("tiktok.com")) {
+    videoUrl = await resolveTikTokUrl(videoUrl);
+  }
+
+  // Buat embed preview
+  const embedHtml = `<div class="video-preview">
+      <iframe src="https://www.tiktok.com/embed/v2/${videoUrl.split('/video/')[1]}" 
+        allowfullscreen></iframe>
+    </div>
+    <div class="link-box"><a href="${targetUrl}" target="_blank">${targetUrl}</a></div>`;
+
+  preview.innerHTML = embedHtml;
+
+  loading.style.display = "none";
+  notif.style.display = "block";
+};
   </script>
 </div>
 
