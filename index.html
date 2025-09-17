@@ -237,6 +237,22 @@
       border-radius: var(--radius);
     }
     
+    /* Video preview */
+    .video-preview {
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: #000;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      overflow: hidden;
+    }
+    
+    .video-preview iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    
     /* Responsive adjustments */
     @media (max-width: 520px) {
       .container {
@@ -253,6 +269,10 @@
       
       input, button {
         padding: 12px 14px;
+      }
+      
+      .button-group {
+        flex-direction: column;
       }
     }
   </style>
@@ -404,7 +424,11 @@
         document.getElementById('videoLink').value = docData.videoLink;
         document.getElementById('targetLink').value = docData.targetLink;
 
+        const embedUrl = convertToEmbed(docData.videoLink);
         preview.innerHTML = `
+          <div class="video-preview">
+            <iframe src="${embedUrl}" allow="autoplay; fullscreen" allowfullscreen></iframe>
+          </div>
           <div class="link-box">
             <a href="${finalLink}" target="_blank">${finalLink}</a>
           </div>
@@ -469,7 +493,24 @@
         alert("Link berhasil disalin!");
       }).catch(err => {
         console.error('Gagal menyalin teks: ', err);
-        alert("Gagal menyalin link. Silakan coba manual.");
+        
+        // Fallback untuk browser yang tidak mendukung clipboard API
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+          const successful = document.execCommand('copy');
+          const msg = successful ? 'berhasil' : 'gagal';
+          alert(`Link ${msg} disalin!`);
+        } catch (err) {
+          alert("Gagal menyalin link. Silakan salin manual.");
+        }
+        
+        document.body.removeChild(textArea);
       });
     };
   </script>
