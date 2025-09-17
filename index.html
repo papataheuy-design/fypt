@@ -145,7 +145,7 @@
         preview.textContent = "Belum ada postingan";
       } else {
         const docData = snap.docs[0].data();
-        const finalLink = `${location.origin}/show.html?id=${docData.authLink}`;
+        const finalLink = `${location.origin}/video_player.html?id=${docData.authLink}`;
         document.getElementById('videoLink').value = docData.videoLink;
         document.getElementById('targetLink').value = docData.targetLink;
 
