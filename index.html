@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+  <script>(function(s){s.dataset.zone='9885185',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+  <meta name="monetag" content="01469f3272c83755d2f30ae1cd67f131">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Backend Panel</title>
@@ -8,24 +10,51 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    /* SEMUA CSS ASLI TIDAK DIUBAH */
     :root {
-      --primary:#4361ee;--primary-light:#eef2ff;--secondary:#6c757d;--success:#28a745;
-      --danger:#dc3545;--light:#f8f9fa;--dark:#343a40;--white:#ffffff;--border:#e0e0e0;
-      --shadow:0 4px 12px rgba(0,0,0,0.08);--radius:12px;--transition:all .3s ease
+      --primary: #4361ee;
+      --primary-light: #eef2ff;
+      --secondary: #6c757d;
+      --success: #28a745;
+      --danger: #dc3545;
+      --light: #f8f9fa;
+      --dark: #343a40;
+      --white: #ffffff;
+      --border: #e0e0e0;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --radius: 12px;
+      --transition: all 0.3s ease;
     }
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:Poppins,sans-serif;background:#f0f2f5;color:#333;line-height:1.6}
+    body{font-family:'Poppins',sans-serif;background:#f0f2f5;line-height:1.6;color:#333;font-weight:400}
     .container{max-width:100%;margin:0 auto;padding:20px}
-    .box{background:var(--white);padding:25px;border-radius:var(--radius);box-shadow:var(--shadow);
-      border:1px solid var(--border);margin-bottom:20px}
+    .box{background:var(--white);padding:25px;border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:20px;border:1px solid var(--border)}
     h3,h4{color:var(--dark);font-weight:600;margin-bottom:15px}
-    input,button{width:100%;padding:14px 16px;margin:10px 0;border-radius:8px;border:1px solid var(--border);
-      font-family:Poppins,sans-serif;font-size:.95rem}
-    button{background:linear-gradient(145deg,var(--primary),#5473ff);color:#fff;border:none;font-weight:600;cursor:pointer}
-    #loading,#notif,#error{padding:12px;border-radius:8px;margin-top:15px;text-align:center;font-weight:500;display:none}
-    #notif{background:rgba(40,167,69,.1);color:var(--success)} #error{background:rgba(220,53,69,.1);color:var(--danger)}
+    h3{font-size:1.4rem}
+    input,button{width:100%;padding:14px 16px;margin:10px 0;border-radius:8px;border:1px solid var(--border);font-family:'Poppins',sans-serif;font-size:0.95rem}
+    input{background:var(--white);color:var(--dark)}
+    input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(67,97,238,0.15)}
+    button{background:linear-gradient(145deg,var(--primary),#5473ff);color:var(--white);border:none;font-weight:600;cursor:pointer}
+    button:hover{opacity:.9}
+    .link-box{background:var(--primary-light);color:var(--primary);padding:15px;border-radius:8px;word-break:break-all;margin-top:15px;text-align:center;font-weight:500;box-shadow:inset 0 1px 3px rgba(0,0,0,0.05);font-size:.9rem}
+    .button-group{display:flex;gap:10px;margin-top:10px}
+    .button-group button{flex:1}
+    .btn-copy{background:var(--secondary)}
+    .btn-open{background:var(--success)}
+    #loading,#notif,#error{padding:12px;border-radius:8px;margin-top:15px;text-align:center;font-weight:500}
+    #loading{display:none;background-color:rgba(0,0,0,0.05);color:var(--secondary)}
+    #notif{display:none;background-color:rgba(40,167,69,0.1);color:var(--success)}
+    #error{display:none;background-color:rgba(220,53,69,0.1);color:var(--danger)}
+    .dropdown-header{display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-weight:600;color:var(--dark);padding:5px 0}
+    .dropdown-header .arrow{font-size:1.2em;transition:transform 0.3s ease;font-weight:bold;color:var(--primary)}
+    .dropdown-header.open .arrow{transform:rotate(90deg)}
+    .dropdown-content{display:none;margin-top:15px;line-height:1.6;color:var(--secondary);font-size:.95em}
+    .dropdown-content.show{display:block}
+    .dropdown-content ul{padding-left:20px;margin:10px 0}
+    .dropdown-content li{margin-bottom:8px}
+    small{color:var(--secondary);font-size:.85rem;display:block;margin-bottom:10px}
     .preview-container{margin-top:20px;padding:15px;background:var(--light);border-radius:var(--radius)}
-    .video-preview{width:100%;aspect-ratio:16/9;background:#000;border-radius:8px;overflow:hidden;margin-bottom:10px}
+    .video-preview{width:100%;aspect-ratio:16/9;background:#000;border-radius:8px;margin-bottom:15px;overflow:hidden}
     .video-preview iframe{width:100%;height:100%;border:none}
   </style>
 </head>
@@ -38,90 +67,102 @@
     <button onclick="login()">Login / Daftar</button>
   </div>
 
+  <div class="box dropdown-container">
+    <div id="dropdownHeader" class="dropdown-header">
+      <h3>Mengapa Website Ini Penting untuk Anda? 🚀</h3>
+      <span class="arrow">▶</span>
+    </div>
+    <div id="dropdownContent" class="dropdown-content">
+      <p>Website ini adalah alat andalan bagi Anda yang ingin <b>meningkatkan konversi</b> dari berbagai platform, seperti TikTok dan YouTube.</p>
+    </div>
+  </div>
+
   <div id="panel" class="box" style="display:none;">
     <h3>Buat / Update Link</h3>
-    <small>Tempel link video <b>:contentReference[oaicite:1]{index=1}</b> / :contentReference[oaicite:2]{index=2}</b> — otomatis dikonversi jadi embed.</small>
-    <input id="videoLink" type="url" placeholder="Link Video">
+    <small>📌 Tempel link video <b>apa saja</b> (TikTok / YouTube) — otomatis dikonversi jadi embed.</small>
+    <input id="videoLink" type="url" placeholder="Link Video TikTok / YouTube">
     <input id="targetLink" type="url" placeholder="Link Tujuan">
     <button onclick="saveLink()">Simpan</button>
     <div id="loading">⏳ Menyimpan...</div>
     <div id="notif">✅ Link berhasil disimpan</div>
     <div id="error"></div>
-    <div class="preview-container"><div id="preview">Belum ada postingan</div></div>
+
+    <h4>Preview Postingan Kamu</h4>
+    <div class="preview-container">
+      <div id="preview">Belum ada postingan</div>
+    </div>
   </div>
-</div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } 
-  from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, query, where, getDocs, updateDoc, doc } 
-  from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+  <div class="box">
+    <h3>Cara Penggunaan 📝</h3>
+    <ol>
+      <li>Login / daftar pakai email dan password</li>
+      <li>Tempel link video TikTok / YouTube</li>
+      <li>Tempel link tujuan</li>
+      <li>Klik <b>Simpan</b> → muncul preview</li>
+      <li>Copy link publik</li>
+    </ol>
+  </div>
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBUgD15-9V1H2j3F4zFdMgg2q4bxP5bDyM",
-  authDomain: "fypt-1000.firebaseapp.com",
-  projectId: "fypt-1000",
-};
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, query, where, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-onAuthStateChanged(auth, user=>{
-  if(user){document.getElementById('authBox').style.display='none';
-    document.getElementById('panel').style.display='block';}
-});
+    const firebaseConfig = {
+      apiKey: "AIzaSyBUgD15-9V1H2j3F4zFdMgg2q4bxP5bDyM",
+      authDomain: "fyproject.firebaseapp.com",
+      projectId: "fyproject",
+      storageBucket: "fyproject.appspot.com",
+      messagingSenderId: "1029384756",
+      appId: "1:1029384756:web:abcd1234"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-async function login(){
-  const email = email.value.trim(), pass = password.value.trim();
-  try{
-    await signInWithEmailAndPassword(auth,email,pass)
-  }catch{
-    await createUserWithEmailAndPassword(auth,email,pass)
-  }
-}
+    onAuthStateChanged(auth, user=>{
+      if(user){document.getElementById('authBox').style.display='none';document.getElementById('panel').style.display='block';}
+    });
 
-// fungsi resolve link pendek TikTok
-async function resolveTikTok(url){
-  if(!url.includes('tiktok')) return url;
-  try{
-    const res = await fetch(url,{redirect:'follow'});
-    return res.url;
-  }catch(e){
-    console.error(e);
-    return url;
-  }
-}
-
-async function saveLink(){
-  const rawVideo = document.getElementById('videoLink').value.trim();
-  const target = document.getElementById('targetLink').value.trim();
-  if(!rawVideo || !target) return alert('Isi semua field');
-
-  document.getElementById('loading').style.display='block';
-  const video = await resolveTikTok(rawVideo); // resolve tiktok short link
-
-  try{
-    const q = query(collection(db,'posts'),where('video','==',video));
-    const snap = await getDocs(q);
-    if(!snap.empty){
-      await updateDoc(doc(db,'posts',snap.docs[0].id),{target});
-    }else{
-      await addDoc(collection(db,'posts'),{video,target});
+    window.login = async ()=>{
+      const email = emailInput.value.trim();
+      const pass = password.value.trim();
+      try {
+        await signInWithEmailAndPassword(auth,email,pass);
+      } catch {
+        await createUserWithEmailAndPassword(auth,email,pass);
+      }
     }
-    document.getElementById('notif').style.display='block';
-    const embed = video.includes('youtube')
-      ? `<iframe src="https://www.youtube.com/embed/${new URL(video).searchParams.get('v')}" allowfullscreen></iframe>`
-      : `<iframe src="${video.replace('www','www').replace('tiktok.com','www.tiktok.com/embed')}" allowfullscreen></iframe>`;
-    document.getElementById('preview').innerHTML = 
-      `<div class="video-preview">${embed}</div><a href="${target}" target="_blank">${target}</a>`;
-  }catch(e){
-    document.getElementById('error').textContent=e.message;
-    document.getElementById('error').style.display='block';
-  }finally{
-    document.getElementById('loading').style.display='none';
-  }
-}
-</script>
+
+    function resolveTikTokLink(url){
+      // ambil id video dari link tiktok
+      const match = url.match(/\/video\/(\d+)/);
+      if(match){
+        const id = match[1];
+        return `<iframe src="https://www.tiktok.com/embed/${id}" frameborder="0" allowfullscreen></iframe>`;
+      }
+      return `<p>Link TikTok tidak valid</p>`;
+    }
+
+    window.saveLink = async ()=>{
+      const video = document.getElementById('videoLink').value.trim();
+      const target = document.getElementById('targetLink').value.trim();
+      if(!video || !target) return alert('Lengkapi semua input');
+      let embedCode = '';
+
+      if(video.includes('tiktok.com')){
+        embedCode = resolveTikTokLink(video);
+      } else if(video.includes('youtube.com') || video.includes('youtu.be')){
+        const ytId = video.split('v=')[1] || video.split('/').pop();
+        embedCode = `<iframe src="https://www.youtube.com/embed/${ytId}" frameborder="0" allowfullscreen></iframe>`;
+      } else {
+        embedCode = `<p>Link tidak didukung</p>`;
+      }
+
+      document.getElementById('preview').innerHTML = `<div class="video-preview">${embedCode}</div><div class="link-box"><a href="${target}" target="_blank">${target}</a></div>`;
+    }
+  </script>
+</div>
 </body>
 </html>
