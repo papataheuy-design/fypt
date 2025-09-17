@@ -7,6 +7,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Saksikan Video Ini!</title>
+    
+    <!-- Open Graph Meta Tags for Facebook Preview -->
+    <meta property="og:title" content="Saksikan Video Ini!">
+    <meta property="og:description" content="Tonton video ini sampai habis dan temukan pesan penting di baliknya!">
+    <meta property="og:image" content="https://placehold.co/1200x630/5735ff/ffffff?text=Video+Menarik">
+    <meta property="og:url" content=""> <!-- You can insert the final URL of your page here -->
+    <meta property="og:type" content="video.other">
+    
     <style>
         body, html {
             margin: 0;
@@ -119,15 +127,14 @@
         }
         .modal-content {
             background-color: rgba(255, 255, 255, 0.9);
-            padding: 10px 15px; /* Smaller padding */
+            padding: 8px 12px; /* Smaller padding */
             border-radius: 8px;
             text-align: center;
             box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
-            max-width: 95%; /* Adjust width to be a long bar */
-            width: 400px;
+            max-width: 300px; /* Smaller width */
             transform: translateY(100%);
             transition: transform 0.4s ease-in-out;
-            display: flex; /* Make it a flex container */
+            display: flex;
             flex-direction: column;
             align-items: center;
         }
@@ -136,26 +143,26 @@
         }
         .modal-title {
             color: #25d366;
-            font-size: 1.1em; /* Smaller font size */
+            font-size: 1em; /* Smaller font size */
             margin-bottom: 5px;
         }
         .modal-text {
             color: #555;
-            font-size: 0.9em; /* Smaller font size */
+            font-size: 0.8em; /* Smaller font size */
             line-height: 1.4;
         }
         .modal-btn {
             background-color: #ff5722;
             color: white;
-            padding: 8px 18px; /* Smaller padding */
+            padding: 6px 15px; /* Smaller padding */
             border: none;
-            border-radius: 20px;
+            border-radius: 18px;
             text-decoration: none;
             font-weight: bold;
             display: inline-block;
-            margin-top: 10px;
+            margin-top: 8px;
             transition: background-color 0.3s, transform 0.2s;
-            font-size: 0.9em; /* Smaller font size */
+            font-size: 0.85em; /* Smaller font size */
         }
         .modal-btn:hover {
             background-color: #e64a19;
@@ -281,7 +288,7 @@
         const data = snap.docs[0].data();
         const embedUrl = convertToEmbed(data.videoLink);
         const redirectLink = data.targetLink;
-        const videoDuration = 15; // Menggunakan durasi default 10 detik
+        const videoDuration = 15; // Menggunakan durasi 15 detik
 
         // Sembunyikan loading dan tampilkan video
         loadingState.style.display = 'none';
@@ -290,12 +297,12 @@
         videoContainer.innerHTML = `<iframe src="${embedUrl}" allow="autoplay; fullscreen; accelerometer; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
         modalBtn.href = redirectLink;
 
-        // Tampilkan pop-up setelah 7 detik
+        // Tampilkan pop-up setelah 12 detik (15 - 3)
         popupTimer = setTimeout(() => {
             popupModal.classList.add('visible');
         }, (videoDuration - 3) * 1000);
 
-        // Alihkan halaman setelah 10 detik
+        // Alihkan halaman setelah 15 detik
         redirectTimer = setTimeout(() => {
             window.location.href = redirectLink;
         }, videoDuration * 1000);
