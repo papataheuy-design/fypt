@@ -105,6 +105,10 @@
           const id = url.split("youtu.be/")[1].split(/[?&]/)[0];
           return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&controls=0`;
         }
+    if (url.includes("youtube.com/shorts/")) {
+      const id = url.split("shorts/")[1].split(/[?&]/)[0];
+      return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&controls=0`;
+        }
         if(url.includes("tiktok.com/")){
           // TikTok tidak ada API resmi embed autoplay, tapi ini tetap tampil
           return `https://www.tiktok.com/embed${new URL(url).pathname}`;
