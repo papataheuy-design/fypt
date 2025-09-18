@@ -407,6 +407,44 @@
               }
             }
           }
+          async function expandTikTokLink(shortUrl) {
+  const response = await fetch(shortUrl, { method: 'HEAD', redirect: 'follow' });
+  return response.url;
+}
+
+async function konversiLink() {
+  const shortUrl = document.getElementById('tiktokUrl').value.trim();
+  const resultEl = document.getElementById('result');
+  const loadingEl = document.getElementById('loading');
+
+  if (!shortUrl) {
+    resultEl.textContent = 'Mohon masukkan link TikTok terlebih dahulu.';
+    return;
+  }
+
+  loadingEl.style.display = 'block';
+
+  try {
+    const longUrl = await expandTikTokLink(shortUrl);
+
+    await db.collection('tiktok_links').add({
+      shortUrl: shortUrl,
+      longUrl: longUrl,
+      createdAt: new Date()
+    });
+
+    resultEl.innerHTML = `
+      <strong>Berhasil disimpan!</strong><br>
+      Link Asli: <a href="${longUrl}" target="_blank">${longUrl}</a>
+    `;
+  } catch (err) {
+    console.error(err);
+    resultEl.textContent = 'Gagal mengonversi link: ' + err.message;
+  } finally {
+    loadingEl.style.display = 'none';
+  }
+}
+          
 
           // Jika response.url memberi info (beberapa browser mengisi response.url walau redirect manual)
           if (res.url && res.url !== shortUrl) {
