@@ -23,6 +23,14 @@
       --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
       --radius: 12px;
       --transition: all 0.3s ease;
+      
+      /* Warna khusus untuk setiap metode */
+      --redirect-color: #4361ee;
+      --redirect-light: #eef2ff;
+      --popup-color: #ff5722;
+      --popup-light: #fff2ee;
+      --banner-color: #25d366;
+      --banner-light: #f0fff4;
     }
     
     * {
@@ -254,9 +262,28 @@
       border: none;
     }
     
-    /* Setting Groups */
+    /* Setting Groups dengan warna berbeda */
     .setting-group {
       margin: 12px 0;
+      padding: 15px;
+      border-radius: var(--radius);
+      border-left: 4px solid var(--secondary);
+      transition: var(--transition);
+    }
+    
+    .redirect-settings {
+      border-left-color: var(--redirect-color);
+      background-color: var(--redirect-light);
+    }
+    
+    .popup-settings {
+      border-left-color: var(--popup-color);
+      background-color: var(--popup-light);
+    }
+    
+    .banner-settings {
+      border-left-color: var(--banner-color);
+      background-color: var(--banner-light);
     }
     
     .setting-group label {
@@ -284,6 +311,90 @@
       display: none;
     }
     
+    /* Toggle switch styling */
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      margin: 10px 0;
+      gap: 10px;
+    }
+    
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+    }
+    
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 34px;
+    }
+    
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    
+    input:checked + .toggle-slider {
+      background-color: var(--success);
+    }
+    
+    input:checked + .toggle-slider:before {
+      transform: translateX(26px);
+    }
+    
+    .toggle-label {
+      font-weight: 500;
+      color: var(--dark);
+    }
+    
+    /* Metode indicator */
+    .method-indicator {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-left: 8px;
+    }
+    
+    .redirect-indicator {
+      background-color: var(--redirect-light);
+      color: var(--redirect-color);
+    }
+    
+    .popup-indicator {
+      background-color: var(--popup-light);
+      color: var(--popup-color);
+    }
+    
+    .banner-indicator {
+      background-color: var(--banner-light);
+      color: var(--banner-color);
+    }
+    
     /* Responsive adjustments */
     @media (max-width: 520px) {
       .container {
@@ -304,6 +415,10 @@
       
       .button-group {
         flex-direction: column;
+      }
+      
+      .setting-group {
+        padding: 12px;
       }
     }
   </style>
@@ -347,17 +462,20 @@
     <input id="targetLink" type="url" placeholder="Link Tujuan">
     
     <!-- Pengaturan Redirect -->
-    <h4 style="margin-top: 20px;">⚙️ Pengaturan Redirect</h4>
-    <div class="setting-group">
+    <h4 style="margin-top: 20px;">⚙️ Pengaturan Redirect <span class="method-indicator redirect-indicator">Redirect Otomatis</span></h4>
+    <div class="setting-group redirect-settings">
       <label for="redirectTime">Waktu Redirect Otomatis (detik):</label>
       <input id="redirectTime" type="number" min="5" max="60" value="15" placeholder="15">
     </div>
     
     <!-- Metode Popup -->
-    <div class="setting-group">
-      <div style="display: flex; align-items: center; gap: 10px; margin: 10px 0;">
-        <input type="checkbox" id="popupEnabled" checked>
-        <label for="popupEnabled" style="margin: 0;">Aktifkan Popup Iklan</label>
+    <div class="setting-group popup-settings">
+      <div class="toggle-container">
+        <label class="toggle-switch">
+          <input type="checkbox" id="popupEnabled" checked>
+          <span class="toggle-slider"></span>
+        </label>
+        <span class="toggle-label">Aktifkan Popup Iklan <span class="method-indicator popup-indicator">Popup</span></span>
       </div>
       
       <div id="popupSettings" class="visible">
@@ -373,10 +491,13 @@
     </div>
     
     <!-- Metode Banner -->
-    <div class="setting-group">
-      <div style="display: flex; align-items: center; gap: 10px; margin: 10px 0;">
-        <input type="checkbox" id="bannerEnabled" checked>
-        <label for="bannerEnabled" style="margin: 0;">Aktifkan Banner Bawah</label>
+    <div class="setting-group banner-settings">
+      <div class="toggle-container">
+        <label class="toggle-switch">
+          <input type="checkbox" id="bannerEnabled" checked>
+          <span class="toggle-slider"></span>
+        </label>
+        <span class="toggle-label">Aktifkan Banner Bawah <span class="method-indicator banner-indicator">Banner</span></span>
       </div>
       
       <div id="bannerSettings" class="visible">
@@ -650,10 +771,16 @@
         let methodsInfo = '';
         if (docData.settings) {
           methodsInfo = `<div style="margin-top: 10px; font-size: 0.8rem; color: var(--secondary);">`;
-          methodsInfo += `⏱️ Redirect: ${docData.settings.redirectTime || 15} detik | `;
-          methodsInfo += docData.settings.popupEnabled !== false ? 
-            `🪟 Popup: ${docData.settings.popupTime || 10}s/${docData.settings.popupDuration || 5}s | ` : '';
-          methodsInfo += docData.settings.bannerEnabled !== false ? `📢 Banner: Aktif` : '';
+          methodsInfo += `<span style="background: var(--redirect-light); color: var(--redirect-color); padding: 3px 8px; border-radius: 12px; margin-right: 5px;">⏱️ Redirect: ${docData.settings.redirectTime || 15} detik</span>`;
+          
+          if (docData.settings.popupEnabled !== false) {
+            methodsInfo += `<span style="background: var(--popup-light); color: var(--popup-color); padding: 3px 8px; border-radius: 12px; margin-right: 5px;">🪟 Popup: ${docData.settings.popupTime || 10}s/${docData.settings.popupDuration || 5}s</span>`;
+          }
+          
+          if (docData.settings.bannerEnabled !== false) {
+            methodsInfo += `<span style="background: var(--banner-light); color: var(--banner-color); padding: 3px 8px; border-radius: 12px;">📢 Banner: Aktif</span>`;
+          }
+          
           methodsInfo += `</div>`;
         }
         
@@ -749,9 +876,16 @@
         
         // Tampilkan informasi metode yang aktif di preview
         let methodsInfo = `<div style="margin-top: 10px; font-size: 0.8rem; color: var(--secondary);">`;
-        methodsInfo += `⏱️ Redirect: ${redirectTime} detik | `;
-        methodsInfo += popupEnabled ? `🪟 Popup: ${popupTime}s/${popupDuration}s | ` : '';
-        methodsInfo += bannerEnabled ? `📢 Banner: Aktif` : '';
+        methodsInfo += `<span style="background: var(--redirect-light); color: var(--redirect-color); padding: 3px 8px; border-radius: 12px; margin-right: 5px;">⏱️ Redirect: ${redirectTime} detik</span>`;
+        
+        if (popupEnabled) {
+          methodsInfo += `<span style="background: var(--popup-light); color: var(--popup-color); padding: 3px 8px; border-radius: 12px; margin-right: 5px;">🪟 Popup: ${popupTime}s/${popupDuration}s</span>`;
+        }
+        
+        if (bannerEnabled) {
+          methodsInfo += `<span style="background: var(--banner-light); color: var(--banner-color); padding: 3px 8px; border-radius: 12px;">📢 Banner: Aktif</span>`;
+        }
+        
         methodsInfo += `</div>`;
         
         preview.innerHTML = `
