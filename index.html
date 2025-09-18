@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+  <script>(function(s){s.dataset.zone='9885185',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+  <meta name="monetag" content="01469f3272c83755d2f30ae1cd67f131">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Backend Panel</title>
@@ -139,7 +141,7 @@
       background: var(--success);
     }
     
-    #loading, #notif, #error, #messageBox { 
+    #loading, #notif, #error { 
       padding: 12px; 
       border-radius: 8px; 
       margin-top: 15px;
@@ -163,12 +165,6 @@
       display: none; 
       background-color: rgba(220, 53, 69, 0.1);
       color: var(--danger);
-    }
-
-    #messageBox {
-      display: none;
-      background-color: var(--light);
-      color: var(--dark);
     }
     
     /* Dropdown Styles */
@@ -286,9 +282,10 @@
 <div class="container">
   <!-- Box Login -->
   <div id="authBox" class="box">
-    <h3>Otentikasi</h3>
-    <p>Sistem akan melakukan otentikasi otomatis.</p>
-    <div id="messageBox"></div>
+    <h3>Login / Daftar</h3>
+    <input id="email" type="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
+    <button onclick="login()">Login / Daftar</button>
   </div>
   
   <!-- Dropdown Penjelasan untuk Afiliator -->
@@ -332,7 +329,7 @@
   <div class="box">
     <h3>Cara Penggunaan 📝</h3>
     <ol>
-      <li>Otentikasi otomatis.</li>
+      <li>Login / daftar pakai email dan password</li>
       <li>Tempel link video TikTok / YouTube (tidak perlu embed)</li>
       <li>Tempel link tujuan (misal link produk / website)</li>
       <li>Klik <b>Simpan</b> → muncul preview & link publik</li>
@@ -341,81 +338,190 @@
   </div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { 
-      getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged 
-    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+      getAuth, createUserWithEmailAndPassword, 
+      signInWithEmailAndPassword, onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
     import { 
       getFirestore, collection, addDoc, query, where, getDocs, updateDoc, doc 
-    } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-    // Variabel global yang disediakan oleh lingkungan
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-    
-    // Inisialisasi Firebase
-    let app, auth, db;
-    if (Object.keys(firebaseConfig).length > 0) {
-        app = initializeApp(firebaseConfig);
-        auth = getAuth(app);
-        db = getFirestore(app);
-    } else {
-        console.error("Firebase config is not defined. The app will not function correctly.");
-    }
-    
-    // Elemen UI
-    const authBox = document.getElementById('authBox');
-    const panel = document.getElementById('panel');
+    const firebaseConfig = {
+      apiKey: "AIzaSyBUgD15-9V1H2j3F4zFdMgg2q4bxP5bDyM",
+      authDomain: "fypt-1000.firebaseapp.com",
+      projectId: "fypt-1000",
+      storageBucket: "fypt-1000.appspot.com",
+      messagingSenderId: "1002775921451",
+      appId: "1:1002775921451:web:d00ff8bd6964a8fcad7b6e",
+      measurementId: "G-QYGXBF7NWR"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
     const preview = document.getElementById('preview');
     const loading = document.getElementById('loading');
     const notif = document.getElementById('notif');
     const errorBox = document.getElementById('error');
-    const messageBox = document.getElementById('messageBox');
-
-    // Menampilkan pesan kustom
-    function showMessage(msg, type = 'info') {
-      messageBox.textContent = msg;
-      messageBox.style.display = 'block';
-      messageBox.className = '';
-      if (type === 'success') {
-        messageBox.style.backgroundColor = 'rgba(40, 167, 69, 0.1)';
-        messageBox.style.color = 'var(--success)';
-      } else if (type === 'error') {
-        messageBox.style.backgroundColor = 'rgba(220, 53, 69, 0.1)';
-        messageBox.style.color = 'var(--danger)';
-      } else {
-        messageBox.style.backgroundColor = 'var(--light)';
-        messageBox.style.color = 'var(--dark)';
-      }
-    }
-    
-    // Otentikasi
-    async function initAuth() {
-        if (!auth) {
-            console.error("Firebase Auth is not initialized.");
-            return;
-        }
-        if (initialAuthToken) {
-            await signInWithCustomToken(auth, initialAuthToken);
-        } else {
-            await signInAnonymously(auth);
-        }
-    }
-    
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        authBox.style.display = 'none';
-        panel.style.display = 'block';
-        loadMyPost();
-      } else {
-        initAuth();
-      }
-    });
 
     /**
-     * Mengonversi link video menjadi format embed yang valid.
+     * resolveTikTokShortLink(shortUrl)
+     * - Tujuan: mengubah link pendek TikTok (vm.tiktok.com, vt.tiktok.com) menjadi link panjang origin yang berisi /video/{id}
+     * - Pendekatan: beberapa strategi berurutan:
+     *   1) FETCH dengan redirect:'manual' -> baca header Location (bila server mengembalikan redirect header dan CORS mengizinkan)
+     *   2) FETCH dengan redirect:'follow' (HEAD dulu jika mungkin) -> gunakan response.url bila tersedia
+     *   3) FALLBACK: ambil HTML melalui service text-fetch (r.jina.ai) lalu parsing meta og:url / canonical
+     * - Catatan: resolving client-side bisa dibatasi oleh CORS; jika semua gagal, fungsi mengembalikan URL asli.
      */
+    async function resolveTikTokShortLink(shortUrl) {
+      try {
+        if (!(shortUrl.includes('vm.tiktok.com') || shortUrl.includes('vt.tiktok.com'))) {
+          // bukan short tiktok
+          return shortUrl;
+        }
+        console.log('Meresolve link TikTok pendek (mulai):', shortUrl);
+
+        // STRATEGI 1: Coba fetch dengan redirect: 'manual' dan periksa header Location
+        try {
+          const res = await fetch(shortUrl, {
+            method: 'GET',
+            redirect: 'manual',
+            // beberapa server memerlukan header user-agent namun browser mungkin tidak mengizinkan mengganti User-Agent
+          });
+
+          // jika server mengembalikan status 3xx dan header Location ada => gunakan itu
+          if (res.status >= 300 && res.status < 400) {
+            const loc = res.headers.get('location') || res.headers.get('Location');
+            if (loc) {
+              console.log('Ditemukan header Location (manual):', loc);
+              // Jika location adalah relatif, buat absolute URL
+              try {
+                const abs = new URL(loc, shortUrl).toString();
+                if (abs.includes('tiktok.com') && abs.includes('/video/')) return abs;
+                // jika tidak berisi /video/, tetap kembalikan abs (agar lebih informatif)
+                return abs;
+              } catch (e) {
+                return loc;
+              }
+            }
+          }
+          async function expandTikTokLink(shortUrl) {
+  const response = await fetch(shortUrl, { method: 'HEAD', redirect: 'follow' });
+  return response.url;
+}
+
+async function konversiLink() {
+  const shortUrl = document.getElementById('tiktokUrl').value.trim();
+  const resultEl = document.getElementById('result');
+  const loadingEl = document.getElementById('loading');
+
+  if (!shortUrl) {
+    resultEl.textContent = 'Mohon masukkan link TikTok terlebih dahulu.';
+    return;
+  }
+
+  loadingEl.style.display = 'block';
+
+  try {
+    const longUrl = await expandTikTokLink(shortUrl);
+
+    await db.collection('tiktok_links').add({
+      shortUrl: shortUrl,
+      longUrl: longUrl,
+      createdAt: new Date()
+    });
+
+    resultEl.innerHTML = `
+      <strong>Berhasil disimpan!</strong><br>
+      Link Asli: <a href="${longUrl}" target="_blank">${longUrl}</a>
+    `;
+  } catch (err) {
+    console.error(err);
+    resultEl.textContent = 'Gagal mengonversi link: ' + err.message;
+  } finally {
+    loadingEl.style.display = 'none';
+  }
+}
+          
+
+          // Jika response.url memberi info (beberapa browser mengisi response.url walau redirect manual)
+          if (res.url && res.url !== shortUrl) {
+            console.log('Response.url dari manual fetch:', res.url);
+            if (res.url.includes('tiktok.com') && res.url.includes('/video/')) return res.url;
+          }
+        } catch (errManual) {
+          console.warn('Strategi manual fetch gagal atau dibatasi CORS:', errManual);
+          // lanjut ke strategi berikutnya
+        }
+
+        // STRATEGI 2: Coba fetch dengan redirect: 'follow' (HEAD jika server mengizinkan)
+        try {
+          // HEAD kadang diblok oleh CORS, tapi kita coba
+          let resHead;
+          try {
+            resHead = await fetch(shortUrl, { method: 'HEAD', redirect: 'follow' });
+            if (resHead && resHead.url && resHead.url !== shortUrl) {
+              console.log('HEAD result url:', resHead.url);
+              if (resHead.url.includes('tiktok.com') && resHead.url.includes('/video/')) return resHead.url;
+            }
+          } catch (eHead) {
+            // fallback ke GET follow
+            const resGet = await fetch(shortUrl, { method: 'GET', redirect: 'follow' });
+            if (resGet && resGet.url && resGet.url !== shortUrl) {
+              console.log('GET follow result url:', resGet.url);
+              if (resGet.url.includes('tiktok.com') && resGet.url.includes('/video/')) return resGet.url;
+            }
+          }
+        } catch (errFollow) {
+          console.warn('Strategi follow fetch gagal atau dibatasi CORS:', errFollow);
+        }
+
+        // STRATEGI 3 (FALLBACK): Ambil HTML via text/proxy reader service dan parsing meta tags
+        // menggunakan r.jina.ai untuk mengambil versi teks dari halaman target (bisa melewati beberapa pembatasan CORS)
+        try {
+          // Merapikan shortUrl agar bisa dipasangkan ke r.jina.ai/http://...
+          const normalized = shortUrl.replace(/^https?:\/\//, '');
+          const proxyUrl = `https://r.jina.ai/http://${normalized}`;
+          console.log('Mencoba fallback parsing via:', proxyUrl);
+          const r = await fetch(proxyUrl);
+          if (r && r.ok) {
+            const txt = await r.text();
+            // Cari meta property og:url atau canonical atau link utama yang mengandung /video/
+            let m = txt.match(/<meta[^>]*property=["']og:url["'][^>]*content=["']([^"']+)["'][^>]*>/i);
+            if (!m) m = txt.match(/<link[^>]*rel=["']canonical["'][^>]*href=["']([^"']+)["'][^>]*>/i);
+            if (!m) m = txt.match(/https?:\/\/(?:www\.)?tiktok\.com\/[^\s"'<>]+\/video\/\d+/i);
+            if (m) {
+              const found = m[1] || m[0];
+              console.log('Ditemukan via parsing HTML fallback:', found);
+              // normalize
+              try {
+                const abs = new URL(found).toString();
+                if (abs.includes('tiktok.com') && abs.includes('/video/')) return abs;
+                return abs;
+              } catch (e) {
+                return found;
+              }
+            } else {
+              console.warn('Tidak menemukan meta og:url / canonical dalam halaman fallback.');
+            }
+          } else {
+            console.warn('Proxy fallback tidak mengembalikan konten yang valid', r && r.status);
+          }
+        } catch (errProxy) {
+          console.warn('Fallback parsing gagal:', errProxy);
+        }
+
+        // Jika sampai sini belum bisa diresolve, kembalikan shortUrl asli
+        console.warn('Semua strategi resolve gagal — kembalikan URL asli.');
+        return shortUrl;
+      } catch (error) {
+        console.error('Error resolving TikTok short link (overall):', error);
+        return shortUrl;
+      }
+    }
+
     function convertToEmbed(url){
       try {
         if(url.includes("youtube.com/watch?v=")){
@@ -431,6 +537,7 @@
           return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&controls=0`;
         }
         if(url.includes("tiktok.com")){
+          // Ambil ID video dari link TikTok
           const videoIdMatch = url.match(/\/video\/(\d+)/);
           if (videoIdMatch && videoIdMatch[1]) {
             return `https://www.tiktok.com/embed/v2/${videoIdMatch[1]}`;
@@ -442,33 +549,34 @@
       return url;
     }
 
-    /**
-     * Meresolve link TikTok pendek menjadi link panjang.
-     */
-    async function resolveTikTokShortLink(shortUrl) {
-      if (!(shortUrl.includes('vm.tiktok.com') || shortUrl.includes('vt.tiktok.com'))) {
-        return shortUrl;
-      }
+    window.login = async () => {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      if(!email || !password) return alert("Isi email dan password");
+
       try {
-        const res = await fetch(shortUrl, { method: 'GET', redirect: 'follow' });
-        if (res.url && res.url !== shortUrl) {
-          return res.url;
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (err) {
+        try {
+          await createUserWithEmailAndPassword(auth, email, password);
+        } catch (err2) {
+          alert("Gagal daftar: " + err2.message);
         }
-      } catch (e) {
-        console.error('Gagal meresolve link TikTok:', e);
       }
-      return shortUrl;
-    }
-    
-    // Memuat postingan yang sudah ada
+    };
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        document.getElementById('authBox').style.display = 'none';
+        document.getElementById('panel').style.display = 'block';
+        loadMyPost();
+      }
+    });
+
     async function loadMyPost() {
-      if (!auth.currentUser || !db) return;
       preview.innerHTML = "⏳ Memuat...";
-      const userId = auth.currentUser.uid;
-      const linksCollection = collection(db, `artifacts/${appId}/users/${userId}/links`);
-      const q = query(linksCollection, where("owner", "==", userId));
+      const q = query(collection(db, "links"), where("owner", "==", auth.currentUser.uid));
       const snap = await getDocs(q);
-      
       if (snap.empty) {
         preview.textContent = "Belum ada postingan";
       } else {
@@ -494,39 +602,55 @@
     }
 
     window.saveLink = async () => {
-      const userId = auth.currentUser.uid;
-      const linksCollection = collection(db, `artifacts/${appId}/users/${userId}/links`);
       let rawVideoLink = document.getElementById('videoLink').value.trim();
       const targetLink = document.getElementById('targetLink').value.trim();
-      if(!rawVideoLink || !targetLink) return showMessage("Harap isi semua kolom", "error");
+      if(!rawVideoLink || !targetLink) return alert("Isi semua field");
 
       loading.style.display = 'block';
       notif.style.display = 'none';
       errorBox.style.display = 'none';
-      
-      try {
-        rawVideoLink = await resolveTikTokShortLink(rawVideoLink);
-        document.getElementById('videoLink').value = rawVideoLink;
 
-        const q = query(linksCollection, where("owner", "==", userId));
+      try {
+        // Jika link TikTok pendek, konversi ke link panjang
+        if (rawVideoLink.includes('vm.tiktok.com') || rawVideoLink.includes('vt.tiktok.com')) {
+          try {
+            const resolvedLink = await resolveTikTokShortLink(rawVideoLink);
+            
+            // Pastikan link berhasil diresolve sebelum menyimpan
+            if (resolvedLink && resolvedLink.includes('tiktok.com') && resolvedLink.includes('/video/')) {
+              rawVideoLink = resolvedLink;
+              document.getElementById('videoLink').value = rawVideoLink;
+              console.log('Link TikTok berhasil diresolve dan disimpan:', rawVideoLink);
+            } else {
+              console.warn('Link TikTok tidak berhasil diresolve, menggunakan link asli');
+            }
+          } catch (resolveError) {
+            console.error('Gagal meresolve link TikTok:', resolveError);
+            // Tetap lanjut dengan link asli meskipun resolve gagal
+          }
+        }
+
+        const q = query(collection(db, "links"), where("owner", "==", auth.currentUser.uid));
         const snap = await getDocs(q);
 
         let authLink;
         if (snap.empty) {
           authLink = Math.random().toString(36).substring(2,10);
-          await addDoc(linksCollection, {
-            owner: userId,
+          await addDoc(collection(db, "links"), {
+            owner: auth.currentUser.uid,
             videoLink: rawVideoLink,
             targetLink, 
             authLink
           });
+          console.log('Dokumen baru dibuat dengan link TikTok panjang:', rawVideoLink);
         } else {
           authLink = snap.docs[0].data().authLink;
-          const ref = doc(linksCollection, snap.docs[0].id);
+          const ref = doc(db, "links", snap.docs[0].id);
           await updateDoc(ref, { 
             videoLink: rawVideoLink, 
             targetLink 
           });
+          console.log('Dokumen diperbarui dengan link TikTok panjang:', rawVideoLink);
         }
         
         // Update preview
@@ -572,10 +696,11 @@
     // Fungsi untuk menyalin teks ke clipboard
     window.copyToClipboard = function(text) {
       navigator.clipboard.writeText(text).then(() => {
-        showMessage("Link berhasil disalin!", "success");
+        alert("Link berhasil disalin!");
       }).catch(err => {
         console.error('Gagal menyalin teks: ', err);
         
+        // Fallback untuk browser yang tidak mendukung clipboard API
         const textArea = document.createElement("textarea");
         textArea.value = text;
         textArea.style.position = "fixed";
@@ -586,9 +711,9 @@
         try {
           const successful = document.execCommand('copy');
           const msg = successful ? 'berhasil' : 'gagal';
-          showMessage(`Link ${msg} disalin!`, successful ? 'success' : 'error');
+          alert(`Link ${msg} disalin!`);
         } catch (err) {
-          showMessage("Gagal menyalin link. Silakan salin manual.", "error");
+          alert("Gagal menyalin link. Silakan salin manual.");
         }
         
         document.body.removeChild(textArea);
