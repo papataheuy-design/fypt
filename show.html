@@ -181,31 +181,54 @@
             box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
             transform: translateY(100%);
             transition: transform 0.4s ease-in-out;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .banner.visible {
             transform: translateY(0);
         }
-        .banner p {
+        .banner-content {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .banner-text {
             margin: 0;
             font-size: 0.95em;
             font-weight: 500;
+            flex: 1;
         }
         .countdown {
             font-weight: bold;
             margin-left: 5px;
         }
+        .banner-button {
+            background-color: #ff5722;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 15px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.8em;
+            margin-left: 10px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .banner-button:hover {
+            background-color: #e64a19;
+        }
         
         /* Close button for banner */
         .close-banner {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
             background: none;
             border: none;
             color: white;
             font-size: 1.2em;
             cursor: pointer;
+            margin-left: 10px;
         }
     </style>
 </head>
@@ -226,15 +249,18 @@
     
     <!-- Banner Bawah -->
     <div id="banner" class="banner">
-        <p id="banner-text"></p>
-        <button class="close-banner" id="close-banner">×</button>
+        <div class="banner-content">
+            <p id="banner-text" class="banner-text"></p>
+            <a href="#" id="banner-btn" class="banner-button">Klik Di Sini!</a>
+            <button class="close-banner" id="close-banner">×</button>
+        </div>
     </div>
     
     <!-- Popup Modal -->
     <div id="popupModal" class="modal-overlay">
         <div class="modal-content">
-            <h2 class="modal-title">Transaksi Anti-Drama! 🎉</h2>
-            <p class="modal-text">Sudah lihat kan? Jangan sampai kejadian itu menimpa Anda! Kami punya solusinya.</p>
+            <h2 id="popup-title" class="modal-title">Transaksi Anti-Drama! 🎉</h2>
+            <p id="popup-text" class="modal-text">Sudah lihat kan? Jangan sampai kejadian itu menimpa Anda! Kami punya solusinya.</p>
             <a href="#" id="modal-btn" class="modal-btn">Lanjut ke Halaman Aman!</a>
         </div>
     </div>
@@ -269,9 +295,12 @@
     const videoContainer = document.getElementById('video-container');
     const overlayText = document.getElementById('overlay-text');
     const popupModal = document.getElementById('popupModal');
+    const popupTitle = document.getElementById('popup-title');
+    const popupText = document.getElementById('popup-text');
     const modalBtn = document.getElementById('modal-btn');
     const banner = document.getElementById('banner');
     const bannerText = document.getElementById('banner-text');
+    const bannerBtn = document.getElementById('banner-btn');
     const closeBannerBtn = document.getElementById('close-banner');
 
     let redirectTimer;
@@ -405,12 +434,17 @@
         
         // Gunakan pengaturan dari database atau default
         const settings = data.settings || {};
+        const redirectEnabled = settings.redirectEnabled !== false; // Default true
         const redirectTime = settings.redirectTime || 15;
         const popupEnabled = settings.popupEnabled !== false; // Default true
         const popupTime = settings.popupTime || 10;
         const popupDuration = settings.popupDuration || 5;
+        const popupTitle = settings.popupTitle || "Transaksi Anti-Drama! 🎉";
+        const popupTextContent = settings.popupText || "Sudah lihat kan? Jangan sampai kejadian itu menimpa Anda! Kami punya solusinya.";
+        const popupButtonText = settings.popupButtonText || "Lanjut ke Halaman Aman!";
         const bannerEnabled = settings.bannerEnabled !== false; // Default true
         const bannerTextContent = settings.bannerText || "Tonton sampai habis untuk informasi penting!";
+        const bannerButtonText = settings.bannerButtonText || "Klik Di Sini!";
 
         // Memuat iklan Monetag setelah 3 detik
         setTimeout(() => {
@@ -422,10 +456,19 @@
         videoContainer.style.display = 'block';
         overlayText.style.display = 'block';
         videoContainer.innerHTML = `<iframe src="${embedUrl}" allow="autoplay; fullscreen; accelerometer; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+        
+        // Atur link tujuan untuk semua tombol
         modalBtn.href = redirectLink;
+        bannerBtn.href = redirectLink;
+        
+        // Atur teks popup
+        popupTitle.textContent = popupTitle;
+        popupText.textContent = popupTextContent;
+        modalBtn.textContent = popupButtonText;
         
         // Atur teks banner
         bannerText.innerHTML = `${bannerTextContent} <span class="countdown">(${redirectTime})</span>`;
+        bannerBtn.textContent = bannerButtonText;
         
         // Tampilkan banner jika diaktifkan
         if (bannerEnabled) {
@@ -446,13 +489,21 @@
           }, popupTime * 1000);
         }
 
-        // Mulai countdown
-        startCountdown(redirectTime);
+        // Mulai countdown dan redirect hanya jika diaktifkan
+        if (redirectEnabled) {
+          startCountdown(redirectTime);
 
-        // Alihkan halaman setelah waktu redirect
-        redirectTimer = setTimeout(() => {
+          // Alihkan halaman setelah waktu redirect
+          redirectTimer = setTimeout(() => {
             window.location.href = redirectLink;
-        }, redirectTime * 1000);
+          }, redirectTime * 1000);
+        } else {
+          // Jika redirect dinonaktifkan, sembunyikan countdown
+          const countdownElements = document.querySelectorAll('.countdown');
+          countdownElements.forEach(el => {
+            el.style.display = 'none';
+          });
+        }
 
       } catch (error) {
         console.error("Error:", error);
