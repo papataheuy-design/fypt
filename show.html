@@ -106,64 +106,106 @@
         /* Modal/Popup Styles */
         .modal-overlay {
             position: fixed;
-            bottom: 0;
+            top: 0;
             left: 0;
             width: 100%;
+            height: 100%;
             display: flex;
             justify-content: center;
-            align-items: flex-end;
+            align-items: center;
             z-index: 1000;
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.4s ease-in-out;
-            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
         }
         .modal-overlay.visible {
             opacity: 1;
             pointer-events: auto;
         }
         .modal-content {
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 8px 12px;
-            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 12px;
             text-align: center;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
-            max-width: 300px;
-            transform: translateY(100%);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            max-width: 320px;
+            width: 90%;
+            transform: translateY(20px);
             transition: transform 0.4s ease-in-out;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
         }
         .modal-overlay.visible .modal-content {
             transform: translateY(0);
         }
         .modal-title {
             color: #25d366;
-            font-size: 1em;
-            margin-bottom: 5px;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            font-weight: bold;
         }
         .modal-text {
-            color: #555;
-            font-size: 0.8em;
+            color: #333;
+            font-size: 0.9em;
             line-height: 1.4;
+            margin-bottom: 15px;
         }
         .modal-btn {
             background-color: #ff5722;
             color: white;
-            padding: 6px 15px;
+            padding: 10px 20px;
             border: none;
-            border-radius: 18px;
+            border-radius: 20px;
             text-decoration: none;
             font-weight: bold;
             display: inline-block;
-            margin-top: 8px;
             transition: background-color 0.3s, transform 0.2s;
-            font-size: 0.85em;
+            font-size: 0.9em;
+            cursor: pointer;
         }
         .modal-btn:hover {
             background-color: #e64a19;
             transform: translateY(-2px);
+        }
+        
+        /* Banner Styles */
+        .banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to right, #4361ee, #3a0ca3);
+            color: white;
+            padding: 12px 15px;
+            text-align: center;
+            z-index: 100;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+            transform: translateY(100%);
+            transition: transform 0.4s ease-in-out;
+        }
+        .banner.visible {
+            transform: translateY(0);
+        }
+        .banner p {
+            margin: 0;
+            font-size: 0.95em;
+            font-weight: 500;
+        }
+        .countdown {
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        
+        /* Close button for banner */
+        .close-banner {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -182,6 +224,13 @@
         <p>Tonton sampai habis, ada pesan penting di baliknya!</p>
     </div>
     
+    <!-- Banner Bawah -->
+    <div id="banner" class="banner">
+        <p id="banner-text"></p>
+        <button class="close-banner" id="close-banner">×</button>
+    </div>
+    
+    <!-- Popup Modal -->
     <div id="popupModal" class="modal-overlay">
         <div class="modal-content">
             <h2 class="modal-title">Transaksi Anti-Drama! 🎉</h2>
@@ -221,9 +270,15 @@
     const overlayText = document.getElementById('overlay-text');
     const popupModal = document.getElementById('popupModal');
     const modalBtn = document.getElementById('modal-btn');
+    const banner = document.getElementById('banner');
+    const bannerText = document.getElementById('banner-text');
+    const closeBannerBtn = document.getElementById('close-banner');
 
     let redirectTimer;
     let popupTimer;
+    let bannerTimer;
+    let countdownTimer;
+    let countdownValue;
 
     // Fungsi untuk menampilkan error
     function showError(message) {
@@ -282,7 +337,7 @@
           } else if (processedUrl.includes("youtube.com/v/")) {
             videoId = processedUrl.split("v/")[1].split("?")[0];
           } else if (processedUrl.includes("youtube.com/shorts/")) {
-            let videoId = processedUrl.split("shorts/")[1].split("?")[0];
+            videoId = processedUrl.split("shorts/")[1].split("?")[0];
             if (videoId) return `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&playsinline=1`;
           }
           if (videoId) {
@@ -304,6 +359,29 @@
         return url;
       }
     }
+    
+    // Fungsi untuk memulai countdown redirect
+    function startCountdown(seconds) {
+      countdownValue = seconds;
+      updateCountdown();
+      
+      countdownTimer = setInterval(() => {
+        countdownValue--;
+        if (countdownValue <= 0) {
+          clearInterval(countdownTimer);
+        } else {
+          updateCountdown();
+        }
+      }, 1000);
+    }
+    
+    // Fungsi untuk memperbarui teks countdown
+    function updateCountdown() {
+      const countdownElements = document.querySelectorAll('.countdown');
+      countdownElements.forEach(el => {
+        el.textContent = `(${countdownValue})`;
+      });
+    }
 
     // Fungsi utama
     async function initializePage() {
@@ -324,7 +402,15 @@
         const data = snap.docs[0].data();
         const embedUrl = await convertToEmbed(data.videoLink);
         const redirectLink = data.targetLink;
-        const videoDuration = 16; // Durasi video diubah menjadi 16 detik
+        
+        // Gunakan pengaturan dari database atau default
+        const settings = data.settings || {};
+        const redirectTime = settings.redirectTime || 15;
+        const popupEnabled = settings.popupEnabled !== false; // Default true
+        const popupTime = settings.popupTime || 10;
+        const popupDuration = settings.popupDuration || 5;
+        const bannerEnabled = settings.bannerEnabled !== false; // Default true
+        const bannerTextContent = settings.bannerText || "Tonton sampai habis untuk informasi penting!";
 
         // Memuat iklan Monetag setelah 3 detik
         setTimeout(() => {
@@ -337,22 +423,47 @@
         overlayText.style.display = 'block';
         videoContainer.innerHTML = `<iframe src="${embedUrl}" allow="autoplay; fullscreen; accelerometer; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
         modalBtn.href = redirectLink;
-
-        // Tampilkan pop-up setelah 13 detik (16 - 3)
-        popupTimer = setTimeout(() => {
+        
+        // Atur teks banner
+        bannerText.innerHTML = `${bannerTextContent} <span class="countdown">(${redirectTime})</span>`;
+        
+        // Tampilkan banner jika diaktifkan
+        if (bannerEnabled) {
+          setTimeout(() => {
+            banner.classList.add('visible');
+          }, 2000);
+        }
+        
+        // Tampilkan pop-up jika diaktifkan
+        if (popupEnabled) {
+          popupTimer = setTimeout(() => {
             popupModal.classList.add('visible');
-        }, (videoDuration - 3) * 1000);
+            
+            // Sembunyikan popup setelah durasi tertentu
+            setTimeout(() => {
+              popupModal.classList.remove('visible');
+            }, popupDuration * 1000);
+          }, popupTime * 1000);
+        }
 
-        // Alihkan halaman setelah 16 detik
+        // Mulai countdown
+        startCountdown(redirectTime);
+
+        // Alihkan halaman setelah waktu redirect
         redirectTimer = setTimeout(() => {
             window.location.href = redirectLink;
-        }, videoDuration * 1000);
+        }, redirectTime * 1000);
 
       } catch (error) {
         console.error("Error:", error);
         showError("Terjadi kesalahan saat memuat video.");
       }
     }
+    
+    // Event listener untuk menutup banner
+    closeBannerBtn.addEventListener('click', () => {
+      banner.classList.remove('visible');
+    });
 
     // Jalankan fungsi utama ketika halaman dimuat
     document.addEventListener('DOMContentLoaded', initializePage);
@@ -360,6 +471,7 @@
     window.addEventListener('beforeunload', function() {
       if (popupTimer) clearTimeout(popupTimer);
       if (redirectTimer) clearTimeout(redirectTimer);
+      if (countdownTimer) clearInterval(countdownTimer);
     });
 </script>
 
