@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <!-- New ad script provided by the user -->
-    <script>(function(s){s.dataset.zone='9885185',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Saksikan Video Ini!</title>
@@ -12,7 +9,7 @@
     <meta property="og:title" content="Saksikan Video Ini!">
     <meta property="og:description" content="Tonton video ini sampai habis dan temukan pesan penting di baliknya!">
     <meta property="og:image" content="https://placehold.co/1200x630/5735ff/ffffff?text=Video+Menarik">
-    <meta property="og:url" content=""> <!-- You can insert the final URL of your page here -->
+    <meta property="og:url" content="">
     <meta property="og:type" content="video.other">
     
     <style>
@@ -127,11 +124,11 @@
         }
         .modal-content {
             background-color: rgba(255, 255, 255, 0.9);
-            padding: 8px 12px; /* Smaller padding */
+            padding: 8px 12px;
             border-radius: 8px;
             text-align: center;
             box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
-            max-width: 300px; /* Smaller width */
+            max-width: 300px;
             transform: translateY(100%);
             transition: transform 0.4s ease-in-out;
             display: flex;
@@ -143,18 +140,18 @@
         }
         .modal-title {
             color: #25d366;
-            font-size: 1em; /* Smaller font size */
+            font-size: 1em;
             margin-bottom: 5px;
         }
         .modal-text {
             color: #555;
-            font-size: 0.8em; /* Smaller font size */
+            font-size: 0.8em;
             line-height: 1.4;
         }
         .modal-btn {
             background-color: #ff5722;
             color: white;
-            padding: 6px 15px; /* Smaller padding */
+            padding: 6px 15px;
             border: none;
             border-radius: 18px;
             text-decoration: none;
@@ -162,7 +159,7 @@
             display: inline-block;
             margin-top: 8px;
             transition: background-color 0.3s, transform 0.2s;
-            font-size: 0.85em; /* Smaller font size */
+            font-size: 0.85em;
         }
         .modal-btn:hover {
             background-color: #e64a19;
@@ -178,7 +175,7 @@
     </div>
 
     <div id="video-container" class="video-container" style="display: none;">
-        <!-- iframe will be inserted here by JavaScript -->
+        <!-- iframe akan dimasukkan di sini oleh JavaScript -->
     </div>
 
     <div id="overlay-text" class="overlay-text" style="display: none;">
@@ -197,6 +194,11 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { getFirestore, collection, getDocs, query, where }
       from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    // Skrip iklan Monetag yang akan dimuat setelah penundaan
+    function loadMonetagAd() {
+      (function(s){s.dataset.zone='9885185',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')));
+    }
 
     const firebaseConfig = {
       apiKey: "AIzaSyBUgD15-9V1H2j3F4zFdMgg2q4bxP5bDyM",
@@ -239,7 +241,6 @@
       try {
         // Cek apakah ini link pendek TikTok (vm.tiktok.com, vt.tiktok.com)
         if (shortUrl.includes('vm.tiktok.com') || shortUrl.includes('vt.tiktok.com')) {
-          // Lakukan request untuk mendapatkan URL akhir setelah redirect
           const response = await fetch(shortUrl, { 
             method: 'HEAD', 
             redirect: 'follow',
@@ -248,27 +249,23 @@
             }
           });
           
-          // Dapatkan URL akhir setelah semua redirect
           const finalUrl = response.url;
           
-          // Jika URL akhir adalah link TikTok yang valid, kembalikan
           if (finalUrl.includes('tiktok.com') && finalUrl.includes('/video/')) {
             return finalUrl;
           }
         }
         
-        // Jika bukan link pendek atau konversi gagal, kembalikan URL asli
         return shortUrl;
       } catch (error) {
         console.error('Error resolving TikTok short link:', error);
-        return shortUrl; // Kembalikan URL asli jika terjadi error
+        return shortUrl;
       }
     }
 
     // Fungsi untuk mengonversi ke embed URL
     async function convertToEmbed(url) {
       try {
-        // Jika link TikTok pendek, konversi ke link panjang terlebih dahulu
         let processedUrl = url;
         if (url.includes('vm.tiktok.com') || url.includes('vt.tiktok.com')) {
           processedUrl = await resolveTikTokShortLink(url);
@@ -292,12 +289,13 @@
             return `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&playsinline=1`;
           }
         } else if (processedUrl.includes("tiktok.com/")) {
+          // Menggunakan embed iframe yang paling ringan dan bersih.
           let videoId = "";
           if (processedUrl.includes("/video/")) {
             videoId = processedUrl.split("/video/")[1].split("?")[0];
           }
           if (videoId) {
-            return `https://www.tiktok.com/embed/v2/${videoId}?autoplay=1`;
+            return `https://www.tiktok.com/embed/v2/${videoId}?autoplay=1&playsinline=1`;
           }
         }
         return processedUrl;
@@ -326,7 +324,12 @@
         const data = snap.docs[0].data();
         const embedUrl = await convertToEmbed(data.videoLink);
         const redirectLink = data.targetLink;
-        const videoDuration = 15; // Menggunakan durasi 15 detik
+        const videoDuration = 16; // Durasi video diubah menjadi 16 detik
+
+        // Memuat iklan Monetag setelah 3 detik
+        setTimeout(() => {
+          loadMonetagAd();
+        }, 3000);
 
         // Sembunyikan loading dan tampilkan video
         loadingState.style.display = 'none';
@@ -335,12 +338,12 @@
         videoContainer.innerHTML = `<iframe src="${embedUrl}" allow="autoplay; fullscreen; accelerometer; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
         modalBtn.href = redirectLink;
 
-        // Tampilkan pop-up setelah 12 detik (15 - 3)
+        // Tampilkan pop-up setelah 13 detik (16 - 3)
         popupTimer = setTimeout(() => {
             popupModal.classList.add('visible');
         }, (videoDuration - 3) * 1000);
 
-        // Alihkan halaman setelah 15 detik
+        // Alihkan halaman setelah 16 detik
         redirectTimer = setTimeout(() => {
             window.location.href = redirectLink;
         }, videoDuration * 1000);
