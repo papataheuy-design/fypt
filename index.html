@@ -467,6 +467,12 @@
     <input id="email" type="email" placeholder="Email">
     <input id="password" type="password" placeholder="Password">
     <button onclick="login()">Login / Daftar</button>
+    <!-- Tempatkan kode ini di dalam div#authBox, setelah button login -->
+<div style="text-align: center; margin-top: 15px;">
+  <a href="#" onclick="forgotPassword()" style="color: var(--primary); text-decoration: none; font-size: 0.9rem;">
+    Lupa Kata Sandi?
+  </a>
+</div>
     
     <!-- Indikator Lazy Loading -->
     <div id="lazyIndicator" class="lazy-indicator" style="display: none;">
@@ -587,6 +593,12 @@
     <div class="preview-container">
       <div id="preview">Belum ada postingan</div>
     </div>
+    <!-- Tempatkan kode ini di dalam div#panel, di bagian paling bawah sebelum penutup div -->
+<div style="text-align: center; margin-top: 25px; padding-top: 15px; border-top: 1px solid var(--border);">
+  <button onclick="logout()" style="background: var(--danger); max-width: 200px; margin: 0 auto;">
+    Logout
+  </button>
+</div>
   </div>
 
   <!-- Cara pakai -->
@@ -1044,6 +1056,57 @@
         document.body.removeChild(textArea);
       });
     };
+    // Tambahkan fungsi forgotPassword
+window.forgotPassword = async function() {
+  const email = document.getElementById('email').value.trim();
+  
+  if (!email) {
+    alert("Silakan masukkan email Anda terlebih dahulu");
+    return;
+  }
+  
+  // Tampilkan lazy indicator
+  lazyIndicator.style.display = 'flex';
+  
+  try {
+    // Import fungsi yang diperlukan
+    const { sendPasswordResetEmail } = await import("https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js");
+    
+    // Kirim email reset password
+    await sendPasswordResetEmail(auth, email);
+    alert(`Email reset kata sandi telah dikirim ke ${email}. Silakan periksa inbox Anda.`);
+  } catch (error) {
+    console.error("Error sending password reset email:", error);
+    alert("Terjadi kesalahan: " + error.message);
+  } finally {
+    // Sembunyikan lazy indicator
+    lazyIndicator.style.display = 'none';
+  }
+};
+
+// Tambahkan fungsi logout
+window.logout = async function() {
+  try {
+    // Import fungsi signOut
+    const { signOut } = await import("https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js");
+    
+    // Lakukan logout
+    await signOut(auth);
+    
+    // Sembunyikan panel dan tampilkan kembali form login
+    document.getElementById('panel').style.display = 'none';
+    document.getElementById('authBox').style.display = 'block';
+    
+    // Reset form
+    document.getElementById('email').value = '';
+    document.getElementById('password').value = '';
+    
+    alert("Anda telah berhasil logout");
+  } catch (error) {
+    console.error("Error during logout:", error);
+    alert("Terjadi kesalahan saat logout: " + error.message);
+  }
+};
   </script>
 </div>
 
