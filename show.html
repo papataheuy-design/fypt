@@ -83,6 +83,7 @@
             text-align: center;
             z-index: 50;
             background-color: #000;
+            padding: 20px;
         }
 
         .loader {
@@ -101,6 +102,27 @@
 
         .error-state h2 {
             margin-bottom: 15px;
+            color: #ff4444;
+        }
+
+        .error-state p {
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .retry-button {
+            background-color: #4361ee;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .retry-button:hover {
+            background-color: #3a56d4;
         }
 
         /* Modal/Popup Styles */
@@ -230,6 +252,20 @@
             cursor: pointer;
             margin-left: 10px;
         }
+
+        /* Debug info */
+        .debug-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 9999;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -265,6 +301,9 @@
         </div>
     </div>
 
+    <!-- Debug info -->
+    <div id="debug-info" class="debug-info"></div>
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { getFirestore, collection, getDocs, query, where }
@@ -272,7 +311,12 @@
 
     // Skrip iklan Monetag yang akan dimuat setelah penundaan
     function loadMonetagAd() {
-      (function(s){s.dataset.zone='9885185',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')));
+      try {
+        (function(s){s.dataset.zone='9885185',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')));
+        console.log("Monetag ad script loaded");
+      } catch (error) {
+        console.error("Error loading Monetag ad:", error);
+      }
     }
 
     const firebaseConfig = {
@@ -284,6 +328,11 @@
       appId: "1:1002775921451:web:d00ff8bd6964a8fcad7b6e",
       measurementId: "G-QYGXBF7NWR"
     };
+
+    // Debug: Tampilkan info konfigurasi
+    const debugInfo = document.getElementById('debug-info');
+    debugInfo.textContent = `App: ${firebaseConfig.projectId}, ID: ${new URLSearchParams(location.search).get("id") || 'none'}`;
+    debugInfo.style.display = 'block';
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -309,20 +358,34 @@
     let countdownTimer;
     let countdownValue;
 
-    // Fungsi untuk menampilkan error
-    function showError(message) {
+    // Fungsi untuk menampilkan error dengan informasi lebih detail
+    function showError(message, detail = '') {
+        console.error("Error:", message, detail);
         loadingState.style.display = 'none';
         videoContainer.style.display = 'none';
         overlayText.style.display = 'none';
+        
         const errorState = document.createElement('div');
         errorState.className = 'error-state';
-        errorState.innerHTML = `<h2>❌ Terjadi Kesalahan</h2><p>${message}</p>`;
+        
+        let errorHTML = `<h2>❌ Terjadi Kesalahan</h2><p>${message}</p>`;
+        
+        if (detail) {
+            errorHTML += `<p><small>Detail: ${detail}</small></p>`;
+        }
+        
+        // Tambahkan tombol untuk mencoba lagi
+        errorHTML += `<button class="retry-button" onclick="window.location.reload()">Coba Lagi</button>`;
+        
+        errorState.innerHTML = errorHTML;
         document.body.appendChild(errorState);
     }
 
     // Fungsi untuk mengonversi link pendek TikTok menjadi link panjang
     async function resolveTikTokShortLink(shortUrl) {
       try {
+        console.log("Attempting to resolve TikTok short link:", shortUrl);
+        
         // Cek apakah ini link pendek TikTok (vm.tiktok.com, vt.tiktok.com)
         if (shortUrl.includes('vm.tiktok.com') || shortUrl.includes('vt.tiktok.com')) {
           const response = await fetch(shortUrl, { 
@@ -333,10 +396,10 @@
             }
           });
           
-          const finalUrl = response.url;
+          console.log("TikTok response URL:", response.url);
           
-          if (finalUrl.includes('tiktok.com') && finalUrl.includes('/video/')) {
-            return finalUrl;
+          if (response.url.includes('tiktok.com') && response.url.includes('/video/')) {
+            return response.url;
           }
         }
         
@@ -350,9 +413,12 @@
     // Fungsi untuk mengonversi ke embed URL
     async function convertToEmbed(url) {
       try {
+        console.log("Converting to embed:", url);
         let processedUrl = url;
+        
         if (url.includes('vm.tiktok.com') || url.includes('vt.tiktok.com')) {
           processedUrl = await resolveTikTokShortLink(url);
+          console.log("Resolved TikTok URL:", processedUrl);
         }
 
         if (processedUrl.includes("youtube.com/") || processedUrl.includes("youtu.be/")) {
@@ -367,10 +433,17 @@
             videoId = processedUrl.split("v/")[1].split("?")[0];
           } else if (processedUrl.includes("youtube.com/shorts/")) {
             videoId = processedUrl.split("shorts/")[1].split("?")[0];
-            if (videoId) return `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&playsinline=1`;
+            if (videoId) {
+              const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&playsinline=1`;
+              console.log("YouTube Shorts embed URL:", embedUrl);
+              return embedUrl;
+            }
           }
+          
           if (videoId) {
-            return `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&playsinline=1`;
+            const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&playsinline=1`;
+            console.log("YouTube embed URL:", embedUrl);
+            return embedUrl;
           }
         } else if (processedUrl.includes("tiktok.com/")) {
           // Menggunakan embed iframe yang paling ringan dan bersih.
@@ -378,10 +451,15 @@
           if (processedUrl.includes("/video/")) {
             videoId = processedUrl.split("/video/")[1].split("?")[0];
           }
+          
           if (videoId) {
-            return `https://www.tiktok.com/embed/v2/${videoId}?autoplay=1&playsinline=1`;
+            const embedUrl = `https://www.tiktok.com/embed/v2/${videoId}?autoplay=1&playsinline=1`;
+            console.log("TikTok embed URL:", embedUrl);
+            return embedUrl;
           }
         }
+        
+        console.log("Returning original URL as fallback");
         return processedUrl;
       } catch (error) {
         console.error("Error converting URL:", error);
@@ -415,8 +493,10 @@
     // Fungsi utama
     async function initializePage() {
       try {
+        console.log("Initializing page with ID:", id);
+        
         if (!id) {
-          showError("ID tidak ditemukan.");
+          showError("ID tidak ditemukan.", "Parameter 'id' tidak ada di URL. Pastikan link yang digunakan benar.");
           return;
         }
 
@@ -424,13 +504,25 @@
         const snap = await getDocs(q);
 
         if (snap.empty) {
-          showError("Link tidak ditemukan.");
+          showError("Link tidak ditemukan.", `Tidak ada data dengan ID: ${id}. Pastikan link sudah disimpan di panel backend.`);
           return;
         }
 
         const data = snap.docs[0].data();
+        console.log("Data from Firebase:", data);
+        
+        if (!data.videoLink) {
+          showError("Link video tidak valid.", "Data dari database tidak mengandung link video yang valid.");
+          return;
+        }
+
         const embedUrl = await convertToEmbed(data.videoLink);
         const redirectLink = data.targetLink;
+        
+        if (!redirectLink) {
+          showError("Link tujuan tidak valid.", "Data dari database tidak mengandung link tujuan yang valid.");
+          return;
+        }
         
         // Gunakan pengaturan dari database atau default
         const settings = data.settings || {};
@@ -439,12 +531,14 @@
         const popupEnabled = settings.popupEnabled !== false; // Default true
         const popupTime = settings.popupTime || 10;
         const popupDuration = settings.popupDuration || 5;
-        const popupTitle = settings.popupTitle || "Transaksi Anti-Drama! 🎉";
+        const popupTitleText = settings.popupTitle || "Transaksi Anti-Drama! 🎉";
         const popupTextContent = settings.popupText || "Sudah lihat kan? Jangan sampai kejadian itu menimpa Anda! Kami punya solusinya.";
         const popupButtonText = settings.popupButtonText || "Lanjut ke Halaman Aman!";
         const bannerEnabled = settings.bannerEnabled !== false; // Default true
         const bannerTextContent = settings.bannerText || "Tonton sampai habis untuk informasi penting!";
         const bannerButtonText = settings.bannerButtonText || "Klik Di Sini!";
+
+        console.log("Settings:", settings);
 
         // Memuat iklan Monetag setelah 3 detik
         setTimeout(() => {
@@ -462,7 +556,7 @@
         bannerBtn.href = redirectLink;
         
         // Atur teks popup
-        popupTitle.textContent = popupTitle;
+        popupTitle.textContent = popupTitleText;
         popupText.textContent = popupTextContent;
         modalBtn.textContent = popupButtonText;
         
@@ -506,8 +600,8 @@
         }
 
       } catch (error) {
-        console.error("Error:", error);
-        showError("Terjadi kesalahan saat memuat video.");
+        console.error("Error in initializePage:", error);
+        showError("Terjadi kesalahan saat memuat video.", error.message);
       }
     }
     
