@@ -223,6 +223,7 @@
     
     ol {
       padding-left: 20px;
+      margin: 10px 0;
     }
     
     ol li {
@@ -251,6 +252,36 @@
       width: 100%;
       height: 100%;
       border: none;
+    }
+    
+    /* Setting Groups */
+    .setting-group {
+      margin: 12px 0;
+    }
+    
+    .setting-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+      color: var(--dark);
+      font-size: 0.9rem;
+    }
+    
+    .setting-group input[type="number"],
+    .setting-group input[type="text"] {
+      margin: 5px 0;
+      padding: 10px 12px;
+      font-size: 0.9rem;
+    }
+    
+    /* Toggle visibility for settings */
+    #popupSettings, #bannerSettings {
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+    
+    #popupSettings:not(.visible), #bannerSettings:not(.visible) {
+      display: none;
     }
     
     /* Responsive adjustments */
@@ -314,6 +345,48 @@
     <small>📌 Tempel link video <b>apa saja</b> (TikTok / YouTube) — otomatis dikonversi jadi embed.</small>
     <input id="videoLink" type="url" placeholder="Link Video TikTok / YouTube">
     <input id="targetLink" type="url" placeholder="Link Tujuan">
+    
+    <!-- Pengaturan Redirect -->
+    <h4 style="margin-top: 20px;">⚙️ Pengaturan Redirect</h4>
+    <div class="setting-group">
+      <label for="redirectTime">Waktu Redirect Otomatis (detik):</label>
+      <input id="redirectTime" type="number" min="5" max="60" value="15" placeholder="15">
+    </div>
+    
+    <!-- Metode Popup -->
+    <div class="setting-group">
+      <div style="display: flex; align-items: center; gap: 10px; margin: 10px 0;">
+        <input type="checkbox" id="popupEnabled" checked>
+        <label for="popupEnabled" style="margin: 0;">Aktifkan Popup Iklan</label>
+      </div>
+      
+      <div id="popupSettings" class="visible">
+        <div class="setting-group">
+          <label for="popupTime">Waktu Muncul Popup (detik):</label>
+          <input id="popupTime" type="number" min="3" max="30" value="10" placeholder="10">
+        </div>
+        <div class="setting-group">
+          <label for="popupDuration">Durasi Popup (detik):</label>
+          <input id="popupDuration" type="number" min="3" max="15" value="5" placeholder="5">
+        </div>
+      </div>
+    </div>
+    
+    <!-- Metode Banner -->
+    <div class="setting-group">
+      <div style="display: flex; align-items: center; gap: 10px; margin: 10px 0;">
+        <input type="checkbox" id="bannerEnabled" checked>
+        <label for="bannerEnabled" style="margin: 0;">Aktifkan Banner Bawah</label>
+      </div>
+      
+      <div id="bannerSettings" class="visible">
+        <div class="setting-group">
+          <label for="bannerText">Teks Banner:</label>
+          <input id="bannerText" type="text" placeholder="Tonton sampai habis untuk informasi penting!" value="Tonton sampai habis untuk informasi penting!">
+        </div>
+      </div>
+    </div>
+    
     <button onclick="saveLink()">Simpan</button>
     <div id="loading">⏳ Menyimpan...</div>
     <div id="notif">✅ Link berhasil disimpan</div>
@@ -366,19 +439,43 @@
     const notif = document.getElementById('notif');
     const errorBox = document.getElementById('error');
 
+    // Fungsi untuk mengelola dropdown
+    document.getElementById('dropdownHeader').addEventListener('click', function() {
+      const content = document.getElementById('dropdownContent');
+      const header = document.getElementById('dropdownHeader');
+      if (content.classList.contains('show')) {
+        content.classList.remove('show');
+        header.classList.remove('open');
+      } else {
+        content.classList.add('show');
+        header.classList.add('open');
+      }
+    });
+
+    // Toggle settings visibility based on checkbox
+    document.getElementById('popupEnabled').addEventListener('change', function() {
+      document.getElementById('popupSettings').classList.toggle('visible', this.checked);
+    });
+
+    document.getElementById('bannerEnabled').addEventListener('change', function() {
+      document.getElementById('bannerSettings').classList.toggle('visible', this.checked);
+    });
+
+    // Initialize settings visibility
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('popupSettings').classList.toggle('visible', 
+        document.getElementById('popupEnabled').checked);
+      document.getElementById('bannerSettings').classList.toggle('visible', 
+        document.getElementById('bannerEnabled').checked);
+    });
+
     /**
      * resolveTikTokShortLink(shortUrl)
      * - Tujuan: mengubah link pendek TikTok (vm.tiktok.com, vt.tiktok.com) menjadi link panjang origin yang berisi /video/{id}
-     * - Pendekatan: beberapa strategi berurutan:
-     *   1) FETCH dengan redirect:'manual' -> baca header Location (bila server mengembalikan redirect header dan CORS mengizinkan)
-     *   2) FETCH dengan redirect:'follow' (HEAD dulu jika mungkin) -> gunakan response.url bila tersedia
-     *   3) FALLBACK: ambil HTML melalui service text-fetch (r.jina.ai) lalu parsing meta og:url / canonical
-     * - Catatan: resolving client-side bisa dibatasi oleh CORS; jika semua gagal, fungsi mengembalikan URL asli.
      */
     async function resolveTikTokShortLink(shortUrl) {
       try {
         if (!(shortUrl.includes('vm.tiktok.com') || shortUrl.includes('vt.tiktok.com'))) {
-          // bukan short tiktok
           return shortUrl;
         }
         console.log('Meresolve link TikTok pendek (mulai):', shortUrl);
@@ -388,77 +485,32 @@
           const res = await fetch(shortUrl, {
             method: 'GET',
             redirect: 'manual',
-            // beberapa server memerlukan header user-agent namun browser mungkin tidak mengizinkan mengganti User-Agent
           });
 
-          // jika server mengembalikan status 3xx dan header Location ada => gunakan itu
           if (res.status >= 300 && res.status < 400) {
             const loc = res.headers.get('location') || res.headers.get('Location');
             if (loc) {
               console.log('Ditemukan header Location (manual):', loc);
-              // Jika location adalah relatif, buat absolute URL
               try {
                 const abs = new URL(loc, shortUrl).toString();
                 if (abs.includes('tiktok.com') && abs.includes('/video/')) return abs;
-                // jika tidak berisi /video/, tetap kembalikan abs (agar lebih informatif)
                 return abs;
               } catch (e) {
                 return loc;
               }
             }
           }
-          async function expandTikTokLink(shortUrl) {
-  const response = await fetch(shortUrl, { method: 'HEAD', redirect: 'follow' });
-  return response.url;
-}
 
-async function konversiLink() {
-  const shortUrl = document.getElementById('tiktokUrl').value.trim();
-  const resultEl = document.getElementById('result');
-  const loadingEl = document.getElementById('loading');
-
-  if (!shortUrl) {
-    resultEl.textContent = 'Mohon masukkan link TikTok terlebih dahulu.';
-    return;
-  }
-
-  loadingEl.style.display = 'block';
-
-  try {
-    const longUrl = await expandTikTokLink(shortUrl);
-
-    await db.collection('tiktok_links').add({
-      shortUrl: shortUrl,
-      longUrl: longUrl,
-      createdAt: new Date()
-    });
-
-    resultEl.innerHTML = `
-      <strong>Berhasil disimpan!</strong><br>
-      Link Asli: <a href="${longUrl}" target="_blank">${longUrl}</a>
-    `;
-  } catch (err) {
-    console.error(err);
-    resultEl.textContent = 'Gagal mengonversi link: ' + err.message;
-  } finally {
-    loadingEl.style.display = 'none';
-  }
-}
-          
-
-          // Jika response.url memberi info (beberapa browser mengisi response.url walau redirect manual)
           if (res.url && res.url !== shortUrl) {
             console.log('Response.url dari manual fetch:', res.url);
             if (res.url.includes('tiktok.com') && res.url.includes('/video/')) return res.url;
           }
         } catch (errManual) {
           console.warn('Strategi manual fetch gagal atau dibatasi CORS:', errManual);
-          // lanjut ke strategi berikutnya
         }
 
-        // STRATEGI 2: Coba fetch dengan redirect: 'follow' (HEAD jika server mengizinkan)
+        // STRATEGI 2: Coba fetch dengan redirect: 'follow'
         try {
-          // HEAD kadang diblok oleh CORS, tapi kita coba
           let resHead;
           try {
             resHead = await fetch(shortUrl, { method: 'HEAD', redirect: 'follow' });
@@ -467,7 +519,6 @@ async function konversiLink() {
               if (resHead.url.includes('tiktok.com') && resHead.url.includes('/video/')) return resHead.url;
             }
           } catch (eHead) {
-            // fallback ke GET follow
             const resGet = await fetch(shortUrl, { method: 'GET', redirect: 'follow' });
             if (resGet && resGet.url && resGet.url !== shortUrl) {
               console.log('GET follow result url:', resGet.url);
@@ -478,24 +529,20 @@ async function konversiLink() {
           console.warn('Strategi follow fetch gagal atau dibatasi CORS:', errFollow);
         }
 
-        // STRATEGI 3 (FALLBACK): Ambil HTML via text/proxy reader service dan parsing meta tags
-        // menggunakan r.jina.ai untuk mengambil versi teks dari halaman target (bisa melewati beberapa pembatasan CORS)
+        // STRATEGI 3 (FALLBACK): Ambil HTML via text/proxy reader service
         try {
-          // Merapikan shortUrl agar bisa dipasangkan ke r.jina.ai/http://...
           const normalized = shortUrl.replace(/^https?:\/\//, '');
           const proxyUrl = `https://r.jina.ai/http://${normalized}`;
           console.log('Mencoba fallback parsing via:', proxyUrl);
           const r = await fetch(proxyUrl);
           if (r && r.ok) {
             const txt = await r.text();
-            // Cari meta property og:url atau canonical atau link utama yang mengandung /video/
             let m = txt.match(/<meta[^>]*property=["']og:url["'][^>]*content=["']([^"']+)["'][^>]*>/i);
             if (!m) m = txt.match(/<link[^>]*rel=["']canonical["'][^>]*href=["']([^"']+)["'][^>]*>/i);
             if (!m) m = txt.match(/https?:\/\/(?:www\.)?tiktok\.com\/[^\s"'<>]+\/video\/\d+/i);
             if (m) {
               const found = m[1] || m[0];
               console.log('Ditemukan via parsing HTML fallback:', found);
-              // normalize
               try {
                 const abs = new URL(found).toString();
                 if (abs.includes('tiktok.com') && abs.includes('/video/')) return abs;
@@ -503,17 +550,12 @@ async function konversiLink() {
               } catch (e) {
                 return found;
               }
-            } else {
-              console.warn('Tidak menemukan meta og:url / canonical dalam halaman fallback.');
             }
-          } else {
-            console.warn('Proxy fallback tidak mengembalikan konten yang valid', r && r.status);
           }
         } catch (errProxy) {
           console.warn('Fallback parsing gagal:', errProxy);
         }
 
-        // Jika sampai sini belum bisa diresolve, kembalikan shortUrl asli
         console.warn('Semua strategi resolve gagal — kembalikan URL asli.');
         return shortUrl;
       } catch (error) {
@@ -537,7 +579,6 @@ async function konversiLink() {
           return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&controls=0`;
         }
         if(url.includes("tiktok.com")){
-          // Ambil ID video dari link TikTok
           const videoIdMatch = url.match(/\/video\/(\d+)/);
           if (videoIdMatch && videoIdMatch[1]) {
             return `https://www.tiktok.com/embed/v2/${videoIdMatch[1]}`;
@@ -582,10 +623,40 @@ async function konversiLink() {
       } else {
         const docData = snap.docs[0].data();
         const finalLink = `${location.origin}/show.html?id=${docData.authLink}`;
+        
+        // Isi form dengan data yang ada
         document.getElementById('videoLink').value = docData.videoLink;
         document.getElementById('targetLink').value = docData.targetLink;
+        
+        // Isi pengaturan jika ada
+        if (docData.settings) {
+          document.getElementById('redirectTime').value = docData.settings.redirectTime || 15;
+          document.getElementById('popupEnabled').checked = docData.settings.popupEnabled !== false;
+          document.getElementById('popupTime').value = docData.settings.popupTime || 10;
+          document.getElementById('popupDuration').value = docData.settings.popupDuration || 5;
+          document.getElementById('bannerEnabled').checked = docData.settings.bannerEnabled !== false;
+          document.getElementById('bannerText').value = docData.settings.bannerText || "Tonton sampai habis untuk informasi penting!";
+          
+          // Update visibility
+          document.getElementById('popupSettings').classList.toggle('visible', 
+            document.getElementById('popupEnabled').checked);
+          document.getElementById('bannerSettings').classList.toggle('visible', 
+            document.getElementById('bannerEnabled').checked);
+        }
 
         const embedUrl = convertToEmbed(docData.videoLink);
+        
+        // Tampilkan informasi metode di preview
+        let methodsInfo = '';
+        if (docData.settings) {
+          methodsInfo = `<div style="margin-top: 10px; font-size: 0.8rem; color: var(--secondary);">`;
+          methodsInfo += `⏱️ Redirect: ${docData.settings.redirectTime || 15} detik | `;
+          methodsInfo += docData.settings.popupEnabled !== false ? 
+            `🪟 Popup: ${docData.settings.popupTime || 10}s/${docData.settings.popupDuration || 5}s | ` : '';
+          methodsInfo += docData.settings.bannerEnabled !== false ? `📢 Banner: Aktif` : '';
+          methodsInfo += `</div>`;
+        }
+        
         preview.innerHTML = `
           <div class="video-preview">
             <iframe src="${embedUrl}" allow="autoplay; fullscreen" allowfullscreen></iframe>
@@ -593,6 +664,7 @@ async function konversiLink() {
           <div class="link-box">
             <a href="${finalLink}" target="_blank">${finalLink}</a>
           </div>
+          ${methodsInfo}
           <div class="button-group">
             <button class="btn-copy" onclick="copyToClipboard('${finalLink}')">Salin Link</button>
             <button class="btn-open" onclick="window.open('${finalLink}', '_blank')">Buka Link</button>
@@ -604,6 +676,15 @@ async function konversiLink() {
     window.saveLink = async () => {
       let rawVideoLink = document.getElementById('videoLink').value.trim();
       const targetLink = document.getElementById('targetLink').value.trim();
+      
+      // Ambil nilai pengaturan baru
+      const redirectTime = parseInt(document.getElementById('redirectTime').value) || 15;
+      const popupEnabled = document.getElementById('popupEnabled').checked;
+      const popupTime = parseInt(document.getElementById('popupTime').value) || 10;
+      const popupDuration = parseInt(document.getElementById('popupDuration').value) || 5;
+      const bannerEnabled = document.getElementById('bannerEnabled').checked;
+      const bannerText = document.getElementById('bannerText').value.trim();
+      
       if(!rawVideoLink || !targetLink) return alert("Isi semua field");
 
       loading.style.display = 'block';
@@ -616,7 +697,6 @@ async function konversiLink() {
           try {
             const resolvedLink = await resolveTikTokShortLink(rawVideoLink);
             
-            // Pastikan link berhasil diresolve sebelum menyimpan
             if (resolvedLink && resolvedLink.includes('tiktok.com') && resolvedLink.includes('/video/')) {
               rawVideoLink = resolvedLink;
               document.getElementById('videoLink').value = rawVideoLink;
@@ -626,7 +706,6 @@ async function konversiLink() {
             }
           } catch (resolveError) {
             console.error('Gagal meresolve link TikTok:', resolveError);
-            // Tetap lanjut dengan link asli meskipun resolve gagal
           }
         }
 
@@ -634,28 +713,46 @@ async function konversiLink() {
         const snap = await getDocs(q);
 
         let authLink;
+        const settings = {
+          redirectTime,
+          popupEnabled,
+          popupTime,
+          popupDuration,
+          bannerEnabled,
+          bannerText
+        };
+
         if (snap.empty) {
           authLink = Math.random().toString(36).substring(2,10);
           await addDoc(collection(db, "links"), {
             owner: auth.currentUser.uid,
             videoLink: rawVideoLink,
             targetLink, 
-            authLink
+            authLink,
+            settings
           });
-          console.log('Dokumen baru dibuat dengan link TikTok panjang:', rawVideoLink);
+          console.log('Dokumen baru dibuat dengan pengaturan:', settings);
         } else {
           authLink = snap.docs[0].data().authLink;
           const ref = doc(db, "links", snap.docs[0].id);
           await updateDoc(ref, { 
             videoLink: rawVideoLink, 
-            targetLink 
+            targetLink,
+            settings
           });
-          console.log('Dokumen diperbarui dengan link TikTok panjang:', rawVideoLink);
+          console.log('Dokumen diperbarui dengan pengaturan:', settings);
         }
         
         // Update preview
         const embedUrl = convertToEmbed(rawVideoLink);
         const finalLink = `${location.origin}/show.html?id=${authLink}`;
+        
+        // Tampilkan informasi metode yang aktif di preview
+        let methodsInfo = `<div style="margin-top: 10px; font-size: 0.8rem; color: var(--secondary);">`;
+        methodsInfo += `⏱️ Redirect: ${redirectTime} detik | `;
+        methodsInfo += popupEnabled ? `🪟 Popup: ${popupTime}s/${popupDuration}s | ` : '';
+        methodsInfo += bannerEnabled ? `📢 Banner: Aktif` : '';
+        methodsInfo += `</div>`;
         
         preview.innerHTML = `
           <div class="video-preview">
@@ -664,6 +761,7 @@ async function konversiLink() {
           <div class="link-box">
             <a href="${finalLink}" target="_blank">${finalLink}</a>
           </div>
+          ${methodsInfo}
           <div class="button-group">
             <button class="btn-copy" onclick="copyToClipboard('${finalLink}')">Salin Link</button>
             <button class="btn-open" onclick="window.open('${finalLink}', '_blank')">Buka Link</button>
@@ -679,19 +777,6 @@ async function konversiLink() {
 
       loading.style.display = 'none';
     };
-
-    // Fungsi untuk mengelola dropdown
-    document.getElementById('dropdownHeader').addEventListener('click', function() {
-      const content = document.getElementById('dropdownContent');
-      const header = document.getElementById('dropdownHeader');
-      if (content.classList.contains('show')) {
-        content.classList.remove('show');
-        header.classList.remove('open');
-      } else {
-        content.classList.add('show');
-        header.classList.add('open');
-      }
-    });
 
     // Fungsi untuk menyalin teks ke clipboard
     window.copyToClipboard = function(text) {
