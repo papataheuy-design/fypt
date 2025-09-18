@@ -74,7 +74,7 @@
       font-size: 1.4rem;
     }
     
-    input, button {
+    input, button, textarea {
       width: 100%;
       padding: 14px 16px;
       margin: 10px 0;
@@ -85,12 +85,12 @@
       font-size: 0.95rem;
     }
     
-    input {
+    input, textarea {
       background: var(--white);
       color: var(--dark);
     }
     
-    input:focus {
+    input:focus, textarea:focus {
       outline: none;
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
@@ -295,7 +295,8 @@
     }
     
     .setting-group input[type="number"],
-    .setting-group input[type="text"] {
+    .setting-group input[type="text"],
+    .setting-group textarea {
       margin: 5px 0;
       padding: 10px 12px;
       font-size: 0.9rem;
@@ -395,6 +396,40 @@
       color: var(--banner-color);
     }
     
+    /* Lazy loading indicator */
+    .lazy-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      margin: 15px 0;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      border: 1px dashed #dee2e6;
+    }
+    
+    .lazy-indicator .dot {
+      width: 10px;
+      height: 10px;
+      background-color: #4361ee;
+      border-radius: 50%;
+      margin: 0 4px;
+      animation: pulse 1.5s infinite ease-in-out;
+    }
+    
+    .lazy-indicator .dot:nth-child(2) {
+      animation-delay: 0.3s;
+    }
+    
+    .lazy-indicator .dot:nth-child(3) {
+      animation-delay: 0.6s;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+    
     /* Responsive adjustments */
     @media (max-width: 520px) {
       .container {
@@ -409,7 +444,7 @@
         font-size: 1.3rem;
       }
       
-      input, button {
+      input, button, textarea {
         padding: 12px 14px;
       }
       
@@ -432,6 +467,13 @@
     <input id="email" type="email" placeholder="Email">
     <input id="password" type="password" placeholder="Password">
     <button onclick="login()">Login / Daftar</button>
+    
+    <!-- Indikator Lazy Loading -->
+    <div id="lazyIndicator" class="lazy-indicator" style="display: none;">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
   </div>
   
   <!-- Dropdown Penjelasan untuk Afiliator -->
@@ -464,8 +506,20 @@
     <!-- Pengaturan Redirect -->
     <h4 style="margin-top: 20px;">⚙️ Pengaturan Redirect <span class="method-indicator redirect-indicator">Redirect Otomatis</span></h4>
     <div class="setting-group redirect-settings">
-      <label for="redirectTime">Waktu Redirect Otomatis (detik):</label>
-      <input id="redirectTime" type="number" min="5" max="60" value="15" placeholder="15">
+      <div class="toggle-container">
+        <label class="toggle-switch">
+          <input type="checkbox" id="redirectEnabled" checked>
+          <span class="toggle-slider"></span>
+        </label>
+        <span class="toggle-label">Aktifkan Redirect Otomatis</span>
+      </div>
+      
+      <div id="redirectSettings" class="visible">
+        <div class="setting-group">
+          <label for="redirectTime">Waktu Redirect Otomatis (detik):</label>
+          <input id="redirectTime" type="number" min="5" max="60" value="15" placeholder="15">
+        </div>
+      </div>
     </div>
     
     <!-- Metode Popup -->
@@ -487,6 +541,18 @@
           <label for="popupDuration">Durasi Popup (detik):</label>
           <input id="popupDuration" type="number" min="3" max="15" value="5" placeholder="5">
         </div>
+        <div class="setting-group">
+          <label for="popupTitle">Judul Popup:</label>
+          <input id="popupTitle" type="text" placeholder="Judul popup" value="Transaksi Anti-Drama! 🎉">
+        </div>
+        <div class="setting-group">
+          <label for="popupText">Teks Popup:</label>
+          <textarea id="popupText" placeholder="Teks promosi popup" rows="3">Sudah lihat kan? Jangan sampai kejadian itu menimpa Anda! Kami punya solusinya.</textarea>
+        </div>
+        <div class="setting-group">
+          <label for="popupButtonText">Teks Tombol Popup:</label>
+          <input id="popupButtonText" type="text" placeholder="Teks tombol" value="Lanjut ke Halaman Aman!">
+        </div>
       </div>
     </div>
     
@@ -504,6 +570,10 @@
         <div class="setting-group">
           <label for="bannerText">Teks Banner:</label>
           <input id="bannerText" type="text" placeholder="Tonton sampai habis untuk informasi penting!" value="Tonton sampai habis untuk informasi penting!">
+        </div>
+        <div class="setting-group">
+          <label for="bannerButtonText">Teks Tombol Banner:</label>
+          <input id="bannerButtonText" type="text" placeholder="Teks tombol banner" value="Klik Di Sini!">
         </div>
       </div>
     </div>
@@ -559,6 +629,7 @@
     const loading = document.getElementById('loading');
     const notif = document.getElementById('notif');
     const errorBox = document.getElementById('error');
+    const lazyIndicator = document.getElementById('lazyIndicator');
 
     // Fungsi untuk mengelola dropdown
     document.getElementById('dropdownHeader').addEventListener('click', function() {
@@ -574,6 +645,10 @@
     });
 
     // Toggle settings visibility based on checkbox
+    document.getElementById('redirectEnabled').addEventListener('change', function() {
+      document.getElementById('redirectSettings').classList.toggle('visible', this.checked);
+    });
+
     document.getElementById('popupEnabled').addEventListener('change', function() {
       document.getElementById('popupSettings').classList.toggle('visible', this.checked);
     });
@@ -584,6 +659,8 @@
 
     // Initialize settings visibility
     document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('redirectSettings').classList.toggle('visible', 
+        document.getElementById('redirectEnabled').checked);
       document.getElementById('popupSettings').classList.toggle('visible', 
         document.getElementById('popupEnabled').checked);
       document.getElementById('bannerSettings').classList.toggle('visible', 
@@ -716,6 +793,9 @@
       const password = document.getElementById('password').value.trim();
       if(!email || !password) return alert("Isi email dan password");
 
+      // Tampilkan lazy indicator
+      lazyIndicator.style.display = 'flex';
+      
       try {
         await signInWithEmailAndPassword(auth, email, password);
       } catch (err) {
@@ -724,6 +804,9 @@
         } catch (err2) {
           alert("Gagal daftar: " + err2.message);
         }
+      } finally {
+        // Sembunyikan lazy indicator
+        lazyIndicator.style.display = 'none';
       }
     };
 
@@ -751,14 +834,21 @@
         
         // Isi pengaturan jika ada
         if (docData.settings) {
+          document.getElementById('redirectEnabled').checked = docData.settings.redirectEnabled !== false;
           document.getElementById('redirectTime').value = docData.settings.redirectTime || 15;
           document.getElementById('popupEnabled').checked = docData.settings.popupEnabled !== false;
           document.getElementById('popupTime').value = docData.settings.popupTime || 10;
           document.getElementById('popupDuration').value = docData.settings.popupDuration || 5;
+          document.getElementById('popupTitle').value = docData.settings.popupTitle || "Transaksi Anti-Drama! 🎉";
+          document.getElementById('popupText').value = docData.settings.popupText || "Sudah lihat kan? Jangan sampai kejadian itu menimpa Anda! Kami punya solusinya.";
+          document.getElementById('popupButtonText').value = docData.settings.popupButtonText || "Lanjut ke Halaman Aman!";
           document.getElementById('bannerEnabled').checked = docData.settings.bannerEnabled !== false;
           document.getElementById('bannerText').value = docData.settings.bannerText || "Tonton sampai habis untuk informasi penting!";
+          document.getElementById('bannerButtonText').value = docData.settings.bannerButtonText || "Klik Di Sini!";
           
           // Update visibility
+          document.getElementById('redirectSettings').classList.toggle('visible', 
+            document.getElementById('redirectEnabled').checked);
           document.getElementById('popupSettings').classList.toggle('visible', 
             document.getElementById('popupEnabled').checked);
           document.getElementById('bannerSettings').classList.toggle('visible', 
@@ -771,7 +861,10 @@
         let methodsInfo = '';
         if (docData.settings) {
           methodsInfo = `<div style="margin-top: 10px; font-size: 0.8rem; color: var(--secondary);">`;
-          methodsInfo += `<span style="background: var(--redirect-light); color: var(--redirect-color); padding: 3px 8px; border-radius: 12px; margin-right: 5px;">⏱️ Redirect: ${docData.settings.redirectTime || 15} detik</span>`;
+          
+          if (docData.settings.redirectEnabled !== false) {
+            methodsInfo += `<span style="background: var(--redirect-light); color: var(--redirect-color); padding: 3px 8px; border-radius: 12px; margin-right: 5px;">⏱️ Redirect: ${docData.settings.redirectTime || 15} detik</span>`;
+          }
           
           if (docData.settings.popupEnabled !== false) {
             methodsInfo += `<span style="background: var(--popup-light); color: var(--popup-color); padding: 3px 8px; border-radius: 12px; margin-right: 5px;">🪟 Popup: ${docData.settings.popupTime || 10}s/${docData.settings.popupDuration || 5}s</span>`;
@@ -805,12 +898,17 @@
       const targetLink = document.getElementById('targetLink').value.trim();
       
       // Ambil nilai pengaturan baru
+      const redirectEnabled = document.getElementById('redirectEnabled').checked;
       const redirectTime = parseInt(document.getElementById('redirectTime').value) || 15;
       const popupEnabled = document.getElementById('popupEnabled').checked;
       const popupTime = parseInt(document.getElementById('popupTime').value) || 10;
       const popupDuration = parseInt(document.getElementById('popupDuration').value) || 5;
+      const popupTitle = document.getElementById('popupTitle').value.trim();
+      const popupText = document.getElementById('popupText').value.trim();
+      const popupButtonText = document.getElementById('popupButtonText').value.trim();
       const bannerEnabled = document.getElementById('bannerEnabled').checked;
       const bannerText = document.getElementById('bannerText').value.trim();
+      const bannerButtonText = document.getElementById('bannerButtonText').value.trim();
       
       if(!rawVideoLink || !targetLink) return alert("Isi semua field");
 
@@ -841,12 +939,17 @@
 
         let authLink;
         const settings = {
+          redirectEnabled,
           redirectTime,
           popupEnabled,
           popupTime,
           popupDuration,
+          popupTitle,
+          popupText,
+          popupButtonText,
           bannerEnabled,
-          bannerText
+          bannerText,
+          bannerButtonText
         };
 
         if (snap.empty) {
@@ -876,7 +979,10 @@
         
         // Tampilkan informasi metode yang aktif di preview
         let methodsInfo = `<div style="margin-top: 10px; font-size: 0.8rem; color: var(--secondary);">`;
-        methodsInfo += `<span style="background: var(--redirect-light); color: var(--redirect-color); padding: 3px 8px; border-radius: 12px; margin-right: 5px;">⏱️ Redirect: ${redirectTime} detik</span>`;
+        
+        if (redirectEnabled) {
+          methodsInfo += `<span style="background: var(--redirect-light); color: var(--redirect-color); padding: 3px 8px; border-radius: 12px; margin-right: 5px;">⏱️ Redirect: ${redirectTime} detik</span>`;
+        }
         
         if (popupEnabled) {
           methodsInfo += `<span style="background: var(--popup-light); color: var(--popup-color); padding: 3px 8px; border-radius: 12px; margin-right: 5px;">🪟 Popup: ${popupTime}s/${popupDuration}s</span>`;
