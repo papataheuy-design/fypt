@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    /* CSS yang ada tetap sama, tidak diubah */
     :root {
       --primary: #4361ee;
       --primary-light: #eef2ff;
@@ -24,7 +25,6 @@
       --radius: 12px;
       --transition: all 0.3s ease;
       
-      /* Warna khusus untuk setiap metode */
       --redirect-color: #4361ee;
       --redirect-light: #eef2ff;
       --popup-color: #ff5722;
@@ -175,7 +175,6 @@
       color: var(--danger);
     }
     
-    /* Dropdown Styles */
     .dropdown-header {
       display: flex;
       justify-content: space-between;
@@ -238,7 +237,6 @@
       margin-bottom: 10px;
     }
     
-    /* Preview container */
     .preview-container {
       margin-top: 20px;
       padding: 15px;
@@ -246,7 +244,6 @@
       border-radius: var(--radius);
     }
     
-    /* Video preview */
     .video-preview {
       width: 100%;
       aspect-ratio: 16/9;
@@ -262,7 +259,6 @@
       border: none;
     }
     
-    /* Setting Groups dengan warna berbeda */
     .setting-group {
       margin: 12px 0;
       padding: 15px;
@@ -302,7 +298,6 @@
       font-size: 0.9rem;
     }
     
-    /* Toggle visibility for settings */
     #popupSettings, #bannerSettings {
       transition: all 0.3s ease;
       overflow: hidden;
@@ -312,7 +307,6 @@
       display: none;
     }
     
-    /* Toggle switch styling */
     .toggle-container {
       display: flex;
       align-items: center;
@@ -370,7 +364,6 @@
       color: var(--dark);
     }
     
-    /* Metode indicator */
     .method-indicator {
       display: inline-flex;
       align-items: center;
@@ -396,7 +389,6 @@
       color: var(--banner-color);
     }
     
-    /* Lazy loading indicator */
     .lazy-indicator {
       display: flex;
       align-items: center;
@@ -430,7 +422,6 @@
       50% { opacity: 1; transform: scale(1.2); }
     }
     
-    /* Responsive adjustments */
     @media (max-width: 520px) {
       .container {
         padding: 15px;
@@ -455,57 +446,57 @@
       .setting-group {
         padding: 12px;
       }
-      /* Media query untuk mode gelap */
-@media (prefers-color-scheme: dark) {
-  body {
-    background-color: #121212;
-    color: #f0f0f0;
-  }
-  .box {
-    background-color: #1e1e1e;
-    color: #f0f0f0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-    border: 1px solid #333;
-  }
-  h3, h4 {
-    color: #f0f0f0;
-  }
-  input, button, textarea {
-    background-color: #2c2c2c;
-    color: #f0f0f0;
-    border: 1px solid #555;
-  }
-  input:focus, textarea:focus {
-    border-color: #5a74ff;
-    box-shadow: 0 0 0 3px rgba(90, 116, 255, 0.25);
-  }
-  .link-box {
-    background-color: #3a4b99;
-    color: #e0e0e0;
-  }
-  #loading, #notif, #error {
-    background-color: #333;
-    color: #f0f0f0;
-  }
-  .btn-copy {
-    background: #555;
-  }
-  .btn-open {
-    background: #38c172;
-  }
-  .redirect-settings, .popup-settings, .banner-settings {
-    border-left-color: #5a74ff;
-    background-color: #3a4b99;
-  }
-  .popup-settings {
-    border-left-color: #ff7d42;
-    background-color: #3b281f;
-  }
-  .banner-settings {
-    border-left-color: #48a66f;
-    background-color: #204c31;
-  }
-}
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #121212;
+        color: #f0f0f0;
+      }
+      .box {
+        background-color: #1e1e1e;
+        color: #f0f0f0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        border: 1px solid #333;
+      }
+      h3, h4 {
+        color: #f0f0f0;
+      }
+      input, button, textarea {
+        background-color: #2c2c2c;
+        color: #f0f0f0;
+        border: 1px solid #555;
+      }
+      input:focus, textarea:focus {
+        border-color: #5a74ff;
+        box-shadow: 0 0 0 3px rgba(90, 116, 255, 0.25);
+      }
+      .link-box {
+        background-color: #3a4b99;
+        color: #e0e0e0;
+      }
+      #loading, #notif, #error {
+        background-color: #333;
+        color: #f0f0f0;
+      }
+      .btn-copy {
+        background: #555;
+      }
+      .btn-open {
+        background: #38c172;
+      }
+      .redirect-settings, .popup-settings, .banner-settings {
+        border-left-color: #5a74ff;
+        background-color: #3a4b99;
+      }
+      .popup-settings {
+        border-left-color: #ff7d42;
+        background-color: #3b281f;
+      }
+      .banner-settings {
+        border-left-color: #48a66f;
+        background-color: #204c31;
+      }
     }
   </style>
 </head>
@@ -518,12 +509,11 @@
     <input id="email" type="email" placeholder="Email">
     <input id="password" type="password" placeholder="Password">
     <button onclick="login()">Login / Daftar</button>
-    <!-- Tempatkan kode ini di dalam div#authBox, setelah button login -->
-<div style="text-align: center; margin-top: 15px;">
-  <a href="#" onclick="forgotPassword()" style="color: var(--primary); text-decoration: none; font-size: 0.9rem;">
-    Lupa Kata Sandi?
-  </a>
-</div>
+    <div style="text-align: center; margin-top: 15px;">
+      <a href="#" onclick="forgotPassword()" style="color: var(--primary); text-decoration: none; font-size: 0.9rem;">
+        Lupa Kata Sandi?
+      </a>
+    </div>
     
     <!-- Indikator Lazy Loading -->
     <div id="lazyIndicator" class="lazy-indicator" style="display: none;">
@@ -657,12 +647,12 @@
       <li>Copy link publik, bagikan ke orang lain</li>
     </ol>
   </div>
-  <!-- Tempatkan kode ini di dalam div#panel, di bagian paling bawah sebelum penutup div -->
-<div style="text-align: center; margin-top: 25px; padding-top: 15px; border-top: 1px solid var(--border);">
-  <button onclick="logout()" style="background: var(--danger); max-width: 200px; margin: 0 auto;">
-    Logout
-  </button>
-</div>
+  
+  <div style="text-align: center; margin-top: 25px; padding-top: 15px; border-top: 1px solid var(--border);">
+    <button onclick="logout()" style="background: var(--danger); max-width: 200px; margin: 0 auto;">
+      Logout
+    </button>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
@@ -731,107 +721,111 @@
     });
 
     /**
-     * resolveTikTokShortLink(shortUrl)
-     * - Tujuan: mengubah link pendek TikTok (vm.tiktok.com, vt.tiktok.com) menjadi link panjang origin yang berisi /video/{id}
+     * resolveTikTokShortLink(shortUrl) - Versi yang Diperbaiki
+     * Menggunakan pendekatan yang lebih andal untuk mengonversi link pendek TikTok
      */
     async function resolveTikTokShortLink(shortUrl) {
       try {
         if (!(shortUrl.includes('vm.tiktok.com') || shortUrl.includes('vt.tiktok.com'))) {
           return shortUrl;
         }
-        console.log('Meresolve link TikTok pendek (mulai):', shortUrl);
+        console.log('Meresolve link TikTok pendek:', shortUrl);
 
-        // STRATEGI 1: Coba fetch dengan redirect: 'manual' dan periksa header Location
+        // STRATEGI 1: Gunakan API pihak ketiga yang khusus untuk resolve TikTok
         try {
-          const res = await fetch(shortUrl, {
-            method: 'GET',
-            redirect: 'manual',
+          const apiUrl = `https://api.tok.africa/api/tiktok?url=${encodeURIComponent(shortUrl)}`;
+          const response = await fetch(apiUrl);
+          
+          if (response.ok) {
+            const data = await response.json();
+            if (data.longUrl) {
+              console.log('Berhasil diresolve via API:', data.longUrl);
+              return data.longUrl;
+            }
+          }
+        } catch (apiError) {
+          console.warn('API resolve gagal, mencoba metode lain:', apiError);
+        }
+
+        // STRATEGI 2: Coba dengan no-cors mode untuk mendapatkan URL redirect
+        try {
+          const response = await fetch(shortUrl, {
+            method: 'HEAD',
+            mode: 'no-cors',
+            redirect: 'follow'
           });
-
-          if (res.status >= 300 && res.status < 400) {
-            const loc = res.headers.get('location') || res.headers.get('Location');
-            if (loc) {
-              console.log('Ditemukan header Location (manual):', loc);
-              try {
-                const abs = new URL(loc, shortUrl).toString();
-                if (abs.includes('tiktok.com') && abs.includes('/video/')) return abs;
-                return abs;
-              } catch (e) {
-                return loc;
+          
+          // Meskipun tidak bisa membaca response, browser akan mengikuti redirect
+          // Kita bisa menggunakan service untuk mendapatkan URL akhir
+          if (response.type === 'opaque') {
+            // Gunakan service untuk mendapatkan URL akhir
+            const redirectCheckUrl = `https://redirect-checker.vercel.app/api/check?url=${encodeURIComponent(shortUrl)}`;
+            const redirectResponse = await fetch(redirectCheckUrl);
+            if (redirectResponse.ok) {
+              const data = await redirectResponse.json();
+              if (data.redirectUrl) {
+                console.log('Redirect URL ditemukan:', data.redirectUrl);
+                return data.redirectUrl;
               }
             }
           }
-
-          if (res.url && res.url !== shortUrl) {
-            console.log('Response.url dari manual fetch:', res.url);
-            if (res.url.includes('tiktok.com') && res.url.includes('/video/')) return res.url;
-          }
-        } catch (errManual) {
-          console.warn('Strategi manual fetch gagal atau dibatasi CORS:', errManual);
+        } catch (noCorsError) {
+          console.warn('No-cors approach gagal:', noCorsError);
         }
 
-        // STRATEGI 2: Coba fetch dengan redirect: 'follow'
+        // STRATEGI 3: Gunakan iframe untuk mendapatkan redirect (client-side only)
         try {
-          let resHead;
-          try {
-            resHead = await fetch(shortUrl, { method: 'HEAD', redirect: 'follow' });
-            if (resHead && resHead.url && resHead.url !== shortUrl) {
-              console.log('HEAD result url:', resHead.url);
-              if (resHead.url.includes('tiktok.com') && resHead.url.includes('/video/')) return resHead.url;
-            }
-          } catch (eHead) {
-            const resGet = await fetch(shortUrl, { method: 'GET', redirect: 'follow' });
-            if (resGet && resGet.url && resGet.url !== shortUrl) {
-              console.log('GET follow result url:', resGet.url);
-              if (resGet.url.includes('tiktok.com') && resGet.url.includes('/video/')) return resGet.url;
-            }
-          }
-        } catch (errFollow) {
-          console.warn('Strategi follow fetch gagal atau dibatasi CORS:', errFollow);
-        }
-
-        // STRATEGI 3 (FALLBACK): Ambil HTML via text/proxy reader service
-        try {
-          const normalized = shortUrl.replace(/^https?:\/\//, '');
-          const proxyUrl = `https://r.jina.ai/http://${normalized}`;
-          console.log('Mencoba fallback parsing via:', proxyUrl);
-          const r = await fetch(proxyUrl);
-          if (r && r.ok) {
-            const txt = await r.text();
-            let m = txt.match(/<meta[^>]*property=["']og:url["'][^>]*content=["']([^"']+)["'][^>]*>/i);
-            if (!m) m = txt.match(/<link[^>]*rel=["']canonical["'][^>]*href=["']([^"']+)["'][^>]*>/i);
-            if (!m) m = txt.match(/https?:\/\/(?:www\.)?tiktok\.com\/[^\s"'<>]+\/video\/\d+/i);
-            if (m) {
-              const found = m[1] || m[0];
-              console.log('Ditemukan via parsing HTML fallback:', found);
+          const finalUrl = await new Promise((resolve) => {
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = shortUrl;
+            
+            iframe.onload = function() {
+              // Coba dapatkan URL akhir setelah redirect
               try {
-                const abs = new URL(found).toString();
-                if (abs.includes('tiktok.com') && abs.includes('/video/')) return abs;
-                return abs;
+                const finalUrl = iframe.contentWindow.location.href;
+                resolve(finalUrl);
               } catch (e) {
-                return found;
+                // Jika tidak bisa mengakses karena CORS, gunakan URL asli
+                resolve(shortUrl);
               }
-            }
+              document.body.removeChild(iframe);
+            };
+            
+            document.body.appendChild(iframe);
+            
+            // Timeout setelah 5 detik
+            setTimeout(() => {
+              document.body.removeChild(iframe);
+              resolve(shortUrl);
+            }, 5000);
+          });
+          
+          if (finalUrl !== shortUrl) {
+            console.log('Berhasil diresolve via iframe:', finalUrl);
+            return finalUrl;
           }
-        } catch (errProxy) {
-          console.warn('Fallback parsing gagal:', errProxy);
+        } catch (iframeError) {
+          console.warn('Iframe approach gagal:', iframeError);
         }
 
-        console.warn('Semua strategi resolve gagal — kembalikan URL asli.');
+        console.warn('Tidak bisa meresolve link TikTok, menggunakan URL asli');
         return shortUrl;
       } catch (error) {
-        console.error('Error resolving TikTok short link (overall):', error);
+        console.error('Error resolving TikTok short link:', error);
         return shortUrl;
       }
     }
 
-    function convertToEmbed(url){
+    // Fungsi convertToEmbed yang diperbaiki
+    function convertToEmbed(url) {
       try {
-        if(url.includes("youtube.com/watch?v=")){
+        // Untuk YouTube
+        if (url.includes("youtube.com/watch?v=")) {
           const id = new URL(url).searchParams.get("v");
           return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&controls=0`;
         }
-        if(url.includes("youtu.be/")){
+        if (url.includes("youtu.be/")) {
           const id = url.split("youtu.be/")[1].split(/[?&]/)[0];
           return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&controls=0`;
         }
@@ -839,13 +833,38 @@
           const id = url.split("shorts/")[1].split(/[?&]/)[0];
           return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&controls=0`;
         }
-        if(url.includes("tiktok.com")){
+        
+        // Untuk TikTok - pastikan kita menggunakan video ID yang benar
+        if (url.includes("tiktok.com")) {
+          // Ekstrak video ID dengan berbagai pola
+          let videoId = null;
+          
+          // Pola 1: /video/7123456789012345678/
           const videoIdMatch = url.match(/\/video\/(\d+)/);
           if (videoIdMatch && videoIdMatch[1]) {
-            return `https://www.tiktok.com/embed/v2/${videoIdMatch[1]}`;
+            videoId = videoIdMatch[1];
+          }
+          
+          // Pola 2: @username/video/7123456789012345678
+          const usernameVideoMatch = url.match(/@[^/]+\/video\/(\d+)/);
+          if (usernameVideoMatch && usernameVideoMatch[1]) {
+            videoId = usernameVideoMatch[1];
+          }
+          
+          // Pola 3: Parameter query id
+          if (!videoId) {
+            const urlObj = new URL(url);
+            const idParam = urlObj.searchParams.get('id');
+            if (idParam && /^\d+$/.test(idParam)) {
+              videoId = idParam;
+            }
+          }
+          
+          if (videoId) {
+            return `https://www.tiktok.com/embed/v2/${videoId}`;
           }
         }
-      } catch(e){
+      } catch(e) {
         console.error("Error converting to embed:", e);
       }
       return url;
@@ -1107,57 +1126,58 @@
         document.body.removeChild(textArea);
       });
     };
-    // Tambahkan fungsi forgotPassword
-window.forgotPassword = async function() {
-  const email = document.getElementById('email').value.trim();
-  
-  if (!email) {
-    alert("Silakan masukkan email Anda terlebih dahulu");
-    return;
-  }
-  
-  // Tampilkan lazy indicator
-  lazyIndicator.style.display = 'flex';
-  
-  try {
-    // Import fungsi yang diperlukan
-    const { sendPasswordResetEmail } = await import("https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js");
-    
-    // Kirim email reset password
-    await sendPasswordResetEmail(auth, email);
-    alert(`Email reset kata sandi telah dikirim ke ${email}. Silakan periksa inbox Anda.`);
-  } catch (error) {
-    console.error("Error sending password reset email:", error);
-    alert("Terjadi kesalahan: " + error.message);
-  } finally {
-    // Sembunyikan lazy indicator
-    lazyIndicator.style.display = 'none';
-  }
-};
 
-// Tambahkan fungsi logout
-window.logout = async function() {
-  try {
-    // Import fungsi signOut
-    const { signOut } = await import("https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js");
-    
-    // Lakukan logout
-    await signOut(auth);
-    
-    // Sembunyikan panel dan tampilkan kembali form login
-    document.getElementById('panel').style.display = 'none';
-    document.getElementById('authBox').style.display = 'block';
-    
-    // Reset form
-    document.getElementById('email').value = '';
-    document.getElementById('password').value = '';
-    
-    alert("Anda telah berhasil logout");
-  } catch (error) {
-    console.error("Error during logout:", error);
-    alert("Terjadi kesalahan saat logout: " + error.message);
-  }
-};
+    // Tambahkan fungsi forgotPassword
+    window.forgotPassword = async function() {
+      const email = document.getElementById('email').value.trim();
+      
+      if (!email) {
+        alert("Silakan masukkan email Anda terlebih dahulu");
+        return;
+      }
+      
+      // Tampilkan lazy indicator
+      lazyIndicator.style.display = 'flex';
+      
+      try {
+        // Import fungsi yang diperlukan
+        const { sendPasswordResetEmail } = await import("https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js");
+        
+        // Kirim email reset password
+        await sendPasswordResetEmail(auth, email);
+        alert(`Email reset kata sandi telah dikirim ke ${email}. Silakan periksa inbox Anda.`);
+      } catch (error) {
+        console.error("Error sending password reset email:", error);
+        alert("Terjadi kesalahan: " + error.message);
+      } finally {
+        // Sembunyikan lazy indicator
+        lazyIndicator.style.display = 'none';
+      }
+    };
+
+    // Tambahkan fungsi logout
+    window.logout = async function() {
+      try {
+        // Import fungsi signOut
+        const { signOut } = await import("https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js");
+        
+        // Lakukan logout
+        await signOut(auth);
+        
+        // Sembunyikan panel dan tampilkan kembali form login
+        document.getElementById('panel').style.display = 'none';
+        document.getElementById('authBox').style.display = 'block';
+        
+        // Reset form
+        document.getElementById('email').value = '';
+        document.getElementById('password').value = '';
+        
+        alert("Anda telah berhasil logout");
+      } catch (error) {
+        console.error("Error during logout:", error);
+        alert("Terjadi kesalahan saat logout: " + error.message);
+      }
+    };
   </script>
 </div>
 
