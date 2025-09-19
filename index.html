@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <script>(function(s){s.dataset.zone='9885126',s.src='https://gizokraijaw.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
-  <meta name="monetag" content="01469f3272c83755d2f30ae1cd67f131">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Backend Panel</title>
@@ -10,7 +8,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    /* CSS yang ada tetap sama, tidak diubah */
     :root {
       --primary: #4361ee;
       --primary-light: #eef2ff;
@@ -81,7 +78,7 @@
       box-sizing: border-box;
       border-radius: 8px;
       border: 1px solid var(--border);
-      font-family: 'Poppins', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 0.95rem;
     }
     
@@ -448,6 +445,31 @@
       }
     }
 
+    @media (max-width: 360px) {
+      .container {
+        padding: 8px;
+      }
+      
+      .box {
+        padding: 15px;
+      }
+      
+      h3 {
+        font-size: 1.1rem;
+      }
+      
+      input, button, textarea {
+        padding: 10px 12px;
+        font-size: 0.9rem;
+      }
+      
+      .method-indicator {
+        display: block;
+        margin-left: 0;
+        margin-top: 5px;
+      }
+    }
+
     @media (prefers-color-scheme: dark) {
       body {
         background-color: #121212;
@@ -520,6 +542,7 @@
       <div class="dot"></div>
       <div class="dot"></div>
       <div class="dot"></div>
+      <div id="lazyText" style="margin-left: 10px; font-size: 0.9rem;"></div>
     </div>
   </div>
   
@@ -658,7 +681,8 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { 
       getAuth, createUserWithEmailAndPassword, 
-      signInWithEmailAndPassword, onAuthStateChanged 
+      signInWithEmailAndPassword, onAuthStateChanged,
+      sendPasswordResetEmail, signOut 
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
     import { 
       getFirestore, collection, addDoc, query, where, getDocs, updateDoc, doc 
@@ -683,6 +707,7 @@
     const notif = document.getElementById('notif');
     const errorBox = document.getElementById('error');
     const lazyIndicator = document.getElementById('lazyIndicator');
+    const lazyText = document.getElementById('lazyText');
 
     // Fungsi untuk mengelola dropdown
     document.getElementById('dropdownHeader').addEventListener('click', function() {
@@ -720,6 +745,16 @@
         document.getElementById('bannerEnabled').checked);
     });
 
+    // Fungsi validasi URL
+    function isValidUrl(string) {
+      try {
+        new URL(string);
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }
+
     /**
      * resolveTikTokShortLink(shortUrl) - Versi yang Diperbaiki
      * Menggunakan pendekatan yang lebih andal untuk mengonversi link pendek TikTok
@@ -729,86 +764,52 @@
         if (!(shortUrl.includes('vm.tiktok.com') || shortUrl.includes('vt.tiktok.com'))) {
           return shortUrl;
         }
+        
         console.log('Meresolve link TikTok pendek:', shortUrl);
-
-        // STRATEGI 1: Gunakan API pihak ketiga yang khusus untuk resolve TikTok
-        try {
-          const apiUrl = `https://api.tok.africa/api/tiktok?url=${encodeURIComponent(shortUrl)}`;
-          const response = await fetch(apiUrl);
-          
-          if (response.ok) {
-            const data = await response.json();
-            if (data.longUrl) {
-              console.log('Berhasil diresolve via API:', data.longUrl);
-              return data.longUrl;
-            }
-          }
-        } catch (apiError) {
-          console.warn('API resolve gagal, mencoba metode lain:', apiError);
-        }
-
-        // STRATEGI 2: Coba dengan no-cors mode untuk mendapatkan URL redirect
+        
+        // Coba metode HEAD request terlebih dahulu
         try {
           const response = await fetch(shortUrl, {
             method: 'HEAD',
-            mode: 'no-cors',
-            redirect: 'follow'
+            redirect: 'manual'
           });
           
-          // Meskipun tidak bisa membaca response, browser akan mengikuti redirect
-          // Kita bisa menggunakan service untuk mendapatkan URL akhir
-          if (response.type === 'opaque') {
-            // Gunakan service untuk mendapatkan URL akhir
-            const redirectCheckUrl = `https://redirect-checker.vercel.app/api/check?url=${encodeURIComponent(shortUrl)}`;
-            const redirectResponse = await fetch(redirectCheckUrl);
-            if (redirectResponse.ok) {
-              const data = await redirectResponse.json();
-              if (data.redirectUrl) {
-                console.log('Redirect URL ditemukan:', data.redirectUrl);
-                return data.redirectUrl;
-              }
+          if (response.status === 301 || response.status === 302) {
+            const location = response.headers.get('Location');
+            if (location && location.includes('tiktok.com')) {
+              console.log('Berhasil diresolve via HEAD:', location);
+              return location;
             }
           }
-        } catch (noCorsError) {
-          console.warn('No-cors approach gagal:', noCorsError);
+        } catch (headError) {
+          console.warn('HEAD request gagal, mencoba GET:', headError);
         }
-
-        // STRATEGI 3: Gunakan iframe untuk mendapatkan redirect (client-side only)
+        
+        // Fallback: Gunakan proxy server
         try {
-          const finalUrl = await new Promise((resolve) => {
-            const iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-            iframe.src = shortUrl;
-            
-            iframe.onload = function() {
-              // Coba dapatkan URL akhir setelah redirect
-              try {
-                const finalUrl = iframe.contentWindow.location.href;
-                resolve(finalUrl);
-              } catch (e) {
-                // Jika tidak bisa mengakses karena CORS, gunakan URL asli
-                resolve(shortUrl);
-              }
-              document.body.removeChild(iframe);
-            };
-            
-            document.body.appendChild(iframe);
-            
-            // Timeout setelah 5 detik
-            setTimeout(() => {
-              document.body.removeChild(iframe);
-              resolve(shortUrl);
-            }, 5000);
+          const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(shortUrl)}`;
+          const response = await fetch(proxyUrl, {
+            method: 'GET',
+            redirect: 'manual'
           });
           
-          if (finalUrl !== shortUrl) {
-            console.log('Berhasil diresolve via iframe:', finalUrl);
-            return finalUrl;
+          if (response.status === 301 || response.status === 302) {
+            const location = response.headers.get('Location');
+            if (location) {
+              console.log('Berhasil diresolve via proxy:', location);
+              return location;
+            }
           }
-        } catch (iframeError) {
-          console.warn('Iframe approach gagal:', iframeError);
+          
+          // Jika redirect tidak terdeteksi, coba baca response URL
+          if (response.url && response.url !== shortUrl) {
+            console.log('Berhasil diresolve via response.url:', response.url);
+            return response.url;
+          }
+        } catch (proxyError) {
+          console.warn('Proxy approach gagal:', proxyError);
         }
-
+        
         console.warn('Tidak bisa meresolve link TikTok, menggunakan URL asli');
         return shortUrl;
       } catch (error) {
@@ -876,6 +877,7 @@
       if(!email || !password) return alert("Isi email dan password");
 
       // Tampilkan lazy indicator
+      lazyText.textContent = 'Sedang memproses...';
       lazyIndicator.style.display = 'flex';
       
       try {
@@ -979,6 +981,17 @@
       let rawVideoLink = document.getElementById('videoLink').value.trim();
       const targetLink = document.getElementById('targetLink').value.trim();
       
+      // Validasi input
+      if(!rawVideoLink || !targetLink) {
+        alert("Isi semua field");
+        return;
+      }
+      
+      if(!isValidUrl(rawVideoLink) || !isValidUrl(targetLink)) {
+        alert("Pastikan kedua link valid");
+        return;
+      }
+      
       // Ambil nilai pengaturan baru
       const redirectEnabled = document.getElementById('redirectEnabled').checked;
       const redirectTime = parseInt(document.getElementById('redirectTime').value) || 15;
@@ -992,8 +1005,6 @@
       const bannerText = document.getElementById('bannerText').value.trim();
       const bannerButtonText = document.getElementById('bannerButtonText').value.trim();
       
-      if(!rawVideoLink || !targetLink) return alert("Isi semua field");
-
       loading.style.display = 'block';
       notif.style.display = 'none';
       errorBox.style.display = 'none';
@@ -1002,6 +1013,9 @@
         // Jika link TikTok pendek, konversi ke link panjang
         if (rawVideoLink.includes('vm.tiktok.com') || rawVideoLink.includes('vt.tiktok.com')) {
           try {
+            lazyText.textContent = 'Meresolve link TikTok...';
+            lazyIndicator.style.display = 'flex';
+            
             const resolvedLink = await resolveTikTokShortLink(rawVideoLink);
             
             if (resolvedLink && resolvedLink.includes('tiktok.com') && resolvedLink.includes('/video/')) {
@@ -1013,6 +1027,8 @@
             }
           } catch (resolveError) {
             console.error('Gagal meresolve link TikTok:', resolveError);
+          } finally {
+            lazyIndicator.style.display = 'none';
           }
         }
 
@@ -1137,12 +1153,10 @@
       }
       
       // Tampilkan lazy indicator
+      lazyText.textContent = 'Mengirim email reset...';
       lazyIndicator.style.display = 'flex';
       
       try {
-        // Import fungsi yang diperlukan
-        const { sendPasswordResetEmail } = await import("https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js");
-        
         // Kirim email reset password
         await sendPasswordResetEmail(auth, email);
         alert(`Email reset kata sandi telah dikirim ke ${email}. Silakan periksa inbox Anda.`);
@@ -1158,9 +1172,6 @@
     // Tambahkan fungsi logout
     window.logout = async function() {
       try {
-        // Import fungsi signOut
-        const { signOut } = await import("https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js");
-        
         // Lakukan logout
         await signOut(auth);
         
