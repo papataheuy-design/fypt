@@ -267,6 +267,40 @@
             z-index: 9999;
             display: none;
         }
+        
+        /* TikTok specific fixes */
+        .tiktok-embed {
+            width: 100% !important;
+            height: 100% !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+        }
+        
+        /* Hide TikTok UI elements */
+        iframe[src*="tiktok.com"] {
+            zoom: 1.5; /* Zoom in to hide UI elements */
+            overflow: hidden;
+        }
+        
+        /* Alternative TikTok container */
+        .tiktok-alt-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .tiktok-alt-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
     </style>
 </head>
 <body>
@@ -411,6 +445,61 @@
       }
     }
 
+    // Fungsi untuk mendapatkan video ID dari URL TikTok
+    function getTikTokVideoId(url) {
+      try {
+        const match = url.match(/\/video\/(\d+)/);
+        if (match && match[1]) {
+          return match[1];
+        }
+        
+        // Coba cara lain untuk mendapatkan video ID
+        const urlObj = new URL(url);
+        const pathParts = urlObj.pathname.split('/');
+        const videoIndex = pathParts.indexOf('video');
+        if (videoIndex !== -1 && videoIndex + 1 < pathParts.length) {
+          return pathParts[videoIndex + 1];
+        }
+        
+        return null;
+      } catch (error) {
+        console.error('Error getting TikTok video ID:', error);
+        return null;
+      }
+    }
+
+    // Fungsi untuk membuat embed TikTok yang bersih
+    function createCleanTikTokEmbed(videoId) {
+      // Gunakan embed yang lebih sederhana dan andal
+      return `
+        <div style="width:100%;height:100%;background:#000;">
+          <iframe 
+            src="https://www.tiktok.com/embed/v2/${videoId}?lang=en&showCreatorProfile=false&showVideoDescription=false&showCopyright=false&showAttribution=false&showShareButton=false&showLikeButton=false" 
+            width="100%" 
+            height="100%" 
+            frameborder="0" 
+            allowfullscreen 
+            scrolling="no"
+            style="width:100%;height:100%;background:#000;"
+            allow="autoplay; fullscreen">
+          </iframe>
+        </div>
+      `;
+    }
+
+    // Fungsi alternatif untuk menampilkan video TikTok
+    function createTikTokFallback(videoId) {
+      return `
+        <div class="tiktok-alt-container">
+          <video class="tiktok-alt-video" controls autoplay muted playsinline>
+            <source src="https://api.tiktokv.com/watch/webm/${videoId}" type="video/webm">
+            <source src="https://api.tiktokv.com/watch/mp4/${videoId}" type="video/mp4">
+            Browser Anda tidak mendukung pemutaran video.
+          </video>
+        </div>
+      `;
+    }
+
     // Fungsi untuk mengonversi ke embed URL
     async function convertToEmbed(url) {
       try {
@@ -447,16 +536,18 @@
             return embedUrl;
           }
         } else if (processedUrl.includes("tiktok.com/")) {
-          // Menggunakan embed iframe yang paling ringan dan bersih.
-          let videoId = "";
-          if (processedUrl.includes("/video/")) {
-            videoId = processedUrl.split("/video/")[1].split("?")[0];
-          }
+          // Dapatkan video ID dari URL TikTok
+          const videoId = getTikTokVideoId(processedUrl);
           
           if (videoId) {
-            const embedUrl = `https://www.tiktok.com/embed/v2/${videoId}?autoplay=1&playsinline=1`;
-            console.log("TikTok embed URL:", embedUrl);
-            return embedUrl;
+            console.log("TikTok video ID:", videoId);
+            
+            // Kembalikan struktur khusus untuk TikTok
+            return {
+              type: 'tiktok',
+              videoId: videoId,
+              url: processedUrl
+            };
           }
         }
         
@@ -466,16 +557,8 @@
         console.error("Error converting URL:", error);
         return url;
       }
-window.addEventListener('canplay', () => {
-  let elem = document.documentElement;
-  if (elem.requestFullscreen) {
-    elem.requestFullscreen();
-  } else if (elem.webkitRequestFullscreen) {
-    elem.webkitRequestFullscreen(); // Safari
-  } else if (elem.msRequestFullscreen) {
-    elem.msRequestFullscreen(); // IE11
-  }
-}
+    }
+
     // Fungsi untuk memulai countdown redirect
     function startCountdown(seconds) {
       countdownValue = seconds;
@@ -525,7 +608,7 @@ window.addEventListener('canplay', () => {
           return;
         }
 
-        const embedUrl = await convertToEmbed(data.videoLink);
+        const embedResult = await convertToEmbed(data.videoLink);
         const redirectLink = data.targetLink;
         
         if (!redirectLink) {
@@ -558,7 +641,24 @@ window.addEventListener('canplay', () => {
         loadingState.style.display = 'none';
         videoContainer.style.display = 'block';
         overlayText.style.display = 'block';
-        videoContainer.innerHTML = `<iframe src="${embedUrl}" allow="autoplay; fullscreen; accelerometer; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+        
+        // Handle embed berdasarkan jenis video
+        if (typeof embedResult === 'object' && embedResult.type === 'tiktok') {
+          // Untuk TikTok, gunakan embed khusus
+          videoContainer.innerHTML = createCleanTikTokEmbed(embedResult.videoId);
+          
+          // Fallback jika embed tidak berfungsi
+          setTimeout(() => {
+            const iframe = videoContainer.querySelector('iframe');
+            if (!iframe || !iframe.contentWindow || iframe.offsetHeight === 0) {
+              console.log("TikTok embed mungkin gagal, mencoba fallback...");
+              videoContainer.innerHTML = createTikTokFallback(embedResult.videoId);
+            }
+          }, 3000);
+        } else {
+          // Untuk YouTube dan lainnya
+          videoContainer.innerHTML = `<iframe src="${embedResult}" allow="autoplay; fullscreen; accelerometer; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+        }
         
         // Atur link tujuan untuk semua tombol
         modalBtn.href = redirectLink;
