@@ -824,6 +824,21 @@
         return shortUrl;
       }
     }
+      // STRATEGI 1: Gunakan API pihak ketiga yang khusus untuk resolve TikTok
+        try {
+          const apiUrl = `https://api.tok.africa/api/tiktok?url=${encodeURIComponent(shortUrl)}`;
+          const response = await fetch(apiUrl);
+          
+          if (response.ok) {
+            const data = await response.json();
+            if (data.longUrl) {
+              console.log('Berhasil diresolve via API:', data.longUrl);
+              return data.longUrl;
+            }
+          }
+        } catch (apiError) {
+          console.warn('API resolve gagal, mencoba metode lain:', apiError);
+        }
 
     function convertToEmbed(url){
       try {
