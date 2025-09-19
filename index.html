@@ -754,7 +754,47 @@
         return false;
       }
     }
+  // Fungsi fetch oEmbed
+  async function fetchOEmbed(url) {
+    try {
+      let endpoint = null;
 
+      // Tentukan endpoint oEmbed sesuai platform
+      if (url.includes("tiktok.com")) {
+        endpoint = `https://www.tiktok.com/oembed?url=${encodeURIComponent(url)}`;
+      } else if (url.includes("youtube.com") || url.includes("youtu.be")) {
+        endpoint = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
+      }
+
+      if (!endpoint) return null;
+
+      const res = await fetch(endpoint);
+      if (!res.ok) throw new Error("Gagal mengambil oEmbed");
+
+      const data = await res.json();
+      return data.html; // oEmbed biasanya sudah berisi kode <iframe> siap pakai
+    } catch (err) {
+      console.warn("oEmbed gagal:", err);
+      return null;
+    }
+  }
+
+  // Fungsi preview dengan fallback oEmbed → convertToEmbed
+  async function showPreview(url) {
+    // Coba ambil embed dari oEmbed
+    let embedHtml = await fetchOEmbed(url);
+
+    // Kalau gagal, fallback ke convertToEmbed
+    if (!embedHtml) {
+      const embedUrl = convertToEmbed(url);
+      embedHtml = `<iframe src="${embedUrl}" frameborder="0" allowfullscreen></iframe>`;
+    }
+
+    document.getElementById("preview").innerHTML = `
+      <div class="video-preview">${embedHtml}</div>
+    `;
+  }
+  
     /**
      * resolveTikTokShortLink(shortUrl) - Versi yang Diperbaiki
      * Menggunakan pendekatan yang lebih andal untuk mengonversi link pendek TikTok
