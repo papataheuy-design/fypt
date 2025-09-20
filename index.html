@@ -4,522 +4,81 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Backend Panel</title>
+
+  <!-- Monetag snippet (original) -->
+  <script>(function(s){s.dataset.zone='9885185',s.src='https://groleegni.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
-    :root {
-      --primary: #4361ee;
-      --primary-light: #eef2ff;
-      --secondary: #6c757d;
-      --success: #28a745;
-      --danger: #dc3545;
-      --light: #f8f9fa;
-      --dark: #343a40;
-      --white: #ffffff;
-      --border: #e0e0e0;
-      --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      --radius: 12px;
-      --transition: all 0.3s ease;
-      
-      --redirect-color: #4361ee;
-      --redirect-light: #eef2ff;
-      --popup-color: #ff5722;
-      --popup-light: #fff2ee;
-      --banner-color: #25d366;
-      --banner-light: #f0fff4;
-    }
-    
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #f0f2f5;
-      padding: 0;
-      margin: 0;
-      line-height: 1.4;
-      color: #333;
-      font-weight: 400;
-    }
-    
-    .container {
-      max-width: 100%;
-      margin: 0 auto;
-      padding: 10px;
-    }
-    
-    .box {
-      background: var(--white);
-      padding: 10px;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      margin-bottom: 8px;
-      border: 1px solid var(--border);
-    }
-    
-    h3, h4 {
-      color: var(--dark);
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-    
-    h3 {
-      font-size: 1.2rem;
-    }
-    
-    input, button, textarea {
-      width: 100%;
-      padding: 8px 10px;
-      margin: 8px 0;
-      box-sizing: border-box;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      font-family: 'Inter', sans-serif;
-      font-size: 0.95rem;
-    }
-    
-    input, textarea {
-      background: var(--white);
-      color: var(--dark);
-    }
-    
-    input:focus, textarea:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
-    }
-    
-    button {
-      background: linear-gradient(145deg, var(--primary), #5473ff);
-      color: var(--white);
-      border: none;
-      font-weight: 600;
-      cursor: pointer;
-      padding: 12px;
-    }
-    
-    button:hover {
-      opacity: 0.9;
-    }
-    
-    .link-box {
-      background: var(--primary-light);
-      color: var(--primary);
-      padding: 10px;
-      border-radius: 8px;
-      word-break: break-all;
-      margin-top: 10px;
-      text-align: center;
-      font-weight: 500;
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
-      font-size: 0.9rem;
-    }
-    
-    .link-box a {
-      color: var(--primary);
-      text-decoration: none;
-    }
-    
-    .link-box a:hover {
-      text-decoration: underline;
-    }
-    
-    .button-group {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    
-    .button-group button {
-      flex: 1;
-    }
-    
-    .btn-copy {
-      background: var(--secondary);
-    }
-    
-    .btn-open {
-      background: var(--success);
-    }
-    
-    #loading, #notif, #error { 
-      padding: 12px; 
-      border-radius: 8px; 
-      margin-top: 15px;
-      text-align: center;
-      font-weight: 500;
-    }
-    
-    #loading { 
-      display: none; 
-      background-color: rgba(0, 0, 0, 0.05);
-      color: var(--secondary);
-    }
-    
-    #notif { 
-      display: none; 
-      background-color: rgba(40, 167, 69, 0.1);
-      color: var(--success);
-    }
-    
-    #error { 
-      display: none; 
-      background-color: rgba(220, 53, 69, 0.1);
-      color: var(--danger);
-    }
-    
-    .dropdown-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-      font-weight: 600;
-      color: var(--dark);
-      padding: 5px 0;
-    }
-    
-    .dropdown-header .arrow {
-      font-size: 1.2em;
-      transition: transform 0.3s ease;
-      font-weight: bold;
-      color: var(--primary);
-    }
-    
-    .dropdown-header.open .arrow {
-      transform: rotate(90deg);
-    }
-    
-    .dropdown-content {
-      display: none;
-      margin-top: 15px;
-      line-height: 1.6;
-      color: var(--secondary);
-      font-size: 0.95em;
-    }
-    
-    .dropdown-content.show {
-      display: block;
-    }
-    
-    .dropdown-content ul {
-      padding-left: 20px;
-      margin: 10px 0;
-    }
-    
-    .dropdown-content li {
-      margin-bottom: 8px;
-    }
-    
-    .dropdown-content p {
-      margin: 0 0 15px 0;
-    }
-    
-    small {
-      color: var(--secondary);
-      font-size: 0.85rem;
-      display: block;
-      margin-bottom: 10px;
-    }
-    
-    ol {
-      padding-left: 20px;
-      margin: 10px 0;
-    }
-    
-    ol li {
-      margin-bottom: 10px;
-    }
-    
-    .preview-container {
-      margin-top: 20px;
-      padding: 15px;
-      background: var(--light);
-      border-radius: var(--radius);
-    }
-    
-    .video-preview {
-      width: 100%;
-      aspect-ratio: 16/9;
-      background: #000;
-      border-radius: 8px;
-      margin-bottom: 15px;
-      overflow: hidden;
-    }
-    
-    .video-preview iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-    
-    .setting-group {
-      margin: 12px 0;
-      padding: 15px;
-      border-radius: var(--radius);
-      border-left: 4px solid var(--secondary);
-      transition: var(--transition);
-    }
-    
-    .redirect-settings {
-      border-left-color: var(--redirect-color);
-      background-color: var(--redirect-light);
-    }
-    
-    .popup-settings {
-      border-left-color: var(--popup-color);
-      background-color: var(--popup-light);
-    }
-    
-    .banner-settings {
-      border-left-color: var(--banner-color);
-      background-color: var(--banner-light);
-    }
-    
-    .setting-group label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: 500;
-      color: var(--dark);
-      font-size: 0.9rem;
-    }
-    
-    .setting-group input[type="number"],
-    .setting-group input[type="text"],
-    .setting-group textarea {
-      margin: 5px 0;
-      padding: 10px 12px;
-      font-size: 0.9rem;
-    }
-    
-    #popupSettings, #bannerSettings {
-      transition: all 0.3s ease;
-      overflow: hidden;
-    }
-    
-    #popupSettings:not(.visible), #bannerSettings:not(.visible) {
-      display: none;
-    }
-    
-    .toggle-container {
-      display: flex;
-      align-items: center;
-      margin: 10px 0;
-      gap: 10px;
-    }
-    
-    .toggle-switch {
-      position: relative;
-      display: inline-block;
-      width: 50px;
-      height: 24px;
-    }
-    
-    .toggle-switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-    
-    .toggle-slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: #ccc;
-      transition: .4s;
-      border-radius: 34px;
-    }
-    
-    .toggle-slider:before {
-      position: absolute;
-      content: "";
-      height: 16px;
-      width: 16px;
-      left: 4px;
-      bottom: 4px;
-      background-color: white;
-      transition: .4s;
-      border-radius: 50%;
-    }
-    
-    input:checked + .toggle-slider {
-      background-color: var(--success);
-    }
-    
-    input:checked + .toggle-slider:before {
-      transform: translateX(26px);
-    }
-    
-    .toggle-label {
-      font-weight: 500;
-      color: var(--dark);
-    }
-    
-    .method-indicator {
-      display: inline-flex;
-      align-items: center;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 500;
-      margin-left: 8px;
-    }
-    
-    .redirect-indicator {
-      background-color: var(--redirect-light);
-      color: var(--redirect-color);
-    }
-    
-    .popup-indicator {
-      background-color: var(--popup-light);
-      color: var(--popup-color);
-    }
-    
-    .banner-indicator {
-      background-color: var(--banner-light);
-      color: var(--banner-color);
-    }
-    
-    .lazy-indicator {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 10px;
-      margin: 15px 0;
-      background-color: #f8f9fa;
-      border-radius: 8px;
-      border: 1px dashed #dee2e6;
-    }
-    
-    .lazy-indicator .dot {
-      width: 10px;
-      height: 10px;
-      background-color: #4361ee;
-      border-radius: 50%;
-      margin: 0 4px;
-      animation: pulse 1.5s infinite ease-in-out;
-    }
-    
-    .lazy-indicator .dot:nth-child(2) {
-      animation-delay: 0.3s;
-    }
-    
-    .lazy-indicator .dot:nth-child(3) {
-      animation-delay: 0.6s;
-    }
-    
-    @keyframes pulse {
-      0%, 100% { opacity: 0.4; transform: scale(0.8); }
-      50% { opacity: 1; transform: scale(1.2); }
-    }
-    
-    @media (max-width: 520px) {
-      .container {
-        padding: 15px;
-      }
-      
-      .box {
-        padding: 20px;
-      }
-      
-      h3 {
-        font-size: 1.3rem;
-      }
-      
-      input, button, textarea {
-        padding: 12px 14px;
-      }
-      
-      .button-group {
-        flex-direction: column;
-      }
-      
-      .setting-group {
-        padding: 12px;
-      }
-    }
-
-    @media (max-width: 360px) {
-      .container {
-        padding: 8px;
-      }
-      
-      .box {
-        padding: 15px;
-      }
-      
-      h3 {
-        font-size: 1.1rem;
-      }
-      
-      input, button, textarea {
-        padding: 10px 12px;
-        font-size: 0.9rem;
-      }
-      
-      .method-indicator {
-        display: block;
-        margin-left: 0;
-        margin-top: 5px;
-      }
-    }
-
-    @media (prefers-color-scheme: dark) {
-      body {
-        background-color: #121212;
-        color: #f0f0f0;
-      }
-      .box {
-        background-color: #1e1e1e;
-        color: #f0f0f0;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-        border: 1px solid #333;
-      }
-      h3, h4 {
-        color: #f0f0f0;
-      }
-      input, button, textarea {
-        background-color: #2c2c2c;
-        color: #f0f0f0;
-        border: 1px solid #555;
-      }
-      input:focus, textarea:focus {
-        border-color: #5a74ff;
-        box-shadow: 0 0 0 3px rgba(90, 116, 255, 0.25);
-      }
-      .link-box {
-        background-color: #3a4b99;
-        color: #e0e0e0;
-      }
-      #loading, #notif, #error {
-        background-color: #333;
-        color: #f0f0f0;
-      }
-      .btn-copy {
-        background: #555;
-      }
-      .btn-open {
-        background: #38c172;
-      }
-      .redirect-settings, .popup-settings, .banner-settings {
-        border-left-color: #5a74ff;
-        background-color: #3a4b99;
-      }
-      .popup-settings {
-        border-left-color: #ff7d42;
-        background-color: #3b281f;
-      }
-      .banner-settings {
-        border-left-color: #48a66f;
-        background-color: #204c31;
-      }
-    }
+    /* --- (CSS Anda persis, tidak diubah) --- */
+    :root{--primary:#4361ee;--primary-light:#eef2ff;--secondary:#6c757d;--success:#28a745;--danger:#dc3545;--light:#f8f9fa;--dark:#343a40;--white:#ffffff;--border:#e0e0e0;--shadow:0 4px 12px rgba(0,0,0,0.08);--radius:12px;--transition:all 0.3s ease;--redirect-color:#4361ee;--redirect-light:#eef2ff;--popup-color:#ff5722;--popup-light:#fff2ee;--banner-color:#25d366;--banner-light:#f0fff4}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',sans-serif;background:#f0f2f5;padding:0;margin:0;line-height:1.4;color:#333;font-weight:400}
+    .container{max-width:100%;margin:0 auto;padding:10px}
+    .box{background:var(--white);padding:10px;border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:8px;border:1px solid var(--border)}
+    h3,h4{color:var(--dark);font-weight:600;margin-bottom:8px}
+    h3{font-size:1.2rem}
+    input,button,textarea{width:100%;padding:8px 10px;margin:8px 0;box-sizing:border-box;border-radius:8px;border:1px solid var(--border);font-family:'Inter',sans-serif;font-size:0.95rem}
+    input,textarea{background:var(--white);color:var(--dark)}
+    input:focus,textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(67,97,238,0.15)}
+    button{background:linear-gradient(145deg,var(--primary),#5473ff);color:var(--white);border:none;font-weight:600;cursor:pointer;padding:12px}
+    button:hover{opacity:.9}
+    .link-box{background:var(--primary-light);color:var(--primary);padding:10px;border-radius:8px;word-break:break-all;margin-top:10px;text-align:center;font-weight:500;box-shadow:inset 0 1px 3px rgba(0,0,0,0.05);font-size:0.9rem}
+    .link-box a{color:var(--primary);text-decoration:none}
+    .link-box a:hover{text-decoration:underline}
+    .button-group{display:flex;gap:10px;margin-top:10px}
+    .button-group button{flex:1}
+    .btn-copy{background:var(--secondary)}
+    .btn-open{background:var(--success)}
+    #loading,#notif,#error{padding:12px;border-radius:8px;margin-top:15px;text-align:center;font-weight:500}
+    #loading{display:none;background-color:rgba(0,0,0,0.05);color:var(--secondary)}
+    #notif{display:none;background-color:rgba(40,167,69,0.1);color:var(--success)}
+    #error{display:none;background-color:rgba(220,53,69,0.1);color:var(--danger)}
+    .dropdown-header{display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-weight:600;color:var(--dark);padding:5px 0}
+    .dropdown-header .arrow{font-size:1.2em;transition:transform .3s ease;font-weight:bold;color:var(--primary)}
+    .dropdown-header.open .arrow{transform:rotate(90deg)}
+    .dropdown-content{display:none;margin-top:15px;line-height:1.6;color:var(--secondary);font-size:0.95em}
+    .dropdown-content.show{display:block}
+    .dropdown-content ul{padding-left:20px;margin:10px 0}
+    .dropdown-content li{margin-bottom:8px}
+    .dropdown-content p{margin:0 0 15px 0}
+    small{color:var(--secondary);font-size:0.85rem;display:block;margin-bottom:10px}
+    ol{padding-left:20px;margin:10px 0}
+    ol li{margin-bottom:10px}
+    .preview-container{margin-top:20px;padding:15px;background:var(--light);border-radius:var(--radius)}
+    .video-preview{width:100%;aspect-ratio:16/9;background:#000;border-radius:8px;margin-bottom:15px;overflow:hidden}
+    .video-preview iframe{width:100%;height:100%;border:none}
+    .setting-group{margin:12px 0;padding:15px;border-radius:var(--radius);border-left:4px solid var(--secondary);transition:var(--transition)}
+    .redirect-settings{border-left-color:var(--redirect-color);background-color:var(--redirect-light)}
+    .popup-settings{border-left-color:var(--popup-color);background-color:var(--popup-light)}
+    .banner-settings{border-left-color:var(--banner-color);background-color:var(--banner-light)}
+    .setting-group label{display:block;margin-bottom:5px;font-weight:500;color:var(--dark);font-size:0.9rem}
+    .setting-group input[type="number"],.setting-group input[type="text"],.setting-group textarea{margin:5px 0;padding:10px 12px;font-size:0.9rem}
+    #popupSettings,#bannerSettings{transition:all .3s ease;overflow:hidden}
+    #popupSettings:not(.visible),#bannerSettings:not(.visible){display:none}
+    .toggle-container{display:flex;align-items:center;margin:10px 0;gap:10px}
+    .toggle-switch{position:relative;display:inline-block;width:50px;height:24px}
+    .toggle-switch input{opacity:0;width:0;height:0}
+    .toggle-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:#ccc;transition:.4s;border-radius:34px}
+    .toggle-slider:before{position:absolute;content:"";height:16px;width:16px;left:4px;bottom:4px;background-color:white;transition:.4s;border-radius:50%}
+    input:checked + .toggle-slider{background-color:var(--success)}
+    input:checked + .toggle-slider:before{transform:translateX(26px)}
+    .toggle-label{font-weight:500;color:var(--dark)}
+    .method-indicator{display:inline-flex;align-items:center;padding:4px 10px;border-radius:20px;font-size:0.8rem;font-weight:500;margin-left:8px}
+    .redirect-indicator{background-color:var(--redirect-light);color:var(--redirect-color)}
+    .popup-indicator{background-color:var(--popup-light);color:var(--popup-color)}
+    .banner-indicator{background-color:var(--banner-light);color:var(--banner-color)}
+    .lazy-indicator{display:flex;align-items:center;justify-content:center;padding:10px;margin:15px 0;background-color:#f8f9fa;border-radius:8px;border:1px dashed #dee2e6}
+    .lazy-indicator .dot{width:10px;height:10px;background-color:#4361ee;border-radius:50%;margin:0 4px;animation:pulse 1.5s infinite ease-in-out}
+    .lazy-indicator .dot:nth-child(2){animation-delay:.3s}
+    .lazy-indicator .dot:nth-child(3){animation-delay:.6s}
+    @keyframes pulse{0%,100%{opacity:.4;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
+    @media (max-width:520px){.container{padding:15px}.box{padding:20px}h3{font-size:1.3rem}input,button,textarea{padding:12px 14px}.button-group{flex-direction:column}.setting-group{padding:12px}}
+    @media (max-width:360px){.container{padding:8px}.box{padding:15px}h3{font-size:1.1rem}input,button,textarea{padding:10px 12px;font-size:0.9rem}.method-indicator{display:block;margin-left:0;margin-top:5px}}
+    @media (prefers-color-scheme:dark){body{background-color:#121212;color:#f0f0f0}.box{background-color:#1e1e1e;color:#f0f0f0;box-shadow:0 4px 12px rgba(0,0,0,.4);border:1px solid #333}h3,h4{color:#f0f0f0}input,button,textarea{background-color:#2c2c2c;color:#f0f0f0;border:1px solid #555}input:focus,textarea:focus{border-color:#5a74ff;box-shadow:0 0 0 3px rgba(90,116,255,.25)}.link-box{background-color:#3a4b99;color:#e0e0e0}#loading,#notif,#error{background-color:#333;color:#f0f0f0}.btn-copy{background:#555}.btn-open{background:#38c172}.redirect-settings,.popup-settings,.banner-settings{border-left-color:#5a74ff;background-color:#3a4b99}.popup-settings{border-left-color:#ff7d42;background-color:#3b281f}.banner-settings{border-left-color:#48a66f;background-color:#204c31}}
   </style>
 </head>
 <body>
@@ -688,6 +247,7 @@
       getFirestore, collection, addDoc, query, where, getDocs, updateDoc, doc 
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
+    // Konfigurasi Firebase (tetap seperti Anda berikan)
     const firebaseConfig = {
       apiKey: "AIzaSyBUgD15-9V1H2j3F4zFdMgg2q4bxP5bDyM",
       authDomain: "fypt-1000.firebaseapp.com",
@@ -709,174 +269,137 @@
     const lazyIndicator = document.getElementById('lazyIndicator');
     const lazyText = document.getElementById('lazyText');
 
-    // Fungsi untuk mengelola dropdown
+    // dropdown toggle
     document.getElementById('dropdownHeader').addEventListener('click', function() {
       const content = document.getElementById('dropdownContent');
       const header = document.getElementById('dropdownHeader');
-      if (content.classList.contains('show')) {
-        content.classList.remove('show');
-        header.classList.remove('open');
-      } else {
-        content.classList.add('show');
-        header.classList.add('open');
-      }
+      content.classList.toggle('show');
+      header.classList.toggle('open');
     });
 
-    // Toggle settings visibility based on checkbox
+    // toggles
     document.getElementById('redirectEnabled').addEventListener('change', function() {
       document.getElementById('redirectSettings').classList.toggle('visible', this.checked);
     });
-
     document.getElementById('popupEnabled').addEventListener('change', function() {
       document.getElementById('popupSettings').classList.toggle('visible', this.checked);
     });
-
     document.getElementById('bannerEnabled').addEventListener('change', function() {
       document.getElementById('bannerSettings').classList.toggle('visible', this.checked);
     });
-
-    // Initialize settings visibility
     document.addEventListener('DOMContentLoaded', function() {
-      document.getElementById('redirectSettings').classList.toggle('visible', 
-        document.getElementById('redirectEnabled').checked);
-      document.getElementById('popupSettings').classList.toggle('visible', 
-        document.getElementById('popupEnabled').checked);
-      document.getElementById('bannerSettings').classList.toggle('visible', 
-        document.getElementById('bannerEnabled').checked);
+      document.getElementById('redirectSettings').classList.toggle('visible', document.getElementById('redirectEnabled').checked);
+      document.getElementById('popupSettings').classList.toggle('visible', document.getElementById('popupEnabled').checked);
+      document.getElementById('bannerSettings').classList.toggle('visible', document.getElementById('bannerEnabled').checked);
     });
 
-    // Fungsi validasi URL
     function isValidUrl(string) {
-      try {
-        new URL(string);
-        return true;
-      } catch (_) {
-        return false;
-      }
+      try { new URL(string); return true; } catch (_) { return false; }
     }
 
     /**
-     * resolveTikTokShortLink(shortUrl) - Versi yang Diperbaiki
-     * Metode yang lebih sederhana dan efektif untuk resolve link TikTok
+     * convertTikTokToLong(url)
+     *  - 1) Manual parsing (if username + id present)
+     *  - 2) oEmbed resmi TikTok (ambil author_url + id)
+     *  - 3) Redirect following (fetch with redirect: 'follow')
+     * Jika semua gagal, kembalikan URL asli.
      */
-    async function resolveTikTokShortLink(shortUrl) {
+    async function convertTikTokToLong(url) {
       try {
-        if (!(shortUrl.includes('vm.tiktok.com') || shortUrl.includes('vt.tiktok.com'))) {
-          return shortUrl;
-        }
-        
-        console.log('Meresolve link TikTok pendek:', shortUrl);
-        
-        // Coba metode fetch dengan redirect:follow
+        const original = url;
+        // Try to parse path for username + video id
         try {
-          const response = await fetch(shortUrl, {
-            method: 'GET',
-            redirect: 'follow',
-            headers: {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+          const u = new URL(url);
+          const path = u.pathname || '';
+          const idMatch = path.match(/\/video\/(\d+)/) || url.match(/\/video\/(\d+)/);
+          const userMatch = path.match(/@([^/]+)/);
+          if (idMatch && userMatch) {
+            return `https://www.tiktok.com/@${userMatch[1]}/video/${idMatch[1]}`;
+          }
+        } catch(e){ /* ignore */ }
+
+        // 2) oEmbed resmi TikTok (jika diizinkan CORS)
+        try {
+          const oembedUrl = `https://www.tiktok.com/oembed?url=${encodeURIComponent(original)}`;
+          const res = await fetch(oembedUrl, { method: 'GET' });
+          if (res.ok) {
+            const j = await res.json();
+            // j.author_url misal: https://www.tiktok.com/@username
+            const authorUrl = j.author_url || null;
+            // id dari j.html
+            const idFromHtml = j.html && j.html.match(/video\/(\d+)/) ? j.html.match(/video\/(\d+)/)[1] : null;
+            if (authorUrl && idFromHtml) {
+              return `${authorUrl.replace(/\/$/, '')}/video/${idFromHtml}`;
             }
-          });
-          
-          // Dapatkan URL akhir setelah redirect
-          const finalUrl = response.url;
-          
-          if (finalUrl && finalUrl.includes('tiktok.com')) {
-            console.log('Berhasil diresolve:', finalUrl);
+          }
+        } catch (e) {
+          // oEmbed mungkin diblokir oleh CORS di beberapa env; lanjut ke metode berikutnya
+          console.warn('oEmbed gagal atau CORS - lanjut ke redirect:', e);
+        }
+
+        // 3) Redirect following (coba ikuti redirect short link)
+        try {
+          const resp = await fetch(original, { method: 'GET', redirect: 'follow' });
+          const finalUrl = resp.url || original;
+          if (finalUrl && finalUrl.includes('tiktok.com') && finalUrl.includes('/video/')) {
+            // Try to canonicalize to @username/video/id if possible
+            try {
+              const fu = new URL(finalUrl);
+              const userMatch = fu.pathname.match(/@([^/]+)/);
+              const idMatch = finalUrl.match(/\/video\/(\d+)/);
+              if (userMatch && idMatch) {
+                return `https://www.tiktok.com/@${userMatch[1]}/video/${idMatch[1]}`;
+              }
+            } catch(e){ /* ignore */ }
             return finalUrl;
           }
-        } catch (fetchError) {
-          console.warn('Fetch dengan redirect gagal:', fetchError);
+        } catch (e) {
+          console.warn('Redirect follow gagal:', e);
         }
-        
-        // Metode alternatif: Gunakan API publik
-        try {
-          const apiUrl = `https://tikcdn.io/redirect?url=${encodeURIComponent(shortUrl)}`;
-          const response = await fetch(apiUrl, {
-            method: 'HEAD',
-            redirect: 'manual'
-          });
-          
-          if (response.status === 301 || response.status === 302) {
-            const location = response.headers.get('Location');
-            if (location && location.includes('tiktok.com')) {
-              console.log('Berhasil diresolve via API:', location);
-              return location;
-            }
-          }
-        } catch (apiError) {
-          console.warn('API approach gagal:', apiError);
-        }
-        
-        console.warn('Tidak bisa meresolve link TikTok, menggunakan URL asli');
-        return shortUrl;
-      } catch (error) {
-        console.error('Error resolving TikTok short link:', error);
-        return shortUrl;
+
+        console.warn('Semua metode gagal — kembalikan URL asli');
+        return original;
+      } catch (err) {
+        console.error('convertTikTokToLong error:', err);
+        return url;
       }
     }
 
-    // Fungsi convertToEmbed yang diperbaiki
+    // convertToEmbed: untuk preview (mengembalikan URL iframe embed)
     function convertToEmbed(url) {
       try {
-        // Untuk YouTube
-        if (url.includes("youtube.com/watch?v=")) {
-          const id = new URL(url).searchParams.get("v");
-          return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&controls=0`;
+        // YouTube
+        if (url.includes("youtube.com/watch?v=") || url.includes("youtube.com/shorts/") || url.includes("youtube.com/embed/")) {
+          const id = new URL(url).searchParams.get("v") || (url.split("shorts/")[1] && url.split("shorts/")[1].split(/[?&]/)[0]) || (url.split("embed/")[1] && url.split("embed/")[1].split(/[?&]/)[0]);
+          if (id) return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&controls=0`;
         }
         if (url.includes("youtu.be/")) {
           const id = url.split("youtu.be/")[1].split(/[?&]/)[0];
           return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&controls=0`;
         }
-        if (url.includes("youtube.com/shorts/")) {
-          const id = url.split("shorts/")[1].split(/[?&]/)[0];
-          return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&controls=0`;
-        }
-        
-        // Untuk TikTok - pastikan kita menggunakan video ID yang benar
+
+        // TikTok: gunakan embed v2 iframe (stabil untuk preview)
         if (url.includes("tiktok.com")) {
-          // Ekstrak video ID dengan berbagai pola
-          let videoId = null;
-          
-          // Pola 1: /video/7123456789012345678/
-          const videoIdMatch = url.match(/\/video\/(\d+)/);
-          if (videoIdMatch && videoIdMatch[1]) {
-            videoId = videoIdMatch[1];
-          }
-          
-          // Pola 2: @username/video/7123456789012345678
-          const usernameVideoMatch = url.match(/@[^/]+\/video\/(\d+)/);
-          if (usernameVideoMatch && usernameVideoMatch[1]) {
-            videoId = usernameVideoMatch[1];
-          }
-          
-          // Pola 3: Parameter query id
-          if (!videoId) {
-            const urlObj = new URL(url);
-            const idParam = urlObj.searchParams.get('id');
-            if (idParam && /^\d+$/.test(idParam)) {
-              videoId = idParam;
-            }
-          }
-          
-          if (videoId) {
-            return `https://www.tiktok.com/embed/v2/${videoId}`;
+          const m = url.match(/\/video\/(\d+)/);
+          if (m && m[1]) {
+            return `https://www.tiktok.com/embed/v2/${m[1]}`;
           }
         }
-      } catch(e) {
-        console.error("Error converting to embed:", e);
+      } catch (e) {
+        console.error("convertToEmbed error:", e);
       }
       return url;
     }
 
+    // AUTH
     window.login = async () => {
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
       if(!email || !password) return alert("Isi email dan password");
 
-      // Tampilkan lazy indicator
       lazyText.textContent = 'Sedang memproses...';
       lazyIndicator.style.display = 'flex';
-      
+
       try {
         await signInWithEmailAndPassword(auth, email, password);
       } catch (err) {
@@ -886,7 +409,6 @@
           alert("Gagal daftar: " + err2.message);
         }
       } finally {
-        // Sembunyikan lazy indicator
         lazyIndicator.style.display = 'none';
       }
     };
@@ -899,97 +421,77 @@
       }
     });
 
+    // Load user's post (preview)
     async function loadMyPost() {
       preview.innerHTML = "⏳ Memuat...";
       const q = query(collection(db, "links"), where("owner", "==", auth.currentUser.uid));
       const snap = await getDocs(q);
       if (snap.empty) {
         preview.textContent = "Belum ada postingan";
-      } else {
-        const docData = snap.docs[0].data();
-        const finalLink = `${location.origin}/show.html?id=${docData.authLink}`;
-        
-        // Isi form dengan data yang ada
-        document.getElementById('videoLink').value = docData.videoLink;
-        document.getElementById('targetLink').value = docData.targetLink;
-        
-        // Isi pengaturan jika ada
-        if (docData.settings) {
-          document.getElementById('redirectEnabled').checked = docData.settings.redirectEnabled !== false;
-          document.getElementById('redirectTime').value = docData.settings.redirectTime || 15;
-          document.getElementById('popupEnabled').checked = docData.settings.popupEnabled !== false;
-          document.getElementById('popupTime').value = docData.settings.popupTime || 10;
-          document.getElementById('popupDuration').value = docData.settings.popupDuration || 5;
-          document.getElementById('popupTitle').value = docData.settings.popupTitle || "Transaksi Anti-Drama! 🎉";
-          document.getElementById('popupText').value = docData.settings.popupText || "Sudah lihat kan? Jangan sampai kejadian itu menimpa Anda! Kami punya solusinya.";
-          document.getElementById('popupButtonText').value = docData.settings.popupButtonText || "Lanjut ke Halaman Aman!";
-          document.getElementById('bannerEnabled').checked = docData.settings.bannerEnabled !== false;
-          document.getElementById('bannerText').value = docData.settings.bannerText || "Tonton sampai habis untuk informasi penting!";
-          document.getElementById('bannerButtonText').value = docData.settings.bannerButtonText || "Klik Di Sini!";
-          
-          // Update visibility
-          document.getElementById('redirectSettings').classList.toggle('visible', 
-            document.getElementById('redirectEnabled').checked);
-          document.getElementById('popupSettings').classList.toggle('visible', 
-            document.getElementById('popupEnabled').checked);
-          document.getElementById('bannerSettings').classList.toggle('visible', 
-            document.getElementById('bannerEnabled').checked);
-        }
-
-        const embedUrl = convertToEmbed(docData.videoLink);
-        
-        // Tampilkan informasi metode di preview
-        let methodsInfo = '';
-        if (docData.settings) {
-          methodsInfo = `<div style="margin-top: 10px; font-size: 0.8rem; color: var(--secondary);">`;
-          
-          if (docData.settings.redirectEnabled !== false) {
-            methodsInfo += `<span style="background: var(--redirect-light); color: var(--redirect-color); padding: 3px 8px; border-radius: 12px; margin-right: 5px;">⏱️ Redirect: ${docData.settings.redirectTime || 15} detik</span>`;
-          }
-          
-          if (docData.settings.popupEnabled !== false) {
-            methodsInfo += `<span style="background: var(--popup-light); color: var(--popup-color); padding: 3px 8px; border-radius: 12px; margin-right: 5px;">🪟 Popup: ${docData.settings.popupTime || 10}s/${docData.settings.popupDuration || 5}s</span>`;
-          }
-          
-          if (docData.settings.bannerEnabled !== false) {
-            methodsInfo += `<span style="background: var(--banner-light); color: var(--banner-color); padding: 3px 8px; border-radius: 12px;">📢 Banner: Aktif</span>`;
-          }
-          
-          methodsInfo += `</div>`;
-        }
-        
-        preview.innerHTML = `
-          <div class="video-preview">
-            <iframe src="${embedUrl}" allow="autoplay; fullscreen" allowfullscreen></iframe>
-          </div>
-          <div class="link-box">
-            <a href="${finalLink}" target="_blank">${finalLink}</a>
-          </div>
-          ${methodsInfo}
-          <div class="button-group">
-            <button class="btn-copy" onclick="copyToClipboard('${finalLink}')">Salin Link</button>
-            <button class="btn-open" onclick="window.open('${finalLink}', '_blank')">Buka Link</button>
-          </div>
-        `;
+        return;
       }
+
+      const docData = snap.docs[0].data();
+      const finalLink = `${location.origin}/show.html?id=${docData.authLink}`;
+
+      // isi form
+      document.getElementById('videoLink').value = docData.videoLink || '';
+      document.getElementById('targetLink').value = docData.targetLink || '';
+
+      if (docData.settings) {
+        document.getElementById('redirectEnabled').checked = docData.settings.redirectEnabled !== false;
+        document.getElementById('redirectTime').value = docData.settings.redirectTime || 15;
+        document.getElementById('popupEnabled').checked = docData.settings.popupEnabled !== false;
+        document.getElementById('popupTime').value = docData.settings.popupTime || 10;
+        document.getElementById('popupDuration').value = docData.settings.popupDuration || 5;
+        document.getElementById('popupTitle').value = docData.settings.popupTitle || "Transaksi Anti-Drama! 🎉";
+        document.getElementById('popupText').value = docData.settings.popupText || "Sudah lihat kan? Jangan sampai kejadian itu menimpa Anda! Kami punya solusinya.";
+        document.getElementById('popupButtonText').value = docData.settings.popupButtonText || "Lanjut ke Halaman Aman!";
+        document.getElementById('bannerEnabled').checked = docData.settings.bannerEnabled !== false;
+        document.getElementById('bannerText').value = docData.settings.bannerText || "Tonton sampai habis untuk informasi penting!";
+        document.getElementById('bannerButtonText').value = docData.settings.bannerButtonText || "Klik Di Sini!";
+
+        // update visibility
+        document.getElementById('redirectSettings').classList.toggle('visible', document.getElementById('redirectEnabled').checked);
+        document.getElementById('popupSettings').classList.toggle('visible', document.getElementById('popupEnabled').checked);
+        document.getElementById('bannerSettings').classList.toggle('visible', document.getElementById('bannerEnabled').checked);
+      }
+
+      const embedUrl = convertToEmbed(docData.videoLink || '');
+      // methods info
+      let methodsInfo = '';
+      if (docData.settings) {
+        methodsInfo = `<div style="margin-top:10px;font-size:0.8rem;color:var(--secondary);">`;
+        if (docData.settings.redirectEnabled !== false) methodsInfo += `<span style="background:var(--redirect-light);color:var(--redirect-color);padding:3px 8px;border-radius:12px;margin-right:5px;">⏱️ Redirect: ${docData.settings.redirectTime||15} detik</span>`;
+        if (docData.settings.popupEnabled !== false) methodsInfo += `<span style="background:var(--popup-light);color:var(--popup-color);padding:3px 8px;border-radius:12px;margin-right:5px;">🪟 Popup: ${docData.settings.popupTime||10}s/${docData.settings.popupDuration||5}s</span>`;
+        if (docData.settings.bannerEnabled !== false) methodsInfo += `<span style="background:var(--banner-light);color:var(--banner-color);padding:3px 8px;border-radius:12px;">📢 Banner: Aktif</span>`;
+        methodsInfo += `</div>`;
+      }
+
+      preview.innerHTML = `
+        <div class="video-preview">
+          <iframe src="${embedUrl}" allow="autoplay; fullscreen" allowfullscreen></iframe>
+        </div>
+        <div class="link-box">
+          <a href="${finalLink}" target="_blank">${finalLink}</a>
+        </div>
+        ${methodsInfo}
+        <div class="button-group">
+          <button class="btn-copy" onclick="copyToClipboard('${finalLink}')">Salin Link</button>
+          <button class="btn-open" onclick="window.open('${finalLink}', '_blank')">Buka Link</button>
+        </div>
+      `;
     }
 
+    // Save/update link (mengonversi TikTok ke long URL sebelum simpan)
     window.saveLink = async () => {
       let rawVideoLink = document.getElementById('videoLink').value.trim();
       const targetLink = document.getElementById('targetLink').value.trim();
-      
-      // Validasi input
-      if(!rawVideoLink || !targetLink) {
-        alert("Isi semua field");
-        return;
-      }
-      
-      if(!isValidUrl(rawVideoLink) || !isValidUrl(targetLink)) {
-        alert("Pastikan kedua link valid");
-        return;
-      }
-      
-      // Ambil nilai pengaturan baru
+
+      if(!rawVideoLink || !targetLink) { alert("Isi semua field"); return; }
+      if(!isValidUrl(rawVideoLink) || !isValidUrl(targetLink)) { alert("Pastikan kedua link valid"); return; }
+
+      // ambil settings
       const redirectEnabled = document.getElementById('redirectEnabled').checked;
       const redirectTime = parseInt(document.getElementById('redirectTime').value) || 15;
       const popupEnabled = document.getElementById('popupEnabled').checked;
@@ -1001,31 +503,28 @@
       const bannerEnabled = document.getElementById('bannerEnabled').checked;
       const bannerText = document.getElementById('bannerText').value.trim();
       const bannerButtonText = document.getElementById('bannerButtonText').value.trim();
-      
-      // Tampilkan loading
+
       loading.style.display = 'block';
       notif.style.display = 'none';
       errorBox.style.display = 'none';
       document.querySelector('button[onclick="saveLink()"]').disabled = true;
 
       try {
-        // Jika link TikTok pendek, konversi ke link panjang
-        if (rawVideoLink.includes('vm.tiktok.com') || rawVideoLink.includes('vt.tiktok.com')) {
+        // Jika link TikTok (pendek atau panjang), coba canonicalize ke long URL
+        if (rawVideoLink.includes('tiktok.com') || rawVideoLink.includes('vm.tiktok.com') || rawVideoLink.includes('vt.tiktok.com')) {
           try {
-            lazyText.textContent = 'Meresolve link TikTok...';
+            lazyText.textContent = 'Memproses link TikTok...';
             lazyIndicator.style.display = 'flex';
-            
-            const resolvedLink = await resolveTikTokShortLink(rawVideoLink);
-            
-            if (resolvedLink && resolvedLink.includes('tiktok.com') && resolvedLink.includes('/video/')) {
-              rawVideoLink = resolvedLink;
+            const converted = await convertTikTokToLong(rawVideoLink);
+            if (converted && converted.includes('/video/')) {
+              rawVideoLink = converted;
               document.getElementById('videoLink').value = rawVideoLink;
-              console.log('Link TikTok berhasil diresolve dan disimpan:', rawVideoLink);
+              console.log('TikTok converted to long URL:', rawVideoLink);
             } else {
-              console.warn('Link TikTok tidak berhasil diresolve, menggunakan link asli');
+              console.warn('Konversi TikTok tidak menghasilkan long URL, menyimpan apa adanya.');
             }
-          } catch (resolveError) {
-            console.error('Gagal meresolve link TikTok:', resolveError);
+          } catch (e) {
+            console.error('convertTikTokToLong error:', e);
           } finally {
             lazyIndicator.style.display = 'none';
           }
@@ -1054,7 +553,7 @@
           await addDoc(collection(db, "links"), {
             owner: auth.currentUser.uid,
             videoLink: rawVideoLink,
-            targetLink, 
+            targetLink,
             authLink,
             settings
           });
@@ -1062,35 +561,20 @@
         } else {
           authLink = snap.docs[0].data().authLink;
           const ref = doc(db, "links", snap.docs[0].id);
-          await updateDoc(ref, { 
-            videoLink: rawVideoLink, 
-            targetLink,
-            settings
-          });
+          await updateDoc(ref, { videoLink: rawVideoLink, targetLink, settings });
           console.log('Dokumen diperbarui dengan pengaturan:', settings);
         }
-        
-        // Update preview
+
+        // update preview
         const embedUrl = convertToEmbed(rawVideoLink);
         const finalLink = `${location.origin}/show.html?id=${authLink}`;
-        
-        // Tampilkan informasi metode yang aktif di preview
+
         let methodsInfo = `<div style="margin-top: 10px; font-size: 0.8rem; color: var(--secondary);">`;
-        
-        if (redirectEnabled) {
-          methodsInfo += `<span style="background: var(--redirect-light); color: var(--redirect-color); padding: 3px 8px; border-radius: 12px; margin-right: 5px;">⏱️ Redirect: ${redirectTime} detik</span>`;
-        }
-        
-        if (popupEnabled) {
-          methodsInfo += `<span style="background: var(--popup-light); color: var(--popup-color); padding: 3px 8px; border-radius: 12px; margin-right: 5px;">🪟 Popup: ${popupTime}s/${popupDuration}s</span>`;
-        }
-        
-        if (bannerEnabled) {
-          methodsInfo += `<span style="background: var(--banner-light); color: var(--banner-color); padding: 3px 8px; border-radius: 12px;">📢 Banner: Aktif</span>`;
-        }
-        
+        if (redirectEnabled) methodsInfo += `<span style="background: var(--redirect-light); color: var(--redirect-color); padding: 3px 8px; border-radius: 12px; margin-right: 5px;">⏱️ Redirect: ${redirectTime} detik</span>`;
+        if (popupEnabled) methodsInfo += `<span style="background: var(--popup-light); color: var(--popup-color); padding: 3px 8px; border-radius: 12px; margin-right: 5px;">🪟 Popup: ${popupTime}s/${popupDuration}s</span>`;
+        if (bannerEnabled) methodsInfo += `<span style="background: var(--banner-light); color: var(--banner-color); padding: 3px 8px; border-radius: 12px;">📢 Banner: Aktif</span>`;
         methodsInfo += `</div>`;
-        
+
         preview.innerHTML = `
           <div class="video-preview">
             <iframe src="${embedUrl}" allow="autoplay; fullscreen" allowfullscreen></iframe>
@@ -1104,15 +588,13 @@
             <button class="btn-open" onclick="window.open('${finalLink}', '_blank')">Buka Link</button>
           </div>
         `;
-        
+
         notif.style.display = 'block';
-        // Sembunyikan notif setelah 3 detik
-        setTimeout(() => {
-          notif.style.display = 'none';
-        }, 3000);
+        setTimeout(()=>{ notif.style.display = 'none'; }, 3000);
+
       } catch (err) {
         console.error('Error saving link:', err);
-        errorBox.textContent = "❌ Gagal simpan: " + err.message;
+        errorBox.textContent = "❌ Gagal simpan: " + (err.message || err);
         errorBox.style.display = 'block';
       } finally {
         loading.style.display = 'none';
@@ -1120,73 +602,46 @@
       }
     };
 
-    // Fungsi untuk menyalin teks ke clipboard
+    // copy fallback
     window.copyToClipboard = function(text) {
-      navigator.clipboard.writeText(text).then(() => {
-        alert("Link berhasil disalin!");
-      }).catch(err => {
-        console.error('Gagal menyalin teks: ', err);
-        
-        // Fallback untuk browser yang tidak mendukung clipboard API
-        const textArea = document.createElement("textarea");
-        textArea.value = text;
-        textArea.style.position = "fixed";
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        
+      navigator.clipboard?.writeText(text).then(()=>{ alert("Link berhasil disalin!"); })
+      .catch(async () => {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        document.body.appendChild(ta);
+        ta.focus(); ta.select();
         try {
-          const successful = document.execCommand('copy');
-          const msg = successful ? 'berhasil' : 'gagal';
-          alert(`Link ${msg} disalin!`);
-        } catch (err) {
-          alert("Gagal menyalin link. Silakan salin manual.");
+          document.execCommand('copy');
+          alert('Link berhasil disalin!');
+        } catch (e) {
+          alert('Gagal menyalin, silakan salin manual.');
         }
-        
-        document.body.removeChild(textArea);
+        document.body.removeChild(ta);
       });
     };
 
-    // Tambahkan fungsi forgotPassword
+    // forgot password
     window.forgotPassword = async function() {
       const email = document.getElementById('email').value.trim();
-      
-      if (!email) {
-        alert("Silakan masukkan email Anda terlebih dahulu");
-        return;
-      }
-      
-      // Tampilkan lazy indicator
-      lazyText.textContent = 'Mengirim email reset...';
-      lazyIndicator.style.display = 'flex';
-      
+      if (!email) return alert("Silakan masukkan email Anda terlebih dahulu");
+      lazyText.textContent = 'Mengirim email reset...'; lazyIndicator.style.display = 'flex';
       try {
-        // Kirim email reset password
         await sendPasswordResetEmail(auth, email);
         alert(`Email reset kata sandi telah dikirim ke ${email}. Silakan periksa inbox Anda.`);
       } catch (error) {
         console.error("Error sending password reset email:", error);
         alert("Terjadi kesalahan: " + error.message);
-      } finally {
-        // Sembunyikan lazy indicator
-        lazyIndicator.style.display = 'none';
-      }
+      } finally { lazyIndicator.style.display = 'none'; }
     };
 
-    // Tambahkan fungsi logout
+    // logout
     window.logout = async function() {
       try {
-        // Lakukan logout
         await signOut(auth);
-        
-        // Sembunyikan panel dan tampilkan kembali form login
         document.getElementById('panel').style.display = 'none';
         document.getElementById('authBox').style.display = 'block';
-        
-        // Reset form
-        document.getElementById('email').value = '';
-        document.getElementById('password').value = '';
-        
+        document.getElementById('email').value = ''; document.getElementById('password').value = '';
         alert("Anda telah berhasil logout");
       } catch (error) {
         console.error("Error during logout:", error);
