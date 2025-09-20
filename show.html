@@ -1,78 +1,65 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <script>(function(s){s.dataset.zone='9885126',s.src='https://gizokraijaw.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Saksikan Video Ini!</title>
 
-  <!-- Default OG (fallback). NOTE: untuk agar OG dinamis terlihat di share, butuh server-side rendering -->
+  <!-- OG default (akan dioverride client-side, crawler hanya lihat ini) -->
   <meta property="og:title" content="Saksikan Video Ini!">
   <meta property="og:description" content="Tonton video singkat ini — ada info penting di akhir.">
   <meta property="og:image" content="https://example.com/default-thumb.jpg">
   <meta property="og:url" content="https://yourdomain.com/show.html">
   <meta property="og:type" content="video.other">
-  <link rel="canonical" href="https://yourdomain.com/show.html">
 
   <style>
-    /* Minimal styles, fokus ringan & responsif */
     html,body{height:100%;margin:0;font-family:Inter,Arial,Helvetica,sans-serif;background:#000;color:#fff}
     .center{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
     .video-wrap{position:relative;width:100%;height:100%;overflow:hidden;background:#000}
     .video-iframe{width:100%;height:100%;border:0}
-    .overlay{position:absolute;left:50%;transform:translateX(-50%);bottom:16px;background:rgba(0,0,0,0.55);padding:10px 14px;border-radius:10px;text-align:center;max-width:95%;min-width:200px}
-    .overlay p{margin:0;font-weight:600}
-    .banner{position:fixed;left:0;right:0;bottom:-100px;background:linear-gradient(90deg,#4361ee,#3a0ca3);padding:10px 14px;display:flex;align-items:center;justify-content:center;gap:10px;transition:transform .35s;transform:translateY(100%)}
+    .overlay{position:absolute;left:50%;transform:translateX(-50%);bottom:16px;background:rgba(0,0,0,.55);padding:10px 14px;border-radius:10px;text-align:center}
+    .banner{position:fixed;left:0;right:0;bottom:-100px;background:linear-gradient(90deg,#4361ee,#3a0ca3);padding:10px 14px;display:flex;align-items:center;justify-content:center;gap:10px;transition:.35s;transform:translateY(100%)}
     .banner.visible{transform:translateY(0)}
     .banner a{background:#ff5722;color:#fff;padding:8px 12px;border-radius:14px;text-decoration:none;font-weight:700}
-    .modal-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);opacity:0;pointer-events:none;transition:opacity .25s}
+    .modal-overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:.25s}
     .modal-overlay.visible{opacity:1;pointer-events:auto}
     .modal{background:#fff;color:#111;padding:18px;border-radius:12px;max-width:360px;width:90%;text-align:center}
     .btn{display:inline-block;padding:8px 14px;border-radius:14px;background:#ff5722;color:#fff;text-decoration:none;font-weight:700}
-    .loader{width:44px;height:44px;border:4px solid rgba(255,255,255,0.15);border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite}
+    .loader{width:44px;height:44px;border:4px solid rgba(255,255,255,.15);border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
     .hidden{display:none}
-    /* small helper for debug (hidden by default) */
-    #debug{position:fixed;top:10px;right:10px;background:rgba(255,255,255,0.08);color:#fff;padding:6px 8px;border-radius:6px;font-size:12px;display:none}
-    @media (max-width:640px){ .overlay p{font-size:14px} }
   </style>
 
-  <!-- TikTok embed script (official). It's tiny and only used if TikTok embed present -->
+  <!-- TikTok embed script -->
   <script async src="https://www.tiktok.com/embed.js"></script>
 </head>
 <body>
   <div id="loading" class="center">
-    <div style="text-align:center">
-      <div class="loader"></div>
-      <div style="margin-top:14px;color:#ddd">Memuat video...</div>
-    </div>
+    <div><div class="loader"></div><div style="margin-top:14px;color:#ddd">Memuat video...</div></div>
   </div>
 
   <div id="videoWrap" class="video-wrap hidden"></div>
-
-  <div id="overlay" class="overlay hidden"><p>Tonton sampai habis, ada pesan penting di baliknya!</p></div>
+  <div id="overlay" class="overlay hidden"><p>Tonton sampai habis, ada pesan penting!</p></div>
 
   <div id="banner" class="banner" aria-hidden="true">
     <div id="bannerText" style="flex:1;text-align:center;font-weight:600">Tonton sampai habis!</div>
-    <a id="bannerBtn" href="#" class="btn" target="_blank" rel="noopener">Klik Di Sini!</a>
-    <button id="closeBanner" style="background:none;border:0;color:#fff;font-size:20px;margin-left:10px;cursor:pointer">×</button>
+    <a id="bannerBtn" href="#" class="btn" target="_blank">Klik Di Sini!</a>
+    <button id="closeBanner" style="background:none;border:0;color:#fff;font-size:20px;cursor:pointer">×</button>
   </div>
 
   <div id="popupModal" class="modal-overlay" aria-hidden="true">
     <div class="modal">
-      <h3 id="popupTitle" style="margin:0 0 8px;color:#25d366">Transaksi Anti-Drama! 🎉</h3>
-      <p id="popupText" style="margin:0 0 12px;color:#222">Sudah lihat kan? Jangan sampai kejadian itu menimpa Anda! Kami punya solusinya.</p>
-      <a id="popupBtn" class="btn" href="#" target="_blank" rel="noopener">Lanjut ke Halaman Aman!</a>
+      <h3 id="popupTitle" style="margin-bottom:8px;color:#25d366">Transaksi Anti-Drama! 🎉</h3>
+      <p id="popupText" style="margin-bottom:12px;color:#222">Sudah lihat kan? Kami punya solusinya.</p>
+      <a id="popupBtn" class="btn" href="#" target="_blank">Lanjut ke Halaman Aman!</a>
     </div>
   </div>
 
-  <div id="debug">debug</div>
-
+  <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-    // Firebase config (sama seperti index.html)
     const firebaseConfig = {
       apiKey: "AIzaSyBUgD15-9V1H2j3F4zFdMgg2q4bxP5bDyM",
       authDomain: "fypt-1000.firebaseapp.com",
@@ -87,310 +74,117 @@
     const db = getFirestore(app);
 
     // UI refs
-    const loadingEl = document.getElementById('loading');
-    const videoWrap = document.getElementById('videoWrap');
-    const overlay = document.getElementById('overlay');
-    const banner = document.getElementById('banner');
-    const bannerText = document.getElementById('bannerText');
-    const bannerBtn = document.getElementById('bannerBtn');
-    const closeBanner = document.getElementById('closeBanner');
-    const popupModal = document.getElementById('popupModal');
-    const popupTitle = document.getElementById('popupTitle');
-    const popupText = document.getElementById('popupText');
-    const popupBtn = document.getElementById('popupBtn');
-    const debug = document.getElementById('debug');
+    const loading = document.getElementById("loading");
+    const videoWrap = document.getElementById("videoWrap");
+    const overlay = document.getElementById("overlay");
+    const banner = document.getElementById("banner");
+    const bannerText = document.getElementById("bannerText");
+    const bannerBtn = document.getElementById("bannerBtn");
+    const closeBanner = document.getElementById("closeBanner");
+    const popupModal = document.getElementById("popupModal");
+    const popupTitle = document.getElementById("popupTitle");
+    const popupText = document.getElementById("popupText");
+    const popupBtn = document.getElementById("popupBtn");
 
-    // timers
-    let redirectTimer = null;
-    let popupTimer = null;
-    let countdownInterval = null;
-    let countdownValue = 0;
+    // helpers
+    const setMeta = (p, c) => {
+      let m=document.querySelector(`meta[property="${p}"]`);
+      if(!m){m=document.createElement("meta");m.setAttribute("property",p);document.head.appendChild(m);}
+      m.setAttribute("content",c);
+    };
 
-    // helper: set or update meta tag (client-side only)
-    function setMeta(property, content) {
-      let meta = document.querySelector(`meta[property="${property}"]`);
-      if (!meta) {
-        meta = document.createElement('meta');
-        meta.setAttribute('property', property);
-        document.head.appendChild(meta);
-      }
-      meta.setAttribute('content', content);
-    }
+    const renderTikTok = (url, vid) => {
+      videoWrap.innerHTML = `<blockquote class="tiktok-embed" cite="${url}" data-video-id="${vid}" style="max-width:605px;min-width:325px"><section></section></blockquote>`;
+      const s=document.createElement("script");s.src="https://www.tiktok.com/embed.js";document.body.appendChild(s);
+    };
 
-    function showError(message, detail = '') {
-      loadingEl.classList.add('hidden');
-      videoWrap.classList.add('hidden');
-      overlay.classList.add('hidden');
-      const el = document.createElement('div');
-      el.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#000;color:#fff;padding:20px;text-align:center';
-      el.innerHTML = `<div><h2 style="color:#ff6b6b">Terjadi Kesalahan</h2><p>${message}</p>${detail?`<pre style="text-align:left;color:#ddd">${detail}</pre>`:''}<p style="margin-top:12px"><button onclick="location.reload()" style="padding:8px 12px;border-radius:8px;border:0;background:#4361ee;color:#fff">Muat ulang</button></p></div>`;
-      document.body.appendChild(el);
-      console.error(message, detail);
-    }
+    const renderYouTube = (vid) => {
+      videoWrap.innerHTML = `<iframe class="video-iframe" src="https://www.youtube.com/embed/${vid}?autoplay=1&rel=0&modestbranding=1&playsinline=1" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
+    };
 
-    // Try resolve short tiktok (best-effort). May fail due to CORS — that's normal.
-    async function resolveShortTikTok(url) {
-      try {
-        const res = await fetch(url, { method: 'GET', redirect: 'follow' });
-        // response.url may give final URL after redirects
-        if (res && res.url) return res.url;
-      } catch (e) {
-        console.warn('resolveShortTikTok failed (CORS/blocked) —', e);
-      }
-      return url;
-    }
+    const renderFallback = (url) => {
+      videoWrap.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;padding:20px;color:#fff;text-align:center"><p>Pemutar tidak tersedia<br><a href="${url}" target="_blank" style="color:#25d366;text-decoration:underline">${url}</a></p></div>`;
+    };
 
-    // Extract TikTok video id from many possible forms
-    function extractTikTokId(url) {
-      try {
-        const m = url.match(/\/video\/(\d+)/);
-        if (m && m[1]) return m[1];
-        // sometimes id present as query param 'id'
-        const u = new URL(url, location.origin);
-        const id = u.searchParams.get('id');
-        if (id && /^\d+$/.test(id)) return id;
-      } catch(e) { /* ignore */ }
-      return null;
-    }
-
-    // Try oEmbed (to get thumbnail/author) — may be blocked by CORS
-    async function tryTikTokOEmbed(url) {
-      try {
-        const oembedUrl = `https://www.tiktok.com/oembed?url=${encodeURIComponent(url)}`;
-        const r = await fetch(oembedUrl);
-        if (r.ok) return await r.json();
-      } catch(e) {
-        // ignore (likely CORS)
-        console.warn('oEmbed blocked or failed:', e);
-      }
-      return null;
-    }
-
-    // Build TikTok official embed blockquote (embed.js will render)
-    function renderTikTokEmbed(longUrl, vid) {
-      videoWrap.innerHTML = ''; // clear
-      const block = document.createElement('blockquote');
-      block.className = 'tiktok-embed';
-      block.setAttribute('cite', longUrl);
-      block.setAttribute('data-video-id', vid);
-      block.style.maxWidth = '605px';
-      block.style.minWidth = '325px';
-      block.innerHTML = '<section></section>';
-      videoWrap.appendChild(block);
-      // If embed.js has already parsed page, try to re-run by inserting script again (safe)
-      if (!window.__tiktokEmbedInitialized) {
-        // embed.js auto-runs; mark if we tried injecting manually
-        window.__tiktokEmbedInitialized = true;
-      } else {
-        // re-insert to force parsing (cheap)
-        const s = document.createElement('script');
-        s.async = true;
-        s.src = 'https://www.tiktok.com/embed.js';
-        document.head.appendChild(s);
-      }
-    }
-
-    // Build YouTube embed
-    function renderYouTubeEmbed(videoId) {
-      videoWrap.innerHTML = `<iframe class="video-iframe" src="https://www.youtube.com/embed/${videoId}?autoplay=1&playsinline=1&rel=0&modestbranding=1" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
-    }
-
-    // fallback UI (open external)
-    function renderFallbackLink(url) {
-      videoWrap.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:20px;color:#fff;"><p style="margin-bottom:12px">Pemutar tidak tersedia — buka langsung:</p><a href="${url}" target="_blank" rel="noopener" style="background:#25d366;color:#000;padding:10px 14px;border-radius:12px;font-weight:700;text-decoration:none">${url}</a></div>`;
-    }
-
-    // update countdown elements (banner)
-    function startCountdown(seconds) {
-      countdownValue = seconds;
-      const span = document.createElement('span');
-      span.className = 'countdown';
-      span.style.marginLeft = '8px';
+    const startCountdown = (seconds, cb) => {
+      let n=seconds;
+      const span=document.createElement("span");
+      span.style.marginLeft="8px";span.textContent=`(${n})`;
       bannerText.appendChild(span);
-      span.textContent = `(${countdownValue})`;
+      const iv=setInterval(()=>{
+        n--;span.textContent=`(${n})`;
+        if(n<=0){clearInterval(iv);cb();}
+      },1000);
+    };
 
-      countdownInterval = setInterval(()=> {
-        countdownValue--;
-        if (countdownValue <= 0) {
-          clearInterval(countdownInterval);
-        } else {
-          span.textContent = `(${countdownValue})`;
-        }
-      }, 1000);
-    }
+    (async ()=>{
+      const params = new URLSearchParams(location.search);
+      const id = params.get("id");
+      if(!id){loading.innerHTML="❌ ID tidak ditemukan";return;}
 
-    // load Monetag ad script once (delayed)
-    function loadMonetagOnce() {
-      if (window.__monetagLoaded) return;
-      window.__monetagLoaded = true;
-      const s = document.createElement('script');
-      s.dataset.zone = '9885185';
-      s.src = 'https://groleegni.net/vignette.min.js';
-      s.async = true;
-      document.body.appendChild(s);
-    }
+      const ref = doc(db,"links",id);
+      const snap = await getDoc(ref);
+      if(!snap.exists()){loading.innerHTML="❌ Data tidak ditemukan";return;}
+      const d = snap.data();
 
-    // Main init
-    (async function init() {
-      try {
-        const params = new URLSearchParams(location.search);
-        const id = params.get('id');
-        if (!id) { showError("ID tidak ditemukan di URL"); return; }
+      // OG dinamis (client-side, crawler tetap lihat default)
+      setMeta("og:url", location.href);
+      if(d.ogTitle) setMeta("og:title", d.ogTitle);
+      if(d.ogDescription) setMeta("og:description", d.ogDescription);
+      if(d.ogImage) setMeta("og:image", d.ogImage);
+      document.title = d.ogTitle || "Saksikan Video Ini!";
 
-        // Query Firestore by authLink (consistent with index.html)
-        const q = query(collection(db, 'links'), where('authLink', '==', id));
-        const snap = await getDocs(q);
-        if (snap.empty) { showError("Link tidak ditemukan", `ID: ${id}`); return; }
+      // tampilkan UI
+      loading.classList.add("hidden");
+      videoWrap.classList.remove("hidden");
+      overlay.classList.remove("hidden");
 
-        const doc = snap.docs[0].data();
-        const videoLink = (doc.videoLink || '').trim();
-        const targetLink = (doc.targetLink || '').trim();
-        const settings = doc.settings || {};
-
-        if (!videoLink) { showError("Data video kosong"); return; }
-        if (!targetLink) { showError("Link tujuan kosong"); return; }
-
-        // Update basic OG & title (client-side only; crawlers won't pick this up)
-        const title = doc.ogTitle || `Saksikan Video - ${id}`;
-        const description = doc.ogDescription || (settings.popupText || 'Tonton video ini untuk info penting.');
-        setMeta('og:title', title);
-        setMeta('og:description', description);
-
-        // Try to obtain thumbnail (youtube quick, else tiktok oembed (best-effort), else fallback)
-        let thumb = 'https://example.com/default-thumb.jpg';
-        if (videoLink.includes('youtube.com') || videoLink.includes('youtu.be')) {
-          // extract youtube id
-          const m = videoLink.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_\-]{6,})/);
-          if (m && m[1]) thumb = `https://i.ytimg.com/vi/${m[1]}/hqdefault.jpg`;
-        } else if (videoLink.includes('tiktok.com')) {
-          try {
-            const o = await tryTikTokOEmbed(videoLink);
-            if (o && o.thumbnail_url) thumb = o.thumbnail_url;
-          } catch (e) { /* ignore */ }
-        }
-        setMeta('og:image', thumb);
-        setMeta('og:url', location.href);
-        document.title = title;
-
-        // Start delayed ad load (non-blocking)
-        setTimeout(loadMonetagOnce, 2500);
-
-        // Build embed
-        loadingEl.classList.add('hidden');
-        videoWrap.classList.remove('hidden');
-        overlay.classList.remove('hidden');
-
-        // If it's a tiktok short link (vm/vt) attempt resolve first (best-effort)
-        let resolvedVideoLink = videoLink;
-        if (videoLink.includes('vm.tiktok.com') || videoLink.includes('vt.tiktok.com')) {
-          resolvedVideoLink = await resolveShortTikTok(videoLink);
-        }
-
-        // If still not containing /video/ it may be user page — attempt oEmbed → fallback
-        let videoId = extractTikTokId(resolvedVideoLink);
-
-        if (resolvedVideoLink.includes('tiktok.com') && videoId) {
-          // Render official tiktok embed
-          renderTikTokEmbed(resolvedVideoLink, videoId);
-
-          // If embed doesn't appear in a few seconds, show fallback
-          setTimeout(()=> {
-            const iframe = videoWrap.querySelector('iframe');
-            if (!iframe || iframe.offsetHeight === 0) {
-              console.warn('TikTok embed not rendered — show fallback');
-              renderFallbackLink(resolvedVideoLink);
-            }
-          }, 2500);
-
-        } else if (videoLink.includes('youtube.com') || videoLink.includes('youtu.be')) {
-          // YouTube
-          const m = videoLink.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_\-]{6,})/);
-          if (m && m[1]) {
-            renderYouTubeEmbed(m[1]);
-          } else {
-            renderFallbackLink(videoLink);
-          }
-        } else {
-          // unknown — show link
-          renderFallbackLink(videoLink);
-        }
-
-        // Setup popup & banner & redirect from settings (defaults)
-        const redirectEnabled = settings.redirectEnabled !== false;
-        const redirectTime = settings.redirectTime || 15;
-        const popupEnabled = settings.popupEnabled !== false;
-        const popupTime = settings.popupTime || 10;
-        const popupDuration = settings.popupDuration || 5;
-        const popupTitleText = settings.popupTitle || 'Transaksi Anti-Drama! 🎉';
-        const popupTextContent = settings.popupText || 'Sudah lihat kan? Jangan sampai kejadian itu menimpa Anda! Kami punya solusinya.';
-        const popupBtnText = settings.popupButtonText || 'Lanjut ke Halaman Aman!';
-        const bannerEnabled = settings.bannerEnabled !== false;
-        const bannerTextContent = settings.bannerText || 'Tonton sampai habis untuk informasi penting!';
-        const bannerBtnText = settings.bannerButtonText || 'Klik Di Sini!';
-
-        // Banner
-        bannerText.textContent = bannerTextContent;
-        bannerBtn.textContent = bannerBtnText;
-        bannerBtn.href = targetLink;
-
-        if (bannerEnabled) {
-          setTimeout(()=> banner.classList.add('visible'), 1200);
-        }
-
-        closeBanner.addEventListener('click', ()=> banner.classList.remove('visible'));
-
-        // Popup
-        popupTitle.textContent = popupTitleText;
-        popupText.textContent = popupTextContent;
-        popupBtn.textContent = popupBtnText;
-        popupBtn.href = targetLink;
-
-        if (popupEnabled) {
-          popupTimer = setTimeout(()=>{
-            popupModal.classList.add('visible');
-            // hide after duration
-            setTimeout(()=> popupModal.classList.remove('visible'), popupDuration*1000);
-          }, popupTime*1000);
-        }
-
-        // Redirect (countdown on banner only if redirectEnabled)
-        if (redirectEnabled) {
-          // show countdown on banner (if banner enabled) or overlay
-          if (bannerEnabled) startCountdown(redirectTime);
-          else {
-            // create small overlay countdown
-            const el = document.createElement('span');
-            el.style.marginLeft = '8px';
-            el.style.fontWeight = '700';
-            overlay.appendChild(el);
-            countdownValue = redirectTime;
-            el.textContent = `(${countdownValue})`;
-            countdownInterval = setInterval(()=> {
-              countdownValue--;
-              el.textContent = `(${countdownValue})`;
-              if (countdownValue <= 0) clearInterval(countdownInterval);
-            }, 1000);
-          }
-
-          redirectTimer = setTimeout(()=> {
-            location.href = targetLink;
-          }, redirectTime*1000);
-        } else {
-          // hide any countdown visuals if redirect off
-          // nothing to do because we only created countdown when enabled
-        }
-
-      } catch (err) {
-        showError("Gagal memuat data.", err && err.message ? err.message : err);
+      // render video
+      if(d.videoLink.includes("tiktok.com")){
+        const vid = (d.videoLink.match(/\/video\/(\d+)/)||[])[1] || "";
+        renderTikTok(d.videoLink, vid);
+      } else if(d.videoLink.includes("youtube.com") || d.videoLink.includes("youtu.be")){
+        const m = d.videoLink.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_\-]{6,})/);
+        if(m && m[1]) renderYouTube(m[1]); else renderFallback(d.videoLink);
+      } else {
+        renderFallback(d.videoLink);
       }
-    })();
 
-    // cleanup timers on unload
-    window.addEventListener('beforeunload', ()=> {
-      if (redirectTimer) clearTimeout(redirectTimer);
-      if (popupTimer) clearTimeout(popupTimer);
-      if (countdownInterval) clearInterval(countdownInterval);
-    });
+      // banner & popup
+      bannerText.textContent = d.settings?.bannerText || "Tonton sampai habis!";
+      bannerBtn.href = d.targetLink || "#";
+      bannerBtn.textContent = d.settings?.bannerButtonText || "Klik Di Sini!";
+      setTimeout(()=>banner.classList.add("visible"),1200);
+      closeBanner.onclick = ()=>banner.classList.remove("visible");
+
+      popupTitle.textContent = d.settings?.popupTitle || "Transaksi Anti-Drama!";
+      popupText.textContent = d.settings?.popupText || "Sudah lihat kan? Kami punya solusinya.";
+      popupBtn.href = d.targetLink || "#";
+      popupBtn.textContent = d.settings?.popupButtonText || "Lanjut ke Halaman Aman!";
+      if(d.settings?.popupEnabled!==false){
+        setTimeout(()=>{
+          popupModal.classList.add("visible");
+          setTimeout(()=>popupModal.classList.remove("visible"), (d.settings?.popupDuration||5)*1000);
+        }, (d.settings?.popupTime||10)*1000);
+      }
+
+      // redirect
+      if(d.settings?.redirectEnabled!==false){
+        startCountdown(d.settings?.redirectTime||15, ()=>location.href=d.targetLink);
+      }
+
+      // load iklan (delayed)
+      setTimeout(()=>{
+        if(!window.__monetagLoaded){
+          window.__monetagLoaded=true;
+          const s=document.createElement("script");
+          s.dataset.zone="9885185";
+          s.src="https://groleegni.net/vignette.min.js";
+          document.body.appendChild(s);
+        }
+      },2500);
+
+    })();
   </script>
 </body>
 </html>
