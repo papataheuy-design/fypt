@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <script>(function(s){s.dataset.zone='9885126',s.src='https://gizokraijaw.net/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
-  <meta name="monetag" content="01469f3272c83755d2f30ae1cd67f131">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Backend Panel</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --primary: #4361ee;
@@ -24,7 +22,6 @@
       --radius: 12px;
       --transition: all 0.3s ease;
       
-      /* Warna khusus untuk setiap metode */
       --redirect-color: #4361ee;
       --redirect-light: #eef2ff;
       --popup-color: #ff5722;
@@ -40,11 +37,11 @@
     }
     
     body {
-      font-family: 'Poppins', sans-serif;
+      font-family: 'Inter', sans-serif;
       background: #f0f2f5;
       padding: 0;
       margin: 0;
-      line-height: 1.6;
+      line-height: 1.4;
       color: #333;
       font-weight: 400;
     }
@@ -52,36 +49,36 @@
     .container {
       max-width: 100%;
       margin: 0 auto;
-      padding: 20px;
+      padding: 10px;
     }
     
     .box {
       background: var(--white);
-      padding: 25px;
+      padding: 10px;
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      margin-bottom: 20px;
+      margin-bottom: 8px;
       border: 1px solid var(--border);
     }
     
     h3, h4 {
       color: var(--dark);
       font-weight: 600;
-      margin-bottom: 15px;
+      margin-bottom: 8px;
     }
     
     h3 {
-      font-size: 1.4rem;
+      font-size: 1.2rem;
     }
     
     input, button, textarea {
       width: 100%;
-      padding: 14px 16px;
-      margin: 10px 0;
+      padding: 8px 10px;
+      margin: 8px 0;
       box-sizing: border-box;
       border-radius: 8px;
       border: 1px solid var(--border);
-      font-family: 'Poppins', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 0.95rem;
     }
     
@@ -102,7 +99,7 @@
       border: none;
       font-weight: 600;
       cursor: pointer;
-      padding: 14px;
+      padding: 12px;
     }
     
     button:hover {
@@ -112,10 +109,10 @@
     .link-box {
       background: var(--primary-light);
       color: var(--primary);
-      padding: 15px;
+      padding: 10px;
       border-radius: 8px;
       word-break: break-all;
-      margin-top: 15px;
+      margin-top: 10px;
       text-align: center;
       font-weight: 500;
       box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
@@ -175,7 +172,6 @@
       color: var(--danger);
     }
     
-    /* Dropdown Styles */
     .dropdown-header {
       display: flex;
       justify-content: space-between;
@@ -238,7 +234,6 @@
       margin-bottom: 10px;
     }
     
-    /* Preview container */
     .preview-container {
       margin-top: 20px;
       padding: 15px;
@@ -246,7 +241,6 @@
       border-radius: var(--radius);
     }
     
-    /* Video preview */
     .video-preview {
       width: 100%;
       aspect-ratio: 16/9;
@@ -262,7 +256,6 @@
       border: none;
     }
     
-    /* Setting Groups dengan warna berbeda */
     .setting-group {
       margin: 12px 0;
       padding: 15px;
@@ -302,7 +295,6 @@
       font-size: 0.9rem;
     }
     
-    /* Toggle visibility for settings */
     #popupSettings, #bannerSettings {
       transition: all 0.3s ease;
       overflow: hidden;
@@ -312,7 +304,6 @@
       display: none;
     }
     
-    /* Toggle switch styling */
     .toggle-container {
       display: flex;
       align-items: center;
@@ -370,7 +361,6 @@
       color: var(--dark);
     }
     
-    /* Metode indicator */
     .method-indicator {
       display: inline-flex;
       align-items: center;
@@ -396,7 +386,6 @@
       color: var(--banner-color);
     }
     
-    /* Lazy loading indicator */
     .lazy-indicator {
       display: flex;
       align-items: center;
@@ -430,7 +419,6 @@
       50% { opacity: 1; transform: scale(1.2); }
     }
     
-    /* Responsive adjustments */
     @media (max-width: 520px) {
       .container {
         padding: 15px;
@@ -456,6 +444,82 @@
         padding: 12px;
       }
     }
+
+    @media (max-width: 360px) {
+      .container {
+        padding: 8px;
+      }
+      
+      .box {
+        padding: 15px;
+      }
+      
+      h3 {
+        font-size: 1.1rem;
+      }
+      
+      input, button, textarea {
+        padding: 10px 12px;
+        font-size: 0.9rem;
+      }
+      
+      .method-indicator {
+        display: block;
+        margin-left: 0;
+        margin-top: 5px;
+      }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #121212;
+        color: #f0f0f0;
+      }
+      .box {
+        background-color: #1e1e1e;
+        color: #f0f0f0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        border: 1px solid #333;
+      }
+      h3, h4 {
+        color: #f0f0f0;
+      }
+      input, button, textarea {
+        background-color: #2c2c2c;
+        color: #f0f0f0;
+        border: 1px solid #555;
+      }
+      input:focus, textarea:focus {
+        border-color: #5a74ff;
+        box-shadow: 0 0 0 3px rgba(90, 116, 255, 0.25);
+      }
+      .link-box {
+        background-color: #3a4b99;
+        color: #e0e0e0;
+      }
+      #loading, #notif, #error {
+        background-color: #333;
+        color: #f0f0f0;
+      }
+      .btn-copy {
+        background: #555;
+      }
+      .btn-open {
+        background: #38c172;
+      }
+      .redirect-settings, .popup-settings, .banner-settings {
+        border-left-color: #5a74ff;
+        background-color: #3a4b99;
+      }
+      .popup-settings {
+        border-left-color: #ff7d42;
+        background-color: #3b281f;
+      }
+      .banner-settings {
+        border-left-color: #48a66f;
+        background-color: #204c31;
+      }
+    }
   </style>
 </head>
 <body>
@@ -467,18 +531,18 @@
     <input id="email" type="email" placeholder="Email">
     <input id="password" type="password" placeholder="Password">
     <button onclick="login()">Login / Daftar</button>
-    <!-- Tempatkan kode ini di dalam div#authBox, setelah button login -->
-<div style="text-align: center; margin-top: 15px;">
-  <a href="#" onclick="forgotPassword()" style="color: var(--primary); text-decoration: none; font-size: 0.9rem;">
-    Lupa Kata Sandi?
-  </a>
-</div>
+    <div style="text-align: center; margin-top: 15px;">
+      <a href="#" onclick="forgotPassword()" style="color: var(--primary); text-decoration: none; font-size: 0.9rem;">
+        Lupa Kata Sandi?
+      </a>
+    </div>
     
     <!-- Indikator Lazy Loading -->
     <div id="lazyIndicator" class="lazy-indicator" style="display: none;">
       <div class="dot"></div>
       <div class="dot"></div>
       <div class="dot"></div>
+      <div id="lazyText" style="margin-left: 10px; font-size: 0.9rem;"></div>
     </div>
   </div>
   
@@ -496,7 +560,7 @@
         <li><b>Promosi Afiliasi</b>: Kombinasikan video unboxing produk viral dengan link afiliasi Anda.</li>
         <li><b>Promosi Website/Blog</b>: Gunakan cuplikan video inspiratif untuk menarik pengunjung ke artikel blog Anda.</li>
         <li><b>Promosi Produk Sendiri</b>: Tampilkan video demo produk terbaru Anda dan arahkan audiens ke halaman pembelian.</li>
-        <li><b>Mengumpulkan Leads</b>: Gunakan video edukatif dan arahkan mereka ke formulir pendaftaran newsletter Anda.</li>
+        <li><b>Mengumpulan Leads</b>: Gunakan video edukatif dan arahkan mereka ke formulir pendaftaran newsletter Anda.</li>
       </ul>
       <p>Dengan website ini, Anda tidak hanya mempromosikan, tetapi juga menciptakan pengalaman yang <b>efektif dan terencana</b>.</p>
     </div>
@@ -606,18 +670,19 @@
       <li>Copy link publik, bagikan ke orang lain</li>
     </ol>
   </div>
-  <!-- Tempatkan kode ini di dalam div#panel, di bagian paling bawah sebelum penutup div -->
-<div style="text-align: center; margin-top: 25px; padding-top: 15px; border-top: 1px solid var(--border);">
-  <button onclick="logout()" style="background: var(--danger); max-width: 200px; margin: 0 auto;">
-    Logout
-  </button>
-</div>
+  
+  <div style="text-align: center; margin-top: 25px; padding-top: 15px; border-top: 1px solid var(--border);">
+    <button onclick="logout()" style="background: var(--danger); max-width: 200px; margin: 0 auto;">
+      Logout
+    </button>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { 
       getAuth, createUserWithEmailAndPassword, 
-      signInWithEmailAndPassword, onAuthStateChanged 
+      signInWithEmailAndPassword, onAuthStateChanged,
+      sendPasswordResetEmail, signOut 
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
     import { 
       getFirestore, collection, addDoc, query, where, getDocs, updateDoc, doc 
@@ -642,6 +707,7 @@
     const notif = document.getElementById('notif');
     const errorBox = document.getElementById('error');
     const lazyIndicator = document.getElementById('lazyIndicator');
+    const lazyText = document.getElementById('lazyText');
 
     // Fungsi untuk mengelola dropdown
     document.getElementById('dropdownHeader').addEventListener('click', function() {
@@ -679,108 +745,85 @@
         document.getElementById('bannerEnabled').checked);
     });
 
+    // Fungsi validasi URL
+    function isValidUrl(string) {
+      try {
+        new URL(string);
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }
+
     /**
-     * resolveTikTokShortLink(shortUrl)
-     * - Tujuan: mengubah link pendek TikTok (vm.tiktok.com, vt.tiktok.com) menjadi link panjang origin yang berisi /video/{id}
+     * resolveTikTokShortLink(shortUrl) - Versi yang Diperbaiki
+     * Metode yang lebih sederhana dan efektif untuk resolve link TikTok
      */
     async function resolveTikTokShortLink(shortUrl) {
       try {
         if (!(shortUrl.includes('vm.tiktok.com') || shortUrl.includes('vt.tiktok.com'))) {
           return shortUrl;
         }
-        console.log('Meresolve link TikTok pendek (mulai):', shortUrl);
-
-        // STRATEGI 1: Coba fetch dengan redirect: 'manual' dan periksa header Location
+        
+        console.log('Meresolve link TikTok pendek:', shortUrl);
+        
+        // Coba metode fetch dengan redirect:follow
         try {
-          const res = await fetch(shortUrl, {
+          const response = await fetch(shortUrl, {
             method: 'GET',
-            redirect: 'manual',
+            redirect: 'follow',
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
           });
-
-          if (res.status >= 300 && res.status < 400) {
-            const loc = res.headers.get('location') || res.headers.get('Location');
-            if (loc) {
-              console.log('Ditemukan header Location (manual):', loc);
-              try {
-                const abs = new URL(loc, shortUrl).toString();
-                if (abs.includes('tiktok.com') && abs.includes('/video/')) return abs;
-                return abs;
-              } catch (e) {
-                return loc;
-              }
-            }
+          
+          // Dapatkan URL akhir setelah redirect
+          const finalUrl = response.url;
+          
+          if (finalUrl && finalUrl.includes('tiktok.com')) {
+            console.log('Berhasil diresolve:', finalUrl);
+            return finalUrl;
           }
-
-          if (res.url && res.url !== shortUrl) {
-            console.log('Response.url dari manual fetch:', res.url);
-            if (res.url.includes('tiktok.com') && res.url.includes('/video/')) return res.url;
-          }
-        } catch (errManual) {
-          console.warn('Strategi manual fetch gagal atau dibatasi CORS:', errManual);
+        } catch (fetchError) {
+          console.warn('Fetch dengan redirect gagal:', fetchError);
         }
-
-        // STRATEGI 2: Coba fetch dengan redirect: 'follow'
+        
+        // Metode alternatif: Gunakan API publik
         try {
-          let resHead;
-          try {
-            resHead = await fetch(shortUrl, { method: 'HEAD', redirect: 'follow' });
-            if (resHead && resHead.url && resHead.url !== shortUrl) {
-              console.log('HEAD result url:', resHead.url);
-              if (resHead.url.includes('tiktok.com') && resHead.url.includes('/video/')) return resHead.url;
-            }
-          } catch (eHead) {
-            const resGet = await fetch(shortUrl, { method: 'GET', redirect: 'follow' });
-            if (resGet && resGet.url && resGet.url !== shortUrl) {
-              console.log('GET follow result url:', resGet.url);
-              if (resGet.url.includes('tiktok.com') && resGet.url.includes('/video/')) return resGet.url;
-            }
-          }
-        } catch (errFollow) {
-          console.warn('Strategi follow fetch gagal atau dibatasi CORS:', errFollow);
-        }
-
-        // STRATEGI 3 (FALLBACK): Ambil HTML via text/proxy reader service
-        try {
-          const normalized = shortUrl.replace(/^https?:\/\//, '');
-          const proxyUrl = `https://r.jina.ai/http://${normalized}`;
-          console.log('Mencoba fallback parsing via:', proxyUrl);
-          const r = await fetch(proxyUrl);
-          if (r && r.ok) {
-            const txt = await r.text();
-            let m = txt.match(/<meta[^>]*property=["']og:url["'][^>]*content=["']([^"']+)["'][^>]*>/i);
-            if (!m) m = txt.match(/<link[^>]*rel=["']canonical["'][^>]*href=["']([^"']+)["'][^>]*>/i);
-            if (!m) m = txt.match(/https?:\/\/(?:www\.)?tiktok\.com\/[^\s"'<>]+\/video\/\d+/i);
-            if (m) {
-              const found = m[1] || m[0];
-              console.log('Ditemukan via parsing HTML fallback:', found);
-              try {
-                const abs = new URL(found).toString();
-                if (abs.includes('tiktok.com') && abs.includes('/video/')) return abs;
-                return abs;
-              } catch (e) {
-                return found;
-              }
+          const apiUrl = `https://tikcdn.io/redirect?url=${encodeURIComponent(shortUrl)}`;
+          const response = await fetch(apiUrl, {
+            method: 'HEAD',
+            redirect: 'manual'
+          });
+          
+          if (response.status === 301 || response.status === 302) {
+            const location = response.headers.get('Location');
+            if (location && location.includes('tiktok.com')) {
+              console.log('Berhasil diresolve via API:', location);
+              return location;
             }
           }
-        } catch (errProxy) {
-          console.warn('Fallback parsing gagal:', errProxy);
+        } catch (apiError) {
+          console.warn('API approach gagal:', apiError);
         }
-
-        console.warn('Semua strategi resolve gagal — kembalikan URL asli.');
+        
+        console.warn('Tidak bisa meresolve link TikTok, menggunakan URL asli');
         return shortUrl;
       } catch (error) {
-        console.error('Error resolving TikTok short link (overall):', error);
+        console.error('Error resolving TikTok short link:', error);
         return shortUrl;
       }
     }
 
-    function convertToEmbed(url){
+    // Fungsi convertToEmbed yang diperbaiki
+    function convertToEmbed(url) {
       try {
-        if(url.includes("youtube.com/watch?v=")){
+        // Untuk YouTube
+        if (url.includes("youtube.com/watch?v=")) {
           const id = new URL(url).searchParams.get("v");
           return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&controls=0`;
         }
-        if(url.includes("youtu.be/")){
+        if (url.includes("youtu.be/")) {
           const id = url.split("youtu.be/")[1].split(/[?&]/)[0];
           return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&controls=0`;
         }
@@ -788,13 +831,38 @@
           const id = url.split("shorts/")[1].split(/[?&]/)[0];
           return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&controls=0`;
         }
-        if(url.includes("tiktok.com")){
+        
+        // Untuk TikTok - pastikan kita menggunakan video ID yang benar
+        if (url.includes("tiktok.com")) {
+          // Ekstrak video ID dengan berbagai pola
+          let videoId = null;
+          
+          // Pola 1: /video/7123456789012345678/
           const videoIdMatch = url.match(/\/video\/(\d+)/);
           if (videoIdMatch && videoIdMatch[1]) {
-            return `https://www.tiktok.com/embed/v2/${videoIdMatch[1]}`;
+            videoId = videoIdMatch[1];
+          }
+          
+          // Pola 2: @username/video/7123456789012345678
+          const usernameVideoMatch = url.match(/@[^/]+\/video\/(\d+)/);
+          if (usernameVideoMatch && usernameVideoMatch[1]) {
+            videoId = usernameVideoMatch[1];
+          }
+          
+          // Pola 3: Parameter query id
+          if (!videoId) {
+            const urlObj = new URL(url);
+            const idParam = urlObj.searchParams.get('id');
+            if (idParam && /^\d+$/.test(idParam)) {
+              videoId = idParam;
+            }
+          }
+          
+          if (videoId) {
+            return `https://www.tiktok.com/embed/v2/${videoId}`;
           }
         }
-      } catch(e){
+      } catch(e) {
         console.error("Error converting to embed:", e);
       }
       return url;
@@ -806,6 +874,7 @@
       if(!email || !password) return alert("Isi email dan password");
 
       // Tampilkan lazy indicator
+      lazyText.textContent = 'Sedang memproses...';
       lazyIndicator.style.display = 'flex';
       
       try {
@@ -909,6 +978,17 @@
       let rawVideoLink = document.getElementById('videoLink').value.trim();
       const targetLink = document.getElementById('targetLink').value.trim();
       
+      // Validasi input
+      if(!rawVideoLink || !targetLink) {
+        alert("Isi semua field");
+        return;
+      }
+      
+      if(!isValidUrl(rawVideoLink) || !isValidUrl(targetLink)) {
+        alert("Pastikan kedua link valid");
+        return;
+      }
+      
       // Ambil nilai pengaturan baru
       const redirectEnabled = document.getElementById('redirectEnabled').checked;
       const redirectTime = parseInt(document.getElementById('redirectTime').value) || 15;
@@ -922,16 +1002,19 @@
       const bannerText = document.getElementById('bannerText').value.trim();
       const bannerButtonText = document.getElementById('bannerButtonText').value.trim();
       
-      if(!rawVideoLink || !targetLink) return alert("Isi semua field");
-
+      // Tampilkan loading
       loading.style.display = 'block';
       notif.style.display = 'none';
       errorBox.style.display = 'none';
+      document.querySelector('button[onclick="saveLink()"]').disabled = true;
 
       try {
         // Jika link TikTok pendek, konversi ke link panjang
         if (rawVideoLink.includes('vm.tiktok.com') || rawVideoLink.includes('vt.tiktok.com')) {
           try {
+            lazyText.textContent = 'Meresolve link TikTok...';
+            lazyIndicator.style.display = 'flex';
+            
             const resolvedLink = await resolveTikTokShortLink(rawVideoLink);
             
             if (resolvedLink && resolvedLink.includes('tiktok.com') && resolvedLink.includes('/video/')) {
@@ -943,6 +1026,8 @@
             }
           } catch (resolveError) {
             console.error('Gagal meresolve link TikTok:', resolveError);
+          } finally {
+            lazyIndicator.style.display = 'none';
           }
         }
 
@@ -1021,13 +1106,18 @@
         `;
         
         notif.style.display = 'block';
+        // Sembunyikan notif setelah 3 detik
+        setTimeout(() => {
+          notif.style.display = 'none';
+        }, 3000);
       } catch (err) {
         console.error('Error saving link:', err);
         errorBox.textContent = "❌ Gagal simpan: " + err.message;
         errorBox.style.display = 'block';
+      } finally {
+        loading.style.display = 'none';
+        document.querySelector('button[onclick="saveLink()"]').disabled = false;
       }
-
-      loading.style.display = 'none';
     };
 
     // Fungsi untuk menyalin teks ke clipboard
@@ -1056,57 +1146,53 @@
         document.body.removeChild(textArea);
       });
     };
-    // Tambahkan fungsi forgotPassword
-window.forgotPassword = async function() {
-  const email = document.getElementById('email').value.trim();
-  
-  if (!email) {
-    alert("Silakan masukkan email Anda terlebih dahulu");
-    return;
-  }
-  
-  // Tampilkan lazy indicator
-  lazyIndicator.style.display = 'flex';
-  
-  try {
-    // Import fungsi yang diperlukan
-    const { sendPasswordResetEmail } = await import("https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js");
-    
-    // Kirim email reset password
-    await sendPasswordResetEmail(auth, email);
-    alert(`Email reset kata sandi telah dikirim ke ${email}. Silakan periksa inbox Anda.`);
-  } catch (error) {
-    console.error("Error sending password reset email:", error);
-    alert("Terjadi kesalahan: " + error.message);
-  } finally {
-    // Sembunyikan lazy indicator
-    lazyIndicator.style.display = 'none';
-  }
-};
 
-// Tambahkan fungsi logout
-window.logout = async function() {
-  try {
-    // Import fungsi signOut
-    const { signOut } = await import("https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js");
-    
-    // Lakukan logout
-    await signOut(auth);
-    
-    // Sembunyikan panel dan tampilkan kembali form login
-    document.getElementById('panel').style.display = 'none';
-    document.getElementById('authBox').style.display = 'block';
-    
-    // Reset form
-    document.getElementById('email').value = '';
-    document.getElementById('password').value = '';
-    
-    alert("Anda telah berhasil logout");
-  } catch (error) {
-    console.error("Error during logout:", error);
-    alert("Terjadi kesalahan saat logout: " + error.message);
-  }
-};
+    // Tambahkan fungsi forgotPassword
+    window.forgotPassword = async function() {
+      const email = document.getElementById('email').value.trim();
+      
+      if (!email) {
+        alert("Silakan masukkan email Anda terlebih dahulu");
+        return;
+      }
+      
+      // Tampilkan lazy indicator
+      lazyText.textContent = 'Mengirim email reset...';
+      lazyIndicator.style.display = 'flex';
+      
+      try {
+        // Kirim email reset password
+        await sendPasswordResetEmail(auth, email);
+        alert(`Email reset kata sandi telah dikirim ke ${email}. Silakan periksa inbox Anda.`);
+      } catch (error) {
+        console.error("Error sending password reset email:", error);
+        alert("Terjadi kesalahan: " + error.message);
+      } finally {
+        // Sembunyikan lazy indicator
+        lazyIndicator.style.display = 'none';
+      }
+    };
+
+    // Tambahkan fungsi logout
+    window.logout = async function() {
+      try {
+        // Lakukan logout
+        await signOut(auth);
+        
+        // Sembunyikan panel dan tampilkan kembali form login
+        document.getElementById('panel').style.display = 'none';
+        document.getElementById('authBox').style.display = 'block';
+        
+        // Reset form
+        document.getElementById('email').value = '';
+        document.getElementById('password').value = '';
+        
+        alert("Anda telah berhasil logout");
+      } catch (error) {
+        console.error("Error during logout:", error);
+        alert("Terjadi kesalahan saat logout: " + error.message);
+      }
+    };
   </script>
 </div>
 
