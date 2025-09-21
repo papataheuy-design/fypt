@@ -65,7 +65,13 @@
     </div>
 </div>
 
-<script>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+    import { getFirestore, doc, getDoc, collection } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+    import { setLogLevel } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+
+    setLogLevel('debug');
     const articleContent = document.getElementById('article-content');
     const articleTitle = document.getElementById('article-title');
     const articleImage = document.getElementById('article-image');
@@ -74,31 +80,55 @@
     const messageArea = document.getElementById('message-area');
     const messageTitle = document.getElementById('message-title');
     const messageText = document.getElementById('message-text');
-    const dataKey = 'singleArticlePost';
-    const EXPIRATION_DAYS = 15;
 
-    function checkAndDisplayArticle() {
-        const storedData = localStorage.getItem(dataKey);
-        
-        if (!storedData) {
-            showMessage("Maaf, Artikel Tidak Ditemukan", "Postingan ini mungkin sudah kedaluwarsa atau tidak ada.");
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+    let db;
+    let auth;
+    let userId = null;
+
+    function showMessage(title, text) {
+        messageArea.style.display = 'block';
+        messageTitle.textContent = title;
+        messageText.textContent = text;
+        articleContent.style.display = 'none';
+    }
+
+    async function getArticleData(docId, uid) {
+        try {
+            const articleDocRef = doc(collection(db, `/artifacts/${appId}/users/${uid}/articles`), docId);
+            const articleSnap = await getDoc(articleDocRef);
+            if (articleSnap.exists()) {
+                return articleSnap.data();
+            }
+        } catch (e) {
+            console.error("Error fetching article data:", e);
+        }
+        return null;
+    }
+
+    async function checkAndDisplayArticle() {
+        if (!userId) {
+            showMessage("Autentikasi Gagal", "Silakan muat ulang halaman atau periksa koneksi Anda.");
             return;
         }
 
-        const docData = JSON.parse(storedData);
-        
-        // Periksa kedaluwarsa
-        const now = new Date();
-        const storedDate = new Date(docData.timestamp);
-        const diffTime = Math.abs(now - storedDate);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const urlParams = new URLSearchParams(window.location.search);
+        const docId = urlParams.get('id');
 
-        if (diffDays > EXPIRATION_DAYS) {
-            localStorage.removeItem(dataKey);
-            showMessage("Artikel Kedaluwarsa", "Postingan ini telah kedaluwarsa dan dihapus dari perangkat ini.");
+        if (!docId) {
+            showMessage("Artikel Tidak Ditemukan", "URL tidak valid. Silakan periksa kembali tautannya.");
             return;
         }
 
+        const docData = await getArticleData(docId, userId);
+        if (!docData) {
+            showMessage("Artikel Tidak Ditemukan", "Postingan ini mungkin sudah kedaluwarsa atau tidak ada.");
+            return;
+        }
+        
         // Tampilkan konten artikel
         articleTitle.textContent = docData.scrapedContent.title;
         articleImage.src = docData.scrapedContent.image;
@@ -122,13 +152,32 @@
         }
     }
 
-    function showMessage(title, text) {
-        messageArea.style.display = 'block';
-        messageTitle.textContent = title;
-        messageText.textContent = text;
+    async function initFirebase() {
+        if (Object.keys(firebaseConfig).length > 0) {
+            const app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+
+            await new Promise(resolve => {
+                const unsubscribe = onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                    unsubscribe();
+                    resolve();
+                });
+            });
+
+            if (initialAuthToken) {
+                 await signInWithCustomToken(auth, initialAuthToken);
+            }
+            await checkAndDisplayArticle();
+        }
     }
-    
-    window.onload = checkAndDisplayArticle;
+
+    window.onload = initFirebase;
 </script>
 </body>
 </html>
