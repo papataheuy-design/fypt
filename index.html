@@ -87,6 +87,26 @@
   .box p,
   .box span {
     color:#fff !important;
+    .article-btn {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .article-btn:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
   }
 }
     
@@ -228,6 +248,10 @@
       <div id="preview">Belum ada postingan</div>
     </div>
   </div>
+  <!-- Tombol untuk mengalihkan ke Panel Artikel -->
+    <button class="article-btn" onclick="redirectToPanelArtikel()">
+        Buka Panel Artikel
+    </button>
 
   <!-- Cara pakai -->
   <div class="box">
@@ -659,6 +683,10 @@
         document.body.removeChild(ta);
       });
     };
+    // Fungsi untuk mengalihkan ke halaman Panel Artikel
+        function redirectToPanelArtikel() {
+            window.location.href = 'https://fypt.vercel.app/Panel%20Artikel.html';
+        }
 
     // forgot password
     window.forgotPassword = async function() {
