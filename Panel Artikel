@@ -4,11 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Panel Artikel & Berita Sederhana</title>
-
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
+    
     <style>
         :root{--primary:#4361ee;--primary-light:#eef2ff;--secondary:#6c757d;--success:#28a745;--danger:#dc3545;--light:#f8f9fa;--dark:#343a40;--white:#ffffff;--border:#e0e0e0;--shadow:0 4px 12px rgba(0,0,0,0.08);--radius:12px;--transition:all 0.3s ease}
         *{box-sizing:border-box;margin:0;padding:0}
@@ -57,6 +57,11 @@
           line-height: 1.6;
           font-size: 0.95rem;
         }
+        #user-id-display {
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 5px;
+        }
         @media (max-width:520px){.container{padding:15px}.box{padding:20px}h3{font-size:1.3rem}input,button,textarea{padding:12px 14px}.button-group{flex-direction:column}}
         @media (max-width:360px){.container{padding:8px}.box{padding:15px}h3{font-size:1.1rem}input,button,textarea{padding:10px 12px;font-size:0.9rem}}
         @media (prefers-color-scheme:dark){body{background-color:#121212;color:#ffffff}.box{background-color:#1e1e1e;color:#ffffff;box-shadow:0 4px 12px rgba(0,0,0,.4);border:1px solid #ddd}h3,h4{color:#ffffff}input,button,textarea{background-color:#2c2c2c;color:#ffffff;border:1px solid #555}input:focus,textarea:focus{border-color:#5a74ff;box-shadow:0 0 0 3px rgba(90,116,255,.25)}.link-box{background-color:#3a4b99;color:#e0e0e0}#loading,#notif,#error{background-color:#333;color:#f0f0f0}.btn-copy{background:#555}.btn-open{background:#38c172}}
@@ -78,6 +83,7 @@
     <div id="panel" class="box">
         <h3 id="panelTitle">Buat Link Artikel Baru</h3>
         <small id="panelSubtitle">📌 Tempel link artikel berita apa saja.</small>
+        <span id="user-id-display"></span>
         <input id="articleLink" type="url" placeholder="Link Artikel Berita">
 
         <h4>Pengaturan Iklan & Redirect</h4>
@@ -91,11 +97,10 @@
         <div id="error"></div>
     </div>
     
-    <!-- Bagian baru untuk preview artikel -->
     <div id="previewBox" class="box" style="display:none;">
         <h3 id="previewTitle">Pratinjau Artikel</h3>
         <div id="articlePreview" class="article-preview">
-            <!-- Konten preview akan dimuat di sini -->
+            
         </div>
         <div id="share-area">
             <h3>Salin Link Publik</h3>
@@ -120,7 +125,13 @@
     </div>
 </div>
 
-<script>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, collection } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+    import { setLogLevel } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+
+    setLogLevel('debug');
     const loading = document.getElementById('loading');
     const notif = document.getElementById('notif');
     const errorBox = document.getElementById('error');
@@ -130,15 +141,23 @@
     const previewBox = document.getElementById('previewBox');
     const articlePreview = document.getElementById('articlePreview');
     const publicLinkSpan = document.getElementById('public-link');
-    const dataKey = 'singleArticlePost';
-    const EXPIRATION_DAYS = 15;
+    const userIdDisplay = document.getElementById('user-id-display');
+
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+    let db;
+    let auth;
+    let userId = null;
+    let articleDocRef;
 
     function isValidUrl(string) {
         try { new URL(string); return true; } catch (_) { return false; }
     }
 
     // Fungsi simulasi scraping artikel
-    // NOTE: For a real application, scraping MUST be done on a server to avoid CORS issues.
+    // NOTE: In a real application, scraping MUST be done on a server to avoid CORS issues.
     function fetchArticle(url) {
         return new Promise(resolve => {
             const dummyArticles = {
@@ -162,14 +181,13 @@
         });
     }
 
-    // New function to render the article preview
     function renderPreview(docData) {
         if (!docData) {
             previewBox.style.display = 'none';
             return;
         }
 
-        const publicUrl = window.location.href.replace('panel_artikel.html', 'tampilan_utama.html');
+        const publicUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname.replace('panel_artikel.html', 'page.html')}?id=${docData.id}`;
         publicLinkSpan.textContent = publicUrl;
 
         articlePreview.innerHTML = `
@@ -180,35 +198,34 @@
         previewBox.style.display = 'block';
     }
 
-    // Check for existing data and update UI on load
-    function checkAndSetUI() {
-        const storedData = localStorage.getItem(dataKey);
-        if (storedData) {
-            const docData = JSON.parse(storedData);
-            const now = new Date();
-            const storedDate = new Date(docData.timestamp);
-            const diffTime = Math.abs(now - storedDate);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            
-            if (diffDays <= EXPIRATION_DAYS) {
+    async function checkAndSetUI() {
+        if (!userId) return;
+
+        try {
+            const articleSnap = await getDoc(articleDocRef);
+            if (articleSnap.exists()) {
+                const docData = articleSnap.data();
+                docData.id = articleSnap.id;
                 panelTitle.textContent = "Update Artikel Anda";
-                panelSubtitle.textContent = `📌 Postingan Anda akan kedaluwarsa dalam ${EXPIRATION_DAYS - diffDays} hari.`;
                 saveButton.textContent = "Update";
                 document.getElementById('articleLink').value = docData.sourceLink;
                 document.getElementById('redirectLink').value = docData.redirectLink;
                 document.getElementById('popupLink').value = docData.popupLink || '';
                 document.getElementById('bannerCode').value = docData.bannerCode || '';
                 renderPreview(docData);
-            } else {
-                localStorage.removeItem(dataKey);
-                renderPreview(null);
             }
-        } else {
-            renderPreview(null);
+        } catch (e) {
+            console.error('Error fetching data:', e);
         }
     }
 
     window.saveArticle = async () => {
+        if (!userId) {
+            errorBox.textContent = "Autentikasi gagal. Silakan muat ulang halaman.";
+            errorBox.style.display = 'block';
+            return;
+        }
+
         const articleLink = document.getElementById('articleLink').value.trim();
         const redirectLink = document.getElementById('redirectLink').value.trim();
         const popupLink = document.getElementById('popupLink').value.trim();
@@ -233,31 +250,21 @@
         try {
             const scrapedContent = await fetchArticle(articleLink);
             
-            let authLink;
-            const storedData = localStorage.getItem(dataKey);
-            if (storedData) {
-                authLink = JSON.parse(storedData).authLink;
-            } else {
-                authLink = Math.random().toString(36).substring(2,10);
-            }
-
             const dataToStore = {
                 sourceLink: articleLink,
                 redirectLink,
-                popupLink,
-                bannerCode,
-                authLink,
+                popupLink: popupLink || null,
+                bannerCode: bannerCode || null,
                 scrapedContent,
                 timestamp: new Date().toISOString()
             };
             
-            localStorage.setItem(dataKey, JSON.stringify(dataToStore));
-            console.log('Dokumen artikel diperbarui di localStorage.');
+            await setDoc(articleDocRef, dataToStore, { merge: true });
+            console.log('Dokumen artikel diperbarui di Firestore.');
             
-            // Render preview and show success message
-            renderPreview(dataToStore);
             notif.textContent = "✅ Tautan berhasil disimpan.";
             notif.style.display = 'block';
+            renderPreview({ ...dataToStore, id: articleDocRef.id });
 
         } catch (e) {
             console.error('saveArticle error:', e);
@@ -285,7 +292,34 @@
         window.open(publicUrl, '_blank');
     };
 
-    window.onload = checkAndSetUI;
+    async function initFirebaseAndCheckData() {
+        if (Object.keys(firebaseConfig).length > 0) {
+            const app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+
+            await new Promise(resolve => {
+                const unsubscribe = onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        userIdDisplay.textContent = `User ID: ${userId}`;
+                        articleDocRef = doc(collection(db, `/artifacts/${appId}/users/${userId}/articles`), 'article_post');
+                        await checkAndSetUI();
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                    unsubscribe();
+                    resolve();
+                });
+            });
+
+            if (initialAuthToken) {
+                 await signInWithCustomToken(auth, initialAuthToken);
+            }
+        }
+    }
+
+    initFirebaseAndCheckData();
 </script>
 </body>
 </html>
