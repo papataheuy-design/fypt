@@ -79,43 +79,22 @@
     @media (max-width:520px){.container{padding:15px}.box{padding:20px}h3{font-size:1.3rem}input,button,textarea{padding:12px 14px}.button-group{flex-direction:column}.setting-group{padding:12px}}
     @media (max-width:360px){.container{padding:8px}.box{padding:15px}h3{font-size:1.1rem}input,button,textarea{padding:10px 12px;font-size:0.9rem}.method-indicator{display:block;margin-left:0;margin-top:5px}}
     @media (prefers-color-scheme:dark){body{background-color:#121212;color:#ffffff}.box{background-color:#1e1e1e;color:#ffffff;box-shadow:0 4px 12px rgba(0,0,0,.4);border:1px solid #ddd}h3,h4{color:#ffffff}input,button,textarea{background-color:#2c2c2c;color:#ffffff;border:1px solid #555}input:focus,textarea:focus{border-color:#5a74ff;box-shadow:0 0 0 3px rgba(90,116,255,.25)}.link-box{background-color:#3a4b99;color:#e0e0e0}#loading,#notif,#error{background-color:#333;color:#f0f0f0}.btn-copy{background:#555}.btn-open{background:#38c172}.redirect-settings,.popup-settings,.banner-settings{border-left-color:#5a74ff;background-color:#3a4b99}.popup-settings{border-left-color:#ff7d42;background-color:#3b281f}.banner-settings{border-left-color:#48a66f;background-color:#204c31}}
-@media (prefers-color-scheme:dark){
-  .box, 
-  .box h3,
-  .box h4,
-  .box label,
-  .box p,
-  .box span {
-    color:#fff !important;
-  }
-}
+    @media (prefers-color-scheme:dark){
+      .box, 
+      .box h3,
+      .box h4,
+      .box label,
+      .box p,
+      .box span {
+        color:#fff !important;
+      }
+    }
     
   </style>
 </head>
 <body>
 
 <div class="container">
-  <!-- Box Login -->
-  <div id="authBox" class="box">
-    <h3>Login / Daftar</h3>
-    <input id="email" type="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Password">
-    <button onclick="login()">Login / Daftar</button>
-    <div style="text-align: center; margin-top: 15px;">
-      <a href="#" onclick="forgotPassword()" style="color: var(--primary); text-decoration: none; font-size: 0.9rem;">
-        Lupa Kata Sandi?
-      </a>
-    </div>
-    
-    <!-- Indikator Lazy Loading -->
-    <div id="lazyIndicator" class="lazy-indicator" style="display: none;">
-      <div class="dot"></div>
-      <div class="dot"></div>
-      <div class="dot"></div>
-      <div id="lazyText" style="margin-left: 10px; font-size: 0.9rem;"></div>
-    </div>
-  </div>
-  
   <!-- Dropdown Penjelasan untuk Afiliator -->
   <div class="box dropdown-container">
     <div id="dropdownHeader" class="dropdown-header">
@@ -136,8 +115,8 @@
     </div>
   </div>
 
-  <!-- Panel utama -->
-  <div id="panel" class="box" style="display:none;">
+  <!-- Panel utama - TAMPIL LANGSUNG -->
+  <div id="panel" class="box">
     <h3>Buat / Update Link</h3>
     <small>📌 Tempel link video <b>apa saja</b> (TikTok / YouTube) — otomatis dikonversi jadi embed.</small>
     <input id="videoLink" type="url" placeholder="Link Video TikTok / YouTube">
@@ -233,7 +212,6 @@
   <div class="box">
     <h3>Cara Penggunaan 📝</h3>
     <ol>
-      <li>Login / daftar pakai email dan password</li>
       <li>Tempel link video TikTok / YouTube (tidak perlu embed)</li>
       <li>Tempel link tujuan (misal link produk / website)</li>
       <li>Klik <b>Simpan</b> → muncul preview & link publik</li>
@@ -242,20 +220,16 @@
   </div>
   
   <div style="text-align: center; margin-top: 25px; padding-top: 15px; border-top: 1px solid var(--border);">
-    <button onclick="logout()" style="background: var(--danger); max-width: 200px; margin: 0 auto;">
-      Logout
+    <button onclick="clearLocalStorage()" style="background: var(--danger); max-width: 200px; margin: 0 auto;">
+      Reset Device
     </button>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
     import { 
-      getAuth, createUserWithEmailAndPassword, 
-      signInWithEmailAndPassword, onAuthStateChanged,
-      sendPasswordResetEmail, signOut 
-    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-    import { 
-      getFirestore, collection, addDoc, query, where, getDocs, updateDoc, doc 
+      getFirestore, collection, addDoc, query, where, getDocs, updateDoc, doc,
+      orderBy, limit
     } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
     // Konfigurasi Firebase (tetap seperti Anda berikan)
@@ -270,7 +244,6 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
     const db = getFirestore(app);
 
     const preview = document.getElementById('preview');
@@ -279,6 +252,57 @@
     const errorBox = document.getElementById('error');
     const lazyIndicator = document.getElementById('lazyIndicator');
     const lazyText = document.getElementById('lazyText');
+
+    // Fungsi untuk mendapatkan/membuat deviceId
+    function getDeviceId() {
+      let deviceId = localStorage.getItem('deviceId');
+      if (!deviceId) {
+        // Generate deviceId baru jika belum ada
+        deviceId = 'device_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        localStorage.setItem('deviceId', deviceId);
+        console.log('Device ID baru dibuat:', deviceId);
+        
+        // Coba cari postingan terbaru untuk device ini (migrasi dari sistem lama)
+        migrateFromOldSystem(deviceId);
+      }
+      return deviceId;
+    }
+
+    // Fungsi untuk migrasi dari sistem lama (tanpa deviceId)
+    async function migrateFromOldSystem(deviceId) {
+      try {
+        // Cari postingan terbaru yang belum memiliki deviceId
+        const q = query(
+          collection(db, "links"), 
+          where("deviceId", "==", null),
+          orderBy("createdAt", "desc"),
+          limit(1)
+        );
+        
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          const docData = snap.docs[0].data();
+          const docId = snap.docs[0].id;
+          
+          // Update dokumen dengan deviceId baru
+          await updateDoc(doc(db, "links", docId), {
+            deviceId: deviceId
+          });
+          
+          console.log('Migrasi berhasil: postingan lama ditautkan ke deviceId', deviceId);
+        }
+      } catch (error) {
+        console.error('Error selama migrasi:', error);
+      }
+    }
+
+    // Fungsi untuk reset localStorage
+    window.clearLocalStorage = function() {
+      if (confirm('Apakah Anda yakin ingin mereset device? Ini akan menghapus semua data lokal dan postingan Anda.')) {
+        localStorage.removeItem('deviceId');
+        location.reload();
+      }
+    };
 
     // dropdown toggle
     document.getElementById('dropdownHeader').addEventListener('click', function() {
@@ -302,6 +326,9 @@
       document.getElementById('redirectSettings').classList.toggle('visible', document.getElementById('redirectEnabled').checked);
       document.getElementById('popupSettings').classList.toggle('visible', document.getElementById('popupEnabled').checked);
       document.getElementById('bannerSettings').classList.toggle('visible', document.getElementById('bannerEnabled').checked);
+      
+      // Load postingan saat halaman dimuat
+      loadMyPost();
     });
 
     function isValidUrl(string) {
@@ -388,35 +415,6 @@
           const id = url.split("youtu.be/")[1].split(/[?&]/)[0];
           return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&controls=0`;
         }
-        async function convertYouTubeToLong(url) {
-  try {
-    const u = new URL(url);
-
-    // youtu.be/xxxx → watch?v=xxxx
-    if (u.hostname.includes("youtu.be")) {
-      const id = u.pathname.replace("/", "");
-      if (id) return `https://www.youtube.com/watch?v=${id}`;
-    }
-
-    // youtube.com/shorts/xxxx → watch?v=xxxx
-    if (u.hostname.includes("youtube.com") && u.pathname.includes("/shorts/")) {
-      const id = u.pathname.split("/shorts/")[1].split(/[?&]/)[0];
-      if (id) return `https://www.youtube.com/watch?v=${id}`;
-    }
-
-    // youtube.com/embed/xxxx → watch?v=xxxx
-    if (u.hostname.includes("youtube.com") && u.pathname.includes("/embed/")) {
-      const id = u.pathname.split("/embed/")[1].split(/[?&]/)[0];
-      if (id) return `https://www.youtube.com/watch?v=${id}`;
-    }
-
-    // youtube.com/watch?v=xxxx → sudah long
-    return url;
-  } catch (e) {
-    console.error("convertYouTubeToLong error:", e);
-    return url;
-  }  
-        }
         // TikTok: gunakan embed v2 iframe (stabil untuk preview)
         if (url.includes("tiktok.com")) {
           const m = url.match(/\/video\/(\d+)/);
@@ -430,47 +428,48 @@
       return url;
     }
 
-    // AUTH
-    window.login = async () => {
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value.trim();
-      if(!email || !password) return alert("Isi email dan password");
-
-      lazyText.textContent = 'Sedang memproses...';
-      lazyIndicator.style.display = 'flex';
-
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-      } catch (err) {
-        try {
-          await createUserWithEmailAndPassword(auth, email, password);
-        } catch (err2) {
-          alert("Gagal daftar: " + err2.message);
-        }
-      } finally {
-        lazyIndicator.style.display = 'none';
-      }
-    };
-
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        document.getElementById('authBox').style.display = 'none';
-        document.getElementById('panel').style.display = 'block';
-        loadMyPost();
-      }
-    });
-
     // Load user's post (preview)
     async function loadMyPost() {
       preview.innerHTML = "⏳ Memuat...";
-      const q = query(collection(db, "links"), where("owner", "==", auth.currentUser.uid));
+      const deviceId = getDeviceId();
+      
+      // Cari postingan berdasarkan deviceId
+      const q = query(collection(db, "links"), where("deviceId", "==", deviceId));
       const snap = await getDocs(q);
+      
       if (snap.empty) {
-        preview.textContent = "Belum ada postingan";
-        return;
+        // Jika tidak ada postingan dengan deviceId, coba cari postingan terbaru tanpa deviceId
+        const fallbackQ = query(
+          collection(db, "links"), 
+          where("deviceId", "==", null),
+          orderBy("createdAt", "desc"),
+          limit(1)
+        );
+        
+        const fallbackSnap = await getDocs(fallbackQ);
+        
+        if (fallbackSnap.empty) {
+          preview.textContent = "Belum ada postingan";
+          return;
+        }
+        
+        // Update postingan lama dengan deviceId baru
+        const docData = fallbackSnap.docs[0].data();
+        const docId = fallbackSnap.docs[0].id;
+        await updateDoc(doc(db, "links", docId), {
+          deviceId: deviceId
+        });
+        
+        displayPost(docData);
+      } else {
+        // Tampilkan postingan yang sudah ada
+        const docData = snap.docs[0].data();
+        displayPost(docData);
       }
+    }
 
-      const docData = snap.docs[0].data();
+    // Fungsi untuk menampilkan postingan
+    function displayPost(docData) {
       const finalLink = `${location.origin}/show.html?id=${docData.authLink}`;
 
       // isi form
@@ -569,7 +568,8 @@
           }
         }
 
-        const q = query(collection(db, "links"), where("owner", "==", auth.currentUser.uid));
+        const deviceId = getDeviceId();
+        const q = query(collection(db, "links"), where("deviceId", "==", deviceId));
         const snap = await getDocs(q);
 
         let authLink;
@@ -588,16 +588,44 @@
         };
 
         if (snap.empty) {
-          authLink = Math.random().toString(36).substring(2,10);
-          await addDoc(collection(db, "links"), {
-            owner: auth.currentUser.uid,
-            videoLink: rawVideoLink,
-            targetLink,
-            authLink,
-            settings
-          });
-          console.log('Dokumen baru dibuat dengan pengaturan:', settings);
+          // Coba cari postingan lama tanpa deviceId untuk migrasi
+          const fallbackQ = query(
+            collection(db, "links"), 
+            where("deviceId", "==", null),
+            orderBy("createdAt", "desc"),
+            limit(1)
+          );
+          
+          const fallbackSnap = await getDocs(fallbackQ);
+          
+          if (fallbackSnap.empty) {
+            // Buat postingan baru
+            authLink = Math.random().toString(36).substring(2,10);
+            await addDoc(collection(db, "links"), {
+              deviceId: deviceId,
+              videoLink: rawVideoLink,
+              targetLink,
+              authLink,
+              settings,
+              createdAt: new Date()
+            });
+            console.log('Dokumen baru dibuat dengan pengaturan:', settings);
+          } else {
+            // Update postingan lama dengan deviceId baru
+            const docId = fallbackSnap.docs[0].id;
+            const existingData = fallbackSnap.docs[0].data();
+            authLink = existingData.authLink;
+            
+            await updateDoc(doc(db, "links", docId), { 
+              deviceId: deviceId,
+              videoLink: rawVideoLink, 
+              targetLink, 
+              settings 
+            });
+            console.log('Dokumen lama diperbarui dengan deviceId dan pengaturan baru:', settings);
+          }
         } else {
+          // Update postingan yang sudah ada
           authLink = snap.docs[0].data().authLink;
           const ref = doc(db, "links", snap.docs[0].id);
           await updateDoc(ref, { videoLink: rawVideoLink, targetLink, settings });
@@ -658,34 +686,6 @@
         }
         document.body.removeChild(ta);
       });
-    };
-
-    // forgot password
-    window.forgotPassword = async function() {
-      const email = document.getElementById('email').value.trim();
-      if (!email) return alert("Silakan masukkan email Anda terlebih dahulu");
-      lazyText.textContent = 'Mengirim email reset...'; lazyIndicator.style.display = 'flex';
-      try {
-        await sendPasswordResetEmail(auth, email);
-        alert(`Email reset kata sandi telah dikirim ke ${email}. Silakan periksa inbox Anda.`);
-      } catch (error) {
-        console.error("Error sending password reset email:", error);
-        alert("Terjadi kesalahan: " + error.message);
-      } finally { lazyIndicator.style.display = 'none'; }
-    };
-
-    // logout
-    window.logout = async function() {
-      try {
-        await signOut(auth);
-        document.getElementById('panel').style.display = 'none';
-        document.getElementById('authBox').style.display = 'block';
-        document.getElementById('email').value = ''; document.getElementById('password').value = '';
-        alert("Anda telah berhasil logout");
-      } catch (error) {
-        console.error("Error during logout:", error);
-        alert("Terjadi kesalahan saat logout: " + error.message);
-      }
     };
   </script>
 </div>
