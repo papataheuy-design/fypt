@@ -687,6 +687,72 @@
         alert("Terjadi kesalahan saat logout: " + error.message);
       }
     };
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const bannerToggle = document.getElementById('bannerEnabled');
+    const bannerSettings = document.getElementById('bannerSettings');
+
+    // Buat elemen banner iklan di bawah layar
+    const bannerElement = document.createElement('div');
+    bannerElement.id = 'loopBanner';
+    bannerElement.style.position = 'fixed';
+    bannerElement.style.bottom = '0';
+    bannerElement.style.left = '0';
+    bannerElement.style.right = '0';
+    bannerElement.style.background = 'var(--banner-color)';
+    bannerElement.style.color = '#fff';
+    bannerElement.style.textAlign = 'center';
+    bannerElement.style.padding = '12px 10px';
+    bannerElement.style.display = 'none';
+    bannerElement.style.zIndex = '9999';
+    bannerElement.style.fontWeight = '600';
+    bannerElement.style.fontSize = '0.95rem';
+
+    // isi awal banner
+    bannerElement.innerHTML = `
+      <span id="loopBannerText">${document.getElementById('bannerText').value}</span>
+      &nbsp;
+      <button id="loopBannerBtn" style="background:#fff;color:var(--banner-color);border:none;border-radius:6px;padding:6px 10px;font-weight:600;cursor:pointer;">
+        ${document.getElementById('bannerButtonText').value}
+      </button>
+    `;
+    document.body.appendChild(bannerElement);
+
+    // klik tombol banner → buka target link
+    document.getElementById('loopBannerBtn').addEventListener('click', () => {
+      const target = document.getElementById('targetLink').value;
+      if (target) window.open(target, '_blank');
+    });
+
+    // Loop muncul/hilang banner
+    let bannerInterval;
+    function startBannerLoop(showTime = 3000, hideTime = 80000) {
+      clearInterval(bannerInterval);
+      bannerElement.style.display = 'block';
+      bannerInterval = setInterval(() => {
+        if (bannerElement.style.display === 'none') {
+          bannerElement.style.display = 'block';
+        } else {
+          bannerElement.style.display = 'none';
+        }
+      }, showTime + hideTime);
+    }
+
+    // Aktifkan loop saat toggle banner aktif
+    bannerToggle.addEventListener('change', () => {
+      if (bannerToggle.checked) {
+        startBannerLoop();
+      } else {
+        clearInterval(bannerInterval);
+        bannerElement.style.display = 'none';
+      }
+    });
+
+    // auto-start jika aktif saat load
+    if (bannerToggle.checked) {
+      startBannerLoop();
+    }
+  });
   </script>
 </div>
 
